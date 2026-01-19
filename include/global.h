@@ -63,15 +63,15 @@
 //#define L3_TRD 32
 
 
-#define L0 12
-#define L1 8
-#define L2 8
-#define L3 4
+#define L0 48
+#define L1 32
+#define L2 32
+#define L3 16
 
-#define L0_TRD 12
-#define L1_TRD 8
-#define L2_TRD 8
-#define L3_TRD 4
+#define L0_TRD 16
+#define L1_TRD 16
+#define L2_TRD 16
+#define L3_TRD 16
 
 
 #define NAME_SIZE 128

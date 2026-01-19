@@ -22,12 +22,11 @@
 #include "linalg.h"
 #include "global.h"
 
-double plaq_time = 0.0; 
-
 
 int main(int argc,char *argv[])
 {
 
+   double plaq_time = 0.0;
    int my_rank,bc,count,nt,n_iter;
    double sm;
    double phi[2],phi_prime[2],theta[3];

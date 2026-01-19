@@ -23,11 +23,11 @@
 #include "global.h"
 
 
-double plaq_time = 0.0; 
 
 int main(int argc,char *argv[])
 {
-
+   
+   double plaq_time = 0.0, start_time;
    int my_rank,bc,count,nt,n_iter;
    double sm;
    double phi[2],phi_prime[2],theta[3];
@@ -124,7 +124,9 @@ int main(int argc,char *argv[])
          MPI_Barrier(MPI_COMM_WORLD);
          wt1=MPI_Wtime();
 
+         start_time = MPI_Wtime();
          sm = plaq_sum_dble(1);
+         plaq_time += MPI_Wtime() - start_time;
 	      n_iter += 1; 
 
          MPI_Barrier(MPI_COMM_WORLD);

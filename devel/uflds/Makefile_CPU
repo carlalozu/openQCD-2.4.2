@@ -66,7 +66,7 @@ LIBPATH = $(MPI_HOME)/lib /opt/cray/pe/cce/12.0.3/cce-clang/x86_64/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c89 -pedantic -fstrict-aliasing -fopenmp -Wall \
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
          -Wno-long-long -Wstrict-prototypes \
          -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
 
@@ -80,7 +80,7 @@ LFLAGS = -fopenmp
 ############################## do not change ###################################
 
 SHELL=/bin/bash
-CC=cc
+CC=mpicc
 
 CLINKER=$(CC)
 
