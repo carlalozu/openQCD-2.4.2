@@ -3,7 +3,7 @@
 *
 * File check1.c
 *
-* Copyright (C) 2005, 2008, 2016, 2023 Martin Luescher
+* Copyright (C) 2005, 2008, 2016 Martin Luescher
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
@@ -35,7 +35,7 @@ int main(int argc,char *argv[])
    int my_rank,n,iw;
    FILE *flog=NULL,*fdat=NULL;
 
-   mpi_init(argc,argv);
+   MPI_Init(&argc,&argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
 
    if (my_rank==0)

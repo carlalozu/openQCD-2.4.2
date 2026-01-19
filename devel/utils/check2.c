@@ -3,7 +3,7 @@
 *
 * File check2.c
 *
-* Copyright (C) 2018, 2023 Martin Luescher
+* Copyright (C) 2018 Martin Luescher
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
@@ -113,7 +113,7 @@ int main(int argc,char *argv[])
    mpf_t X,X3,X4,X5,Y,Z,Xsm,W;
    FILE *flog=NULL;
 
-   mpi_init(argc,argv);
+   MPI_Init(&argc,&argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
 
    if (my_rank==0)
