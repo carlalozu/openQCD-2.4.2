@@ -1,0 +1,1962 @@
+
+Simulation of the SU(3) gauge theory
+------------------------------------
+
+New run, start from random configuration
+
+Using the HMC algorithm
+Program version openQCD-2.4
+The machine is little endian
+16x8x8x8 lattice, 16x8x8x8 local lattice, 4x4x4x4 thread-local lattice
+1x1x1x1 MPI process grid, 1x1x1x1 process block size
+32 OpenMP threads
+
+Lattice parameters:
+beta = 6.0
+c0 = 1.0, c1 = 0.0
+
+Periodic boundary conditions
+
+Random number generator:
+Initialized state using level = 0, seed = 73099
+
+Trajectories:
+tau = 2.0
+4th order OMF integrator
+Number of steps = 16
+
+nth = 6400, ntr = 6400
+dtr_log = 20, dtr_cnfg = 6400
+
+Wilson flow observables are not measured
+
+Output configuration storage types = exported
+
+Total memory used = 13.3 MiB (= 13.3 MiB per MPI process)
+Global fields            =  36.1%
+MD fields                =  30.0%
+Communication buffers    =   0.1%
+Workspace                =  33.8%
+
+Trajectory no 20
+dH = -7.0e-05, iac = 1
+Average plaquette = 1.756455
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.37e-02 sec)
+
+Trajectory no 40
+dH = +2.7e-04, iac = 1
+Average plaquette = 1.770448
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.37e-02 sec)
+
+Trajectory no 60
+dH = +2.5e-04, iac = 1
+Average plaquette = 1.786754
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 80
+dH = +3.9e-04, iac = 1
+Average plaquette = 1.779863
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 100
+dH = -4.5e-04, iac = 1
+Average plaquette = 1.789352
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 120
+dH = -2.3e-04, iac = 1
+Average plaquette = 1.777084
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 140
+dH = +3.3e-04, iac = 1
+Average plaquette = 1.777853
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 160
+dH = +1.5e-05, iac = 1
+Average plaquette = 1.776564
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 180
+dH = -1.2e-04, iac = 1
+Average plaquette = 1.783764
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 200
+dH = +2.7e-04, iac = 1
+Average plaquette = 1.774948
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 220
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.780649
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 240
+dH = -4.1e-04, iac = 1
+Average plaquette = 1.783666
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 260
+dH = -3.2e-04, iac = 1
+Average plaquette = 1.777802
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 280
+dH = +3.6e-04, iac = 1
+Average plaquette = 1.771836
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 300
+dH = -2.5e-04, iac = 1
+Average plaquette = 1.776699
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 320
+dH = +4.0e-04, iac = 1
+Average plaquette = 1.774977
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 340
+dH = +3.2e-06, iac = 1
+Average plaquette = 1.781869
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 360
+dH = -4.2e-04, iac = 1
+Average plaquette = 1.776634
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 380
+dH = +5.7e-04, iac = 1
+Average plaquette = 1.780553
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 400
+dH = +4.2e-04, iac = 1
+Average plaquette = 1.776772
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 420
+dH = +2.8e-04, iac = 1
+Average plaquette = 1.779372
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 440
+dH = -4.7e-04, iac = 1
+Average plaquette = 1.782701
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 460
+dH = -3.7e-04, iac = 1
+Average plaquette = 1.786474
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 480
+dH = -6.4e-04, iac = 1
+Average plaquette = 1.791445
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 500
+dH = -2.7e-05, iac = 1
+Average plaquette = 1.785242
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 520
+dH = -7.4e-04, iac = 1
+Average plaquette = 1.789127
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 540
+dH = +3.0e-05, iac = 1
+Average plaquette = 1.784188
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 560
+dH = +5.2e-06, iac = 1
+Average plaquette = 1.781412
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 580
+dH = -3.9e-04, iac = 1
+Average plaquette = 1.782732
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 600
+dH = -6.4e-05, iac = 1
+Average plaquette = 1.785073
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 620
+dH = +3.9e-04, iac = 1
+Average plaquette = 1.781702
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 640
+dH = +9.0e-04, iac = 1
+Average plaquette = 1.779007
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 660
+dH = +2.7e-04, iac = 1
+Average plaquette = 1.782119
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 680
+dH = -9.5e-05, iac = 1
+Average plaquette = 1.785005
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 700
+dH = -4.2e-04, iac = 1
+Average plaquette = 1.784669
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 720
+dH = -7.6e-04, iac = 1
+Average plaquette = 1.780503
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 740
+dH = +5.6e-04, iac = 1
+Average plaquette = 1.782842
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 760
+dH = -1.4e-04, iac = 1
+Average plaquette = 1.780407
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 780
+dH = -7.0e-04, iac = 1
+Average plaquette = 1.781232
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 800
+dH = -6.4e-04, iac = 1
+Average plaquette = 1.788498
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 820
+dH = -7.3e-04, iac = 1
+Average plaquette = 1.787868
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 840
+dH = +1.1e-03, iac = 1
+Average plaquette = 1.777872
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 860
+dH = -2.3e-04, iac = 1
+Average plaquette = 1.779031
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 880
+dH = +1.2e-03, iac = 1
+Average plaquette = 1.771858
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 900
+dH = -5.7e-05, iac = 1
+Average plaquette = 1.778606
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 920
+dH = +2.2e-05, iac = 1
+Average plaquette = 1.776302
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 940
+dH = -5.0e-05, iac = 1
+Average plaquette = 1.784436
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 960
+dH = +2.2e-04, iac = 1
+Average plaquette = 1.785708
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 980
+dH = +9.0e-05, iac = 1
+Average plaquette = 1.780513
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1000
+dH = -4.0e-04, iac = 1
+Average plaquette = 1.780459
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1020
+dH = -4.1e-04, iac = 1
+Average plaquette = 1.783821
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1040
+dH = +1.2e-04, iac = 1
+Average plaquette = 1.782485
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1060
+dH = -1.8e-04, iac = 1
+Average plaquette = 1.783765
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1080
+dH = -6.3e-04, iac = 1
+Average plaquette = 1.783926
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1100
+dH = -3.5e-05, iac = 1
+Average plaquette = 1.779308
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1120
+dH = -2.6e-05, iac = 1
+Average plaquette = 1.780896
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1140
+dH = +6.0e-04, iac = 1
+Average plaquette = 1.784051
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1160
+dH = +1.6e-04, iac = 1
+Average plaquette = 1.784245
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1180
+dH = +7.2e-04, iac = 1
+Average plaquette = 1.775540
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1200
+dH = +2.7e-04, iac = 1
+Average plaquette = 1.777971
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1220
+dH = +8.9e-04, iac = 1
+Average plaquette = 1.781471
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1240
+dH = +4.4e-04, iac = 1
+Average plaquette = 1.772371
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1260
+dH = -3.1e-04, iac = 1
+Average plaquette = 1.784077
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1280
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.781731
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1300
+dH = -2.7e-04, iac = 1
+Average plaquette = 1.782610
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1320
+dH = -3.8e-04, iac = 1
+Average plaquette = 1.784609
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1340
+dH = -3.1e-04, iac = 1
+Average plaquette = 1.789121
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1360
+dH = -1.0e-03, iac = 1
+Average plaquette = 1.793988
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1380
+dH = -7.3e-04, iac = 1
+Average plaquette = 1.779190
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1400
+dH = +5.8e-05, iac = 1
+Average plaquette = 1.788125
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1420
+dH = +8.1e-04, iac = 1
+Average plaquette = 1.782824
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1440
+dH = +1.5e-04, iac = 1
+Average plaquette = 1.774904
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1460
+dH = +1.1e-03, iac = 1
+Average plaquette = 1.779347
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1480
+dH = -2.9e-04, iac = 1
+Average plaquette = 1.779627
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1500
+dH = -3.3e-05, iac = 1
+Average plaquette = 1.776733
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1520
+dH = -8.1e-04, iac = 1
+Average plaquette = 1.785010
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1540
+dH = -7.2e-04, iac = 1
+Average plaquette = 1.782234
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1560
+dH = +5.4e-04, iac = 1
+Average plaquette = 1.775496
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1580
+dH = +1.4e-05, iac = 1
+Average plaquette = 1.782138
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1600
+dH = +3.8e-04, iac = 1
+Average plaquette = 1.780356
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1620
+dH = -4.8e-04, iac = 1
+Average plaquette = 1.787761
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1640
+dH = -5.4e-04, iac = 1
+Average plaquette = 1.776107
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1660
+dH = -6.3e-04, iac = 1
+Average plaquette = 1.785755
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1680
+dH = +3.7e-04, iac = 1
+Average plaquette = 1.778380
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1700
+dH = +1.3e-04, iac = 1
+Average plaquette = 1.783251
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1720
+dH = +4.6e-04, iac = 1
+Average plaquette = 1.783195
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1740
+dH = -1.1e-04, iac = 1
+Average plaquette = 1.778710
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1760
+dH = -2.8e-04, iac = 1
+Average plaquette = 1.781441
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1780
+dH = -4.0e-04, iac = 1
+Average plaquette = 1.786246
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1800
+dH = +2.2e-04, iac = 1
+Average plaquette = 1.778995
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1820
+dH = -5.5e-06, iac = 1
+Average plaquette = 1.784743
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1840
+dH = -1.3e-04, iac = 1
+Average plaquette = 1.778572
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1860
+dH = -1.3e-03, iac = 1
+Average plaquette = 1.783517
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1880
+dH = +4.3e-04, iac = 1
+Average plaquette = 1.778414
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1900
+dH = +5.3e-04, iac = 1
+Average plaquette = 1.782830
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1920
+dH = +1.5e-04, iac = 1
+Average plaquette = 1.782370
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1940
+dH = -1.0e-03, iac = 1
+Average plaquette = 1.788590
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1960
+dH = +1.6e-04, iac = 1
+Average plaquette = 1.784440
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 1980
+dH = -4.4e-05, iac = 1
+Average plaquette = 1.783526
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2000
+dH = -4.2e-04, iac = 1
+Average plaquette = 1.778164
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2020
+dH = -8.7e-04, iac = 1
+Average plaquette = 1.785560
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2040
+dH = -5.1e-05, iac = 1
+Average plaquette = 1.785235
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2060
+dH = -1.1e-04, iac = 1
+Average plaquette = 1.788261
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2080
+dH = -7.3e-04, iac = 1
+Average plaquette = 1.778749
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2100
+dH = +3.4e-04, iac = 1
+Average plaquette = 1.787542
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2120
+dH = +1.8e-04, iac = 1
+Average plaquette = 1.786136
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2140
+dH = +9.3e-04, iac = 1
+Average plaquette = 1.782820
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2160
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.784271
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2180
+dH = +3.0e-04, iac = 1
+Average plaquette = 1.783467
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2200
+dH = -2.3e-04, iac = 1
+Average plaquette = 1.775681
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2220
+dH = +6.1e-04, iac = 1
+Average plaquette = 1.777957
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2240
+dH = +1.1e-04, iac = 1
+Average plaquette = 1.789960
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2260
+dH = -2.1e-04, iac = 1
+Average plaquette = 1.781518
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2280
+dH = +3.7e-04, iac = 1
+Average plaquette = 1.781384
+Acceptance rate = 1.000000
+Time per trajectory = 5.37e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2300
+dH = +3.7e-04, iac = 1
+Average plaquette = 1.774464
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2320
+dH = +3.3e-04, iac = 1
+Average plaquette = 1.780438
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2340
+dH = -4.5e-04, iac = 1
+Average plaquette = 1.782791
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2360
+dH = -1.0e-04, iac = 1
+Average plaquette = 1.773930
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2380
+dH = -2.3e-04, iac = 1
+Average plaquette = 1.786903
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2400
+dH = -1.7e-04, iac = 1
+Average plaquette = 1.779328
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2420
+dH = +6.9e-05, iac = 1
+Average plaquette = 1.789996
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2440
+dH = -7.8e-04, iac = 1
+Average plaquette = 1.779299
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2460
+dH = -2.8e-04, iac = 1
+Average plaquette = 1.782260
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2480
+dH = -2.9e-04, iac = 1
+Average plaquette = 1.775989
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2500
+dH = +5.8e-04, iac = 1
+Average plaquette = 1.783440
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2520
+dH = +1.5e-04, iac = 1
+Average plaquette = 1.788417
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2540
+dH = +1.4e-04, iac = 1
+Average plaquette = 1.777536
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2560
+dH = -3.9e-05, iac = 1
+Average plaquette = 1.773711
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2580
+dH = -6.2e-04, iac = 1
+Average plaquette = 1.791768
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2600
+dH = -4.4e-04, iac = 1
+Average plaquette = 1.782950
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2620
+dH = +5.8e-04, iac = 1
+Average plaquette = 1.775184
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2640
+dH = -1.9e-04, iac = 1
+Average plaquette = 1.779818
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2660
+dH = -3.0e-04, iac = 1
+Average plaquette = 1.782655
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2680
+dH = -4.9e-04, iac = 1
+Average plaquette = 1.781606
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2700
+dH = -2.0e-05, iac = 1
+Average plaquette = 1.780821
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2720
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.786095
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2740
+dH = +4.2e-04, iac = 1
+Average plaquette = 1.782438
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2760
+dH = -2.1e-04, iac = 1
+Average plaquette = 1.782015
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2780
+dH = +6.2e-05, iac = 1
+Average plaquette = 1.788655
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2800
+dH = -2.1e-04, iac = 1
+Average plaquette = 1.791184
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2820
+dH = +7.1e-05, iac = 1
+Average plaquette = 1.778258
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2840
+dH = +4.1e-05, iac = 1
+Average plaquette = 1.782896
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2860
+dH = +3.4e-04, iac = 1
+Average plaquette = 1.777996
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2880
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.786139
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2900
+dH = +7.9e-04, iac = 1
+Average plaquette = 1.782345
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2920
+dH = +6.1e-04, iac = 1
+Average plaquette = 1.784312
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2940
+dH = -3.7e-04, iac = 1
+Average plaquette = 1.785233
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2960
+dH = -5.2e-04, iac = 1
+Average plaquette = 1.787733
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 2980
+dH = +1.4e-04, iac = 1
+Average plaquette = 1.786527
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3000
+dH = -2.4e-04, iac = 1
+Average plaquette = 1.781158
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3020
+dH = +2.3e-04, iac = 1
+Average plaquette = 1.789314
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3040
+dH = +9.8e-04, iac = 1
+Average plaquette = 1.780509
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3060
+dH = -3.5e-04, iac = 1
+Average plaquette = 1.784563
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3080
+dH = -3.8e-04, iac = 1
+Average plaquette = 1.788890
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3100
+dH = -7.7e-05, iac = 1
+Average plaquette = 1.778702
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3120
+dH = +6.4e-05, iac = 1
+Average plaquette = 1.786423
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3140
+dH = +1.1e-03, iac = 1
+Average plaquette = 1.774226
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3160
+dH = +8.3e-05, iac = 1
+Average plaquette = 1.783663
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3180
+dH = -4.0e-04, iac = 1
+Average plaquette = 1.784041
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3200
+dH = -2.3e-04, iac = 1
+Average plaquette = 1.781984
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3220
+dH = -1.7e-04, iac = 1
+Average plaquette = 1.779174
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3240
+dH = -1.4e-04, iac = 1
+Average plaquette = 1.782278
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3260
+dH = -6.9e-04, iac = 1
+Average plaquette = 1.776053
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3280
+dH = +3.3e-04, iac = 1
+Average plaquette = 1.789521
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3300
+dH = -7.7e-04, iac = 1
+Average plaquette = 1.782240
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3320
+dH = -5.0e-04, iac = 1
+Average plaquette = 1.781842
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3340
+dH = -8.4e-04, iac = 1
+Average plaquette = 1.784532
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3360
+dH = +9.0e-04, iac = 1
+Average plaquette = 1.787733
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3380
+dH = +1.1e-04, iac = 1
+Average plaquette = 1.790012
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3400
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.786146
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3420
+dH = -3.0e-04, iac = 1
+Average plaquette = 1.779125
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3440
+dH = +2.6e-04, iac = 1
+Average plaquette = 1.785331
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3460
+dH = -4.4e-05, iac = 1
+Average plaquette = 1.778356
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3480
+dH = -1.1e-03, iac = 1
+Average plaquette = 1.780473
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3500
+dH = +9.5e-04, iac = 1
+Average plaquette = 1.780322
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3520
+dH = +4.6e-04, iac = 1
+Average plaquette = 1.781004
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3540
+dH = -9.6e-05, iac = 1
+Average plaquette = 1.782007
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3560
+dH = -1.2e-04, iac = 1
+Average plaquette = 1.787031
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3580
+dH = -5.0e-04, iac = 1
+Average plaquette = 1.773595
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3600
+dH = +5.4e-04, iac = 1
+Average plaquette = 1.777767
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3620
+dH = -2.0e-04, iac = 1
+Average plaquette = 1.779356
+Acceptance rate = 1.000000
+Time per trajectory = 5.41e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3640
+dH = +1.6e-04, iac = 1
+Average plaquette = 1.784622
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3660
+dH = -6.9e-05, iac = 1
+Average plaquette = 1.777945
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3680
+dH = +4.9e-04, iac = 1
+Average plaquette = 1.780408
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3700
+dH = +3.0e-04, iac = 1
+Average plaquette = 1.784474
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3720
+dH = -2.5e-04, iac = 1
+Average plaquette = 1.780206
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3740
+dH = +4.7e-04, iac = 1
+Average plaquette = 1.780426
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3760
+dH = -7.1e-04, iac = 1
+Average plaquette = 1.783134
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3780
+dH = +3.2e-04, iac = 1
+Average plaquette = 1.779106
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3800
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.787231
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3820
+dH = +8.2e-04, iac = 1
+Average plaquette = 1.790971
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3840
+dH = -3.2e-06, iac = 1
+Average plaquette = 1.781252
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3860
+dH = +7.3e-05, iac = 1
+Average plaquette = 1.781141
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3880
+dH = +9.9e-04, iac = 1
+Average plaquette = 1.779569
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3900
+dH = -1.7e-05, iac = 1
+Average plaquette = 1.787812
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3920
+dH = +1.2e-05, iac = 1
+Average plaquette = 1.777356
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3940
+dH = -3.7e-04, iac = 1
+Average plaquette = 1.789571
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3960
+dH = +1.6e-05, iac = 1
+Average plaquette = 1.776647
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 3980
+dH = +4.2e-04, iac = 1
+Average plaquette = 1.778832
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4000
+dH = +4.2e-04, iac = 1
+Average plaquette = 1.778529
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4020
+dH = -3.2e-04, iac = 1
+Average plaquette = 1.785755
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4040
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.778249
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4060
+dH = +2.9e-04, iac = 1
+Average plaquette = 1.781432
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4080
+dH = -8.0e-04, iac = 1
+Average plaquette = 1.779307
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4100
+dH = -2.1e-04, iac = 1
+Average plaquette = 1.790845
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4120
+dH = -6.8e-04, iac = 1
+Average plaquette = 1.784091
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4140
+dH = +7.3e-06, iac = 1
+Average plaquette = 1.768318
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4160
+dH = +1.0e-04, iac = 1
+Average plaquette = 1.781488
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4180
+dH = +8.3e-04, iac = 1
+Average plaquette = 1.781205
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4200
+dH = +5.0e-04, iac = 1
+Average plaquette = 1.779289
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4220
+dH = -8.0e-04, iac = 1
+Average plaquette = 1.779808
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4240
+dH = +8.4e-04, iac = 1
+Average plaquette = 1.783671
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4260
+dH = +1.6e-04, iac = 1
+Average plaquette = 1.783074
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4280
+dH = -3.9e-04, iac = 1
+Average plaquette = 1.776124
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4300
+dH = -2.6e-04, iac = 1
+Average plaquette = 1.780254
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4320
+dH = -4.9e-04, iac = 1
+Average plaquette = 1.792612
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4340
+dH = -8.8e-04, iac = 1
+Average plaquette = 1.790462
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4360
+dH = -1.3e-04, iac = 1
+Average plaquette = 1.778286
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4380
+dH = -7.6e-04, iac = 1
+Average plaquette = 1.785112
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4400
+dH = -8.9e-05, iac = 1
+Average plaquette = 1.780000
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4420
+dH = +5.3e-04, iac = 1
+Average plaquette = 1.782966
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4440
+dH = -4.8e-04, iac = 1
+Average plaquette = 1.785410
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4460
+dH = -7.7e-04, iac = 1
+Average plaquette = 1.783967
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4480
+dH = -4.2e-04, iac = 1
+Average plaquette = 1.787930
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4500
+dH = -6.1e-04, iac = 1
+Average plaquette = 1.790071
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4520
+dH = -8.0e-04, iac = 1
+Average plaquette = 1.780987
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4540
+dH = -6.2e-04, iac = 1
+Average plaquette = 1.781198
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4560
+dH = -2.2e-04, iac = 1
+Average plaquette = 1.782166
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4580
+dH = -2.9e-04, iac = 1
+Average plaquette = 1.780413
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4600
+dH = +8.0e-04, iac = 1
+Average plaquette = 1.773292
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4620
+dH = +9.7e-04, iac = 1
+Average plaquette = 1.781389
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4640
+dH = -8.0e-04, iac = 1
+Average plaquette = 1.777129
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4660
+dH = -7.7e-04, iac = 1
+Average plaquette = 1.781510
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4680
+dH = +5.0e-04, iac = 1
+Average plaquette = 1.780323
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4700
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.788459
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4720
+dH = +3.1e-04, iac = 1
+Average plaquette = 1.786008
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4740
+dH = -1.6e-05, iac = 1
+Average plaquette = 1.776179
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4760
+dH = +1.5e-04, iac = 1
+Average plaquette = 1.773657
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4780
+dH = -4.1e-04, iac = 1
+Average plaquette = 1.789834
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4800
+dH = +3.7e-04, iac = 1
+Average plaquette = 1.782980
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4820
+dH = +6.0e-04, iac = 1
+Average plaquette = 1.777554
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4840
+dH = +9.7e-05, iac = 1
+Average plaquette = 1.767466
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4860
+dH = -2.0e-04, iac = 1
+Average plaquette = 1.778455
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4880
+dH = +5.4e-04, iac = 1
+Average plaquette = 1.774360
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4900
+dH = +2.5e-04, iac = 1
+Average plaquette = 1.773735
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4920
+dH = +8.0e-04, iac = 1
+Average plaquette = 1.781191
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4940
+dH = +3.1e-04, iac = 1
+Average plaquette = 1.788021
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4960
+dH = -4.0e-05, iac = 1
+Average plaquette = 1.787677
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 4980
+dH = +7.7e-04, iac = 1
+Average plaquette = 1.781608
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5000
+dH = +9.4e-05, iac = 1
+Average plaquette = 1.780241
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5020
+dH = -1.1e-03, iac = 1
+Average plaquette = 1.790538
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5040
+dH = -9.6e-05, iac = 1
+Average plaquette = 1.782033
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5060
+dH = -1.2e-03, iac = 1
+Average plaquette = 1.788304
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5080
+dH = -1.8e-04, iac = 1
+Average plaquette = 1.785375
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5100
+dH = -2.7e-05, iac = 1
+Average plaquette = 1.779100
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5120
+dH = +4.8e-04, iac = 1
+Average plaquette = 1.780660
+Acceptance rate = 1.000000
+Time per trajectory = 5.45e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5140
+dH = -4.4e-05, iac = 1
+Average plaquette = 1.785626
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5160
+dH = +6.4e-04, iac = 1
+Average plaquette = 1.782228
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5180
+dH = +4.7e-04, iac = 1
+Average plaquette = 1.785448
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5200
+dH = +3.2e-04, iac = 1
+Average plaquette = 1.775111
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5220
+dH = -6.6e-04, iac = 1
+Average plaquette = 1.785749
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5240
+dH = +5.6e-04, iac = 1
+Average plaquette = 1.773439
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5260
+dH = -4.2e-04, iac = 1
+Average plaquette = 1.793111
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5280
+dH = -3.0e-05, iac = 1
+Average plaquette = 1.783047
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5300
+dH = +7.2e-04, iac = 1
+Average plaquette = 1.784007
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5320
+dH = +4.6e-04, iac = 1
+Average plaquette = 1.786924
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5340
+dH = -4.3e-04, iac = 1
+Average plaquette = 1.787351
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5360
+dH = +4.4e-05, iac = 1
+Average plaquette = 1.782805
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5380
+dH = -5.4e-04, iac = 1
+Average plaquette = 1.788080
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5400
+dH = +3.7e-05, iac = 1
+Average plaquette = 1.781708
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5420
+dH = +3.9e-04, iac = 1
+Average plaquette = 1.779125
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5440
+dH = +1.4e-03, iac = 1
+Average plaquette = 1.779195
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5460
+dH = +4.4e-04, iac = 1
+Average plaquette = 1.769083
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5480
+dH = -1.7e-04, iac = 1
+Average plaquette = 1.780598
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5500
+dH = +6.3e-05, iac = 1
+Average plaquette = 1.776080
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5520
+dH = +1.0e-03, iac = 1
+Average plaquette = 1.783802
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5540
+dH = -2.8e-04, iac = 1
+Average plaquette = 1.783769
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5560
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.775760
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5580
+dH = -6.2e-04, iac = 1
+Average plaquette = 1.783413
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5600
+dH = -5.9e-05, iac = 1
+Average plaquette = 1.783180
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5620
+dH = +1.0e-04, iac = 1
+Average plaquette = 1.782044
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5640
+dH = -7.8e-05, iac = 1
+Average plaquette = 1.783257
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5660
+dH = +2.7e-04, iac = 1
+Average plaquette = 1.778305
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5680
+dH = -2.4e-04, iac = 1
+Average plaquette = 1.779441
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5700
+dH = -5.4e-04, iac = 1
+Average plaquette = 1.773372
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5720
+dH = +2.3e-04, iac = 1
+Average plaquette = 1.778852
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5740
+dH = -9.9e-04, iac = 1
+Average plaquette = 1.788306
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5760
+dH = -6.3e-05, iac = 1
+Average plaquette = 1.776033
+Acceptance rate = 1.000000
+Time per trajectory = 5.40e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5780
+dH = +2.1e-04, iac = 1
+Average plaquette = 1.785207
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5800
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.783320
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5820
+dH = +3.7e-04, iac = 1
+Average plaquette = 1.778989
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5840
+dH = -9.2e-04, iac = 1
+Average plaquette = 1.786829
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5860
+dH = -1.6e-04, iac = 1
+Average plaquette = 1.782503
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5880
+dH = -2.0e-05, iac = 1
+Average plaquette = 1.788200
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5900
+dH = -5.2e-04, iac = 1
+Average plaquette = 1.787390
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5920
+dH = +3.8e-04, iac = 1
+Average plaquette = 1.774071
+Acceptance rate = 1.000000
+Time per trajectory = 5.44e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5940
+dH = +8.6e-04, iac = 1
+Average plaquette = 1.781226
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5960
+dH = -8.0e-04, iac = 1
+Average plaquette = 1.781612
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 5980
+dH = -3.7e-04, iac = 1
+Average plaquette = 1.787537
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6000
+dH = -1.6e-04, iac = 1
+Average plaquette = 1.786737
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6020
+dH = +2.0e-05, iac = 1
+Average plaquette = 1.788191
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6040
+dH = -7.8e-04, iac = 1
+Average plaquette = 1.777852
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6060
+dH = +7.6e-04, iac = 1
+Average plaquette = 1.779584
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6080
+dH = -7.4e-04, iac = 1
+Average plaquette = 1.775065
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6100
+dH = -1.4e-04, iac = 1
+Average plaquette = 1.780546
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6120
+dH = +6.7e-04, iac = 1
+Average plaquette = 1.776313
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6140
+dH = +1.7e-04, iac = 1
+Average plaquette = 1.783066
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6160
+dH = -1.8e-04, iac = 1
+Average plaquette = 1.778329
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6180
+dH = +5.5e-04, iac = 1
+Average plaquette = 1.774202
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6200
+dH = +4.6e-04, iac = 1
+Average plaquette = 1.779922
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6220
+dH = +1.1e-03, iac = 1
+Average plaquette = 1.780201
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6240
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.787015
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6260
+dH = +2.4e-04, iac = 1
+Average plaquette = 1.782687
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6280
+dH = +7.7e-05, iac = 1
+Average plaquette = 1.779635
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6300
+dH = +4.6e-05, iac = 1
+Average plaquette = 1.783048
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6320
+dH = +5.8e-04, iac = 1
+Average plaquette = 1.786636
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6340
+dH = -1.2e-04, iac = 1
+Average plaquette = 1.779808
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6360
+dH = -6.2e-04, iac = 1
+Average plaquette = 1.783888
+Acceptance rate = 1.000000
+Time per trajectory = 5.35e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6380
+dH = +5.6e-04, iac = 1
+Average plaquette = 1.787192
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Trajectory no 6400
+dH = -6.6e-04, iac = 1
+Average plaquette = 1.780438
+Acceptance rate = 1.000000
+Time per trajectory = 5.36e-02 sec (average = 5.36e-02 sec)
+
+Configuration no 1 exported in 8.37e-02 sec
+

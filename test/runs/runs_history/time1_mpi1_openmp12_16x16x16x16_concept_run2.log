@@ -1,0 +1,11 @@
+
+Timing of plaq_dble()
+--------------------------
+
+64x32x32x16 lattice, 64x32x32x16 local lattice, 16x16x16x16 thread-local lattice
+1x1x1x1 MPI process grid, 1x1x1x1 process block size
+16 OpenMP threads
+
+The local size of the gauge field is 288 MB
+The local size of a quark field is 96 MB
+

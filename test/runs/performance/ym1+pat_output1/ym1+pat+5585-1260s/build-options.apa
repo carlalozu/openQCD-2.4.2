@@ -1,0 +1,108 @@
+#  You can edit this file, if desired, and use it
+#  to reinstrument the program for tracing like this:
+#
+#           pat_build -O ym1+pat+5585-1260s/build-options.apa
+#
+#  These suggested trace options are based on data from:
+#
+#    /users/smaier/openQCD-2.4/runs/ym1+pat+5585-1260s
+
+# ----------------------------------------------------------------------
+
+#	Collect the default PERFCTR group.
+
+  -Drtenv=PAT_RT_PERFCTR=default
+
+#	Alternatively, energy counters may be added to the default
+#	list by commenting out the line above and enabling the
+#	line below. Note that this may significantly increase the
+#	runtime overhead for high trace counts. The parentheses
+#	in the syntax below denote counters that are not available
+#	on all platforms.
+
+#  -Drtenv=PAT_RT_PERFCTR=default,(PM_ENERGY:NODE),(PM_ENERGY:ACC)
+
+# ----------------------------------------------------------------------
+
+#	Libraries to trace.
+
+  -g mpi
+
+# ----------------------------------------------------------------------
+
+
+#	User-defined functions to trace, sorted by % of samples.
+
+#	The way these functions are filtered can be controlled with
+#	pat_report options (values used for this file are shown):
+#
+#	-s apa_max_count=200	No more than 200 functions are listed.
+#	-s apa_min_size=800	Commented out if text size < 800 bytes.
+#	-s apa_min_pct=1	Commented out if it had < 1% of samples.
+#	-s apa_max_cum_pct=90	Commented out after cumulative 90%.
+
+#	Local functions are listed for completeness, but cannot be traced.
+
+  -w  # Enable tracing of user-defined functions.
+      # Note: -u should NOT be specified as an additional option.
+
+# 15.48% 225 bytes  local
+#         -T su3xsu3vec_pair
+
+# 12.54% 10319 bytes  local
+#         -T force0_part
+
+# 7.02% 206 bytes
+#         -T su3xsu3dag
+
+# 6.54% 236 bytes
+#         -T prod2su3alg
+
+# 6.50% 171 bytes  local
+#         -T su3xsu3vec
+
+# 6.41% 246 bytes
+#         -T chexp_drv0
+
+# 3.66% 606 bytes  local
+#         -T eval_td
+
+# 3.08% 157 bytes  local
+#         -T mapX2v
+
+# 2.53% 225 bytes  local
+#         -T su3dagxsu3vec_pair
+
+# 2.38% 481 bytes
+#         -T expXsu3
+
+# 2.31% 98 bytes
+#         -T update_mom
+
+# 2.24% 255 bytes
+#         -T plaq_uidx
+
+# 1.93% 158 bytes
+#         -T su3xsu3
+
+# 1.75% 69 bytes  local
+#         -T offset
+
+# 1.53% 158 bytes
+#         -T su3dagxsu3
+
+# 1.23% 312 bytes
+#         -T cm3x3_lc1
+
+# 1.20% 276 bytes
+#         -T ch2mat
+
+# 1.04% 188 bytes  local
+#         -T su3dagxsu3vec
+
+
+# ----------------------------------------------------------------------
+
+-o ym1+apa # New instrumented program.
+
+-U /users/smaier/openQCD-2.4/main/ym1 # Original program.

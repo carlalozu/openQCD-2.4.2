@@ -1,0 +1,90 @@
+#  You can edit this file, if desired, and use it
+#  to reinstrument the program for tracing like this:
+#
+#           pat_build -O time1+pat+29266-1572s/build-options.apa
+#
+#  These suggested trace options are based on data from:
+#
+#    /users/smaier/openQCD-2.4/runs/time1+pat+29266-1572s
+
+# ----------------------------------------------------------------------
+
+#	Collect the default PERFCTR group.
+
+  -Drtenv=PAT_RT_PERFCTR=default
+
+#	Alternatively, energy counters may be added to the default
+#	list by commenting out the line above and enabling the
+#	line below. Note that this may significantly increase the
+#	runtime overhead for high trace counts. The parentheses
+#	in the syntax below denote counters that are not available
+#	on all platforms.
+
+#  -Drtenv=PAT_RT_PERFCTR=default,(PM_ENERGY:NODE),(PM_ENERGY:ACC)
+
+# ----------------------------------------------------------------------
+
+#	Libraries to trace.
+
+  -g mpi
+
+# ----------------------------------------------------------------------
+
+
+#	User-defined functions to trace, sorted by % of samples.
+
+#	The way these functions are filtered can be controlled with
+#	pat_report options (values used for this file are shown):
+#
+#	-s apa_max_count=200	No more than 200 functions are listed.
+#	-s apa_min_size=800	Commented out if text size < 800 bytes.
+#	-s apa_min_pct=1	Commented out if it had < 1% of samples.
+#	-s apa_max_cum_pct=90	Commented out after cumulative 90%.
+
+#	Local functions are listed for completeness, but cannot be traced.
+
+  -w  # Enable tracing of user-defined functions.
+      # Note: -u should NOT be specified as an additional option.
+
+# 7.02% 326 bytes
+#         -T gauss_dble
+
+# 6.76% 1137 bytes
+         -T rlx_update
+
+# 4.78% 234 bytes  local
+#         -T random_su3_vector_dble
+
+# 4.52% 924 bytes
+         -T random_su3_dble
+
+# 3.36% 212 bytes
+#         -T ranlxd
+
+# 1.87% 49 bytes  local
+#         -T is_zero
+
+# 1.66% 225 bytes  local
+#         -T su3xsu3vec_pair
+
+# 1.43% 225 bytes  local
+#         -T su3dagxsu3vec_pair
+
+# 1.34% 158 bytes
+#         -T su3xsu3
+
+# 1.15% 322 bytes
+#         -T plaq_uidx
+
+# 1.00% 206 bytes
+#         -T su3dagxsu3dag
+
+# 0.96% 84 bytes  local
+#         -T offset
+
+
+# ----------------------------------------------------------------------
+
+-o time1+apa # New instrumented program.
+
+-U /users/smaier/openQCD-2.4/devel/uflds/time1 # Original program.

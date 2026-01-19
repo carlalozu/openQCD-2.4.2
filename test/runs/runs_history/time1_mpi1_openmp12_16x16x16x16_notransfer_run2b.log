@@ -1,0 +1,30 @@
+
+Timing of plaq_dble()
+--------------------------
+
+64x32x32x32 lattice, 64x32x32x32 local lattice, 16x16x16x16 thread-local lattice
+1x1x1x1 MPI process grid, 1x1x1x1 process block size
+32 OpenMP threads
+
+The local size of the gauge field is 576 MB
+The local size of a quark field is 192 MB
+
+Lattice parameters:
+isw = 0, csw = 1.978
+
+Open boundary conditions
+cF = 0.9012
+theta = 0.35,-1.25,0.78
+
+Time call to plaq_sum_dble:
+211295.247078 micro sec
+
+Time per plaq:
+3.224110 micro sec
+
+Number of iterations:
+n_iter = 15
+
+Number of flop/s:
+145.156355 Mega flop/s
+
