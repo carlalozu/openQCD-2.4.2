@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *
-* File plaq_sum.c
+* File plaq_sum.c  WORKIN CPU VERSION
 *
 * Copyright (C) 2005-2016, 2018, 2021 Martin Luescher
 *
