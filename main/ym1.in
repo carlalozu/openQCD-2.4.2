@@ -1,45 +1,28 @@
 
 [Run name]
-name         Snoopy137
+name         ym_craypat_openmp1_run11
 
 [Log and data directories]
-log_dir      ../data/ym1/log
-dat_dir      ../data/ym1/dat
-
-[Initial configuration]
-type         e
-cnfg_dir     /data/ym1/cnfg
-block_dir    /data/ym1/blk
-local_dir    /data/ym1/loc
-nio_nodes    12
-nio_streams  8
+log_dir      /users/smaier/openQCD-2.4/main/log
+dat_dir      /users/smaier/openQCD-2.4/main/dat
 
 [Configurations]
-types        eb
-cnfg_dir     /data/ym1/cnfg
-block_dir    /data/ym1/blk
-local_dir    /data/ym1/loc
-bs           16 8 8 24
-nio_nodes    16
-nio_streams  12
+types        e
+cnfg_dir     /users/smaier/openQCD-2.4/main/cnfg
 
 [Lattice parameters]
-beta         6.00
-c0           1.6667
+beta         6.0
+c0           1.0
 
 [Boundary conditions]
-type         2
-phi          0.12 -0.56
-phi'         0.92 0.76
-cG           1.10
-cG'          1.05
+type         3
 
 [Random number generator]
 level        0
 seed         73099
 
 [Trajectory length]
-tau          3.0
+tau          2.0
 
 [MD integrator]
 integrator   OMF4
@@ -47,14 +30,8 @@ lambda       0.19
 nstep        16
 
 [MD trajectories]
-nth          320
-ntr          32000
-dtr_log      4
-dtr_cnfg     32
-dtr_ms       8
-
-[Wilson flow]
-integrator   RK3
-eps          2.0e-2
-ntot         100
-dnms         10
+nth          6400
+ntr          6400
+dtr_log      20
+dtr_cnfg     6400
+dtr_ms       6400

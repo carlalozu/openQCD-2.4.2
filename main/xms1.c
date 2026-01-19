@@ -577,8 +577,7 @@ static void check_old_log(int *fst,int *lst,int *stp)
 
    while ((ie==0x0)&&(fgets(line,NAME_SIZE,fend)!=NULL))
    {
-      if ((strstr(line,"MPI process grid")!=NULL)&&
-          (strstr(line,"changed")==NULL))
+      if (strstr(line,"MPI process grid")!=NULL)
       {
          if (sscanf(line,"%dx%dx%dx%d MPI process grid, %dx%dx%dx%d",
                     np,np+1,np+2,np+3,bp,bp+1,bp+2,bp+3)==8)
@@ -591,8 +590,7 @@ static void check_old_log(int *fst,int *lst,int *stp)
          else
             ie|=0x1;
       }
-      else if ((strstr(line,"OpenMP thread")!=NULL)&&
-               (strstr(line,"changed")==NULL))
+      else if (strstr(line,"OpenMP thread")!=NULL)
       {
          if (sscanf(line,"%d OpenMP thread",&nt)==1)
             ipgrd[2]=(nt!=NTHREAD);

@@ -1,0 +1,46 @@
+
+Simulation of the SU(3) gauge theory
+------------------------------------
+
+New run, start from random configuration
+
+Using the HMC algorithm
+Program version openQCD-2.4
+The machine is little endian
+12x8x8x4 lattice, 12x8x8x4 local lattice, 4x8x4x4 thread-local lattice
+1x1x1x1 MPI process grid, 1x1x1x1 process block size
+6 OpenMP threads
+
+Lattice parameters:
+beta = 6.0
+c0 = 1.0, c1 = 0.0
+
+Periodic boundary conditions
+
+Random number generator:
+Initialized state using level = 0, seed = 73099
+
+Trajectories:
+tau = 2.0
+4th order OMF integrator
+Number of steps = 16
+
+nth = 6400, ntr = 6400
+dtr_log = 20, dtr_cnfg = 6400
+
+Wilson flow observables are not measured
+
+Output configuration storage types = exported
+
+Total memory used = 5.0 MiB (= 5.0 MiB per MPI process)
+Global fields            =  36.1%
+MD fields                =  30.0%
+Communication buffers    =   0.3%
+Workspace                =  33.7%
+
+Trajectory no 20
+dH = -1.0e-04, iac = 1
+Average plaquette = 1.762574
+Acceptance rate = 1.000000
+Time per trajectory = 7.06e-02 sec (average = 7.06e-02 sec)
+
