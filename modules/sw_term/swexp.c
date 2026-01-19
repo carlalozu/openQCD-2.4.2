@@ -3,7 +3,7 @@
 *
 * File swexp.c
 *
-* Copyright (C) 2018, 2021, 2023 Antonio Rago, Martin Luescher
+* Copyright (C) 2018, 2021 Antonio Rago, Martin Luescher
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
@@ -56,7 +56,7 @@
 
 swexp_wsp_t *alloc_swexp_wsp(int N)
 {
-   int n,k,l;
+   int k,l;
    double **csv,**ksv,**qsv,*p;
    weyl_dble *wsv;
    pauli_dble *Asv;
@@ -64,14 +64,9 @@ swexp_wsp_t *alloc_swexp_wsp(int N)
 
    if (N>=1)
    {
-      if (N<5)
-         n=5;
-      else
-         n=N;
-
       swsp=malloc(sizeof(*swsp));
-      csv=malloc((n+9)*sizeof(*ksv));
-      p=malloc(((n*(n+19))/2-1)*sizeof(*p));
+      csv=malloc((N+9)*sizeof(*ksv));
+      p=malloc(((N*(N+19))/2-1)*sizeof(*p));
       wsv=amalloc(6*sizeof(*wsv),5);
       Asv=amalloc(3*sizeof(*Asv),5);
 
@@ -79,28 +74,28 @@ swexp_wsp_t *alloc_swexp_wsp(int N)
          return NULL;
 
       ksv=csv+2;
-      qsv=ksv+n+1;
+      qsv=ksv+N+1;
 
       p[0]=1.0;
 
-      for (k=1;k<=(n+1);k++)
+      for (k=1;k<=(N+1);k++)
          p[k]=p[k-1]/(double)(k);
 
-      ksv[0]=p+2*(n+1);
+      ksv[0]=p+2*(N+1);
 
-      for (k=0;k<=n;k++)
+      for (k=0;k<=N;k++)
       {
          if (k>0)
-            ksv[k]=ksv[k-1]+n-k+2;
+            ksv[k]=ksv[k-1]+N-k+2;
 
-         for (l=0;l<=(n-k);l++)
+         for (l=0;l<=(N-k);l++)
             ksv[k][l]=p[k+l+1];
       }
 
       csv[0]=p;
-      csv[1]=p+n+1;
+      csv[1]=p+N+1;
 
-      for (k=0;k<=n;k++)
+      for (k=0;k<=N;k++)
       {
          if (k&0x1)
             csv[1][k]=-csv[0][k];
@@ -108,12 +103,12 @@ swexp_wsp_t *alloc_swexp_wsp(int N)
             csv[1][k]=csv[0][k];
       }
 
-      p+=((n+1)*(n+6))/2;
+      p+=((N+1)*(N+6))/2;
 
       for (k=0;k<6;k++)
       {
          qsv[k]=p;
-         p+=(n-k+1);
+         p+=(N-k+1);
       }
 
       (*swsp).N=N;

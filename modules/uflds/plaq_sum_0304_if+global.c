@@ -75,6 +75,8 @@ static double plaq_dble(int n,int ix)
       su3_dble wd1;
       su3_dble wd2;
 
+      //su3xsu3(&udb_test[ip[0]],&udb_test[ip[1]],&wd1);
+      //su3dagxsu3dag(&udb_test[ip[3]],&udb_test[ip[2]], &wd2);
       su3xsu3(udb+ip[0],udb+ip[1],&wd1);
       su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
       cm3x3_retr(&wd1,&wd2,&sm);
@@ -252,8 +254,8 @@ static double plaq_dble_original(int n,int ix)
 {
    int *ip = &plaq_uidx_array[n*VOLUME*4 + ix*4];
    double sm;
-   su3_dble wd1;
-   su3_dble wd2;
+   su3_dble wd1;// = __runtime_alloc(18*sizeof(double));// ALIGNED16;
+   su3_dble wd2;// = __runtime_alloc(18*sizeof(double));// ALIGNED16;
 
    wd1 = su3xsu3_test(udb+ip[0],udb+ip[1]);
    wd2 = su3dagxsu3dag_test(udb+ip[3],udb+ip[2]);
@@ -280,6 +282,13 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
    set_plaq_uidx_array((plaq_uidx_array));
 
+   //int *ip_test = &plaq_uidx_array[3*VOLUME*4 + 20000*4];
+   //printf("plaq_uidx_array[0] = %d\n",ip_test[0]);
+   //printf("plaq_uidx_array[1] = %d\n",ip_test[1]);
+   //printf("plaq_uidx_array[2] = %d\n",ip_test[2]);
+   //printf("plaq_uidx_array[3] = %d\n\n",ip_test[3]);
+
+
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
 
@@ -290,14 +299,14 @@ static qflt local_plaq_sum_dble(int iw)
    #pragma omp target data map(to:udb[0:4*VOLUME+7*(BNDRY/4)], tms[0:VOLUME])
    {
       MPI_Barrier(MPI_COMM_WORLD);
-      //time_start=MPI_Wtime();
+      time_start=MPI_Wtime();
 
       //#pragma omp parallel for private(t,n) reduction(+ : pa)
       #pragma omp target teams distribute parallel for reduction(+ : pa) thread_limit(8)
       {
          for (int ix = 0; ix < VOLUME; ix++)
          {
-            t=tms[ix];
+            t=global_time(ix);
 
             if ((t<(N0-1))||(bc!=0))
             {
@@ -354,8 +363,8 @@ static qflt local_plaq_sum_dble(int iw)
    acc_qflt(pa,rqsm.q);
 
    MPI_Barrier(MPI_COMM_WORLD);
-   //time_end=MPI_Wtime();
-   //plaq_time += time_end-time_start; 
+   time_end=MPI_Wtime();
+   plaq_time += time_end-time_start; 
 
    return rqsm;
 }

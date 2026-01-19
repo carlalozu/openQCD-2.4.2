@@ -131,7 +131,7 @@ static void alloc_ud(void)
    error(ipt==NULL,1,"alloc_ud [uflds.c]","Geometry arrays are not set");
 
    bc=bc_type();
-   n=4*VOLUME+7*(BNDRY/4);
+   n=4*VOLUME+7*(BNDRY/4); //TODO n
 
    if ((cpr[0]==(NPROC0-1))&&((bc==1)||(bc==2)))
       n+=3;

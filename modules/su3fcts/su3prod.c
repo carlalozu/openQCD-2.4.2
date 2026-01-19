@@ -2017,7 +2017,6 @@ void rotate_su3alg(su3_dble *u,su3_alg_dble *X)
 }
 
 #else
-
 static void su3xsu3vec(su3_dble *u,su3_vector_dble *psi,
                        su3_vector_dble *chi)
 {
@@ -2029,6 +2028,66 @@ static void su3dagxsu3vec(su3_dble *u,su3_vector_dble *psi,
                           su3_vector_dble *chi)
 {
    _su3_inverse_multiply(*chi,*u,*psi);
+}
+
+static void add_increment(double *d, su3_vector_dble *incr)
+{
+   *d += (*incr).c1.re;
+}
+
+static void su3xsu3vec_extern(su3_dble *u,su3_vector_dble *psi,
+                       su3_vector_dble *chi)
+{
+   (*chi).c1.re= (*u).c11.re*(*psi).c1.re-(*u).c11.im*(*psi).c1.im+(*u).c12.re*(*psi).c2.re-(*u).c12.im*(*psi).c2.im+(*u).c13.re*(*psi).c3.re-(*u).c13.im*(*psi).c3.im;
+   (*chi).c1.im= (*u).c11.re*(*psi).c1.im+(*u).c11.im*(*psi).c1.re+(*u).c12.re*(*psi).c2.im+(*u).c12.im*(*psi).c2.re+(*u).c13.re*(*psi).c3.im+(*u).c13.im*(*psi).c3.re;
+   (*chi).c2.re= (*u).c21.re*(*psi).c1.re-(*u).c21.im*(*psi).c1.im+(*u).c22.re*(*psi).c2.re-(*u).c22.im*(*psi).c2.im+(*u).c23.re*(*psi).c3.re-(*u).c23.im*(*psi).c3.im;
+   (*chi).c2.im= (*u).c21.re*(*psi).c1.im+(*u).c21.im*(*psi).c1.re+(*u).c22.re*(*psi).c2.im+(*u).c22.im*(*psi).c2.re+(*u).c23.re*(*psi).c3.im+(*u).c23.im*(*psi).c3.re;
+   (*chi).c3.re= (*u).c31.re*(*psi).c1.re-(*u).c31.im*(*psi).c1.im+(*u).c32.re*(*psi).c2.re-(*u).c32.im*(*psi).c2.im+(*u).c33.re*(*psi).c3.re-(*u).c33.im*(*psi).c3.im;
+   (*chi).c3.im= (*u).c31.re*(*psi).c1.im+(*u).c31.im*(*psi).c1.re+(*u).c32.re*(*psi).c2.im+(*u).c32.im*(*psi).c2.re+(*u).c33.re*(*psi).c3.im+(*u).c33.im*(*psi).c3.re;
+}
+
+void add_one(double *d, su3_dble *s)
+{
+   su3_vector_dble delta; 
+   delta.c1=(*s).c11;
+
+   add_increment(d, &delta);
+}
+
+su3_dble su3xsu3_test(su3_dble *u,su3_dble *v)
+{
+   su3_vector_dble psi,chi;
+   su3_dble w;
+
+   psi.c1=(*v).c11;
+   psi.c2=(*v).c21;
+   psi.c3=(*v).c31;
+
+   su3xsu3vec(u,&psi,&chi);
+
+   w.c11=chi.c1;
+   w.c21=chi.c2;
+   w.c31=chi.c3;
+
+   psi.c1=(*v).c12;
+   psi.c2=(*v).c22;
+   psi.c3=(*v).c32;
+   su3xsu3vec(u,&psi,&chi);
+
+   w.c12=chi.c1;
+   w.c22=chi.c2;
+   w.c32=chi.c3;
+
+   psi.c1=(*v).c13;
+   psi.c2=(*v).c23;
+   psi.c3=(*v).c33;
+   su3xsu3vec(u,&psi,&chi);
+
+   w.c13=chi.c1;
+   w.c23=chi.c2;
+   w.c33=chi.c3;
+
+   return w; 
 }
 
 
@@ -2061,6 +2120,149 @@ void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c33=chi.c3;
 }
 
+su3_dble plaq_dble_su3xsu3_extern(su3_dble *u,su3_dble *v)
+{
+   su3_vector_dble psi,chi;
+   su3_dble w;
+
+   psi.c1=(*v).c11;
+   psi.c2=(*v).c21;
+   psi.c3=(*v).c31;
+
+   (chi).c1.re= (*(u)).c11.re*(psi).c1.re-(*(u)).c11.im*(psi).c1.im + (*(u)).c12.re*(psi).c2.re-(*(u)).c12.im*(psi).c2.im + (*(u)).c13.re*(psi).c3.re-(*(u)).c13.im*(psi).c3.im;
+   (chi).c1.im= (*(u)).c11.re*(psi).c1.im+(*(u)).c11.im*(psi).c1.re + (*(u)).c12.re*(psi).c2.im+(*(u)).c12.im*(psi).c2.re + (*(u)).c13.re*(psi).c3.im+(*(u)).c13.im*(psi).c3.re;
+   (chi).c2.re= (*(u)).c21.re*(psi).c1.re-(*(u)).c21.im*(psi).c1.im + (*(u)).c22.re*(psi).c2.re-(*(u)).c22.im*(psi).c2.im + (*(u)).c23.re*(psi).c3.re-(*(u)).c23.im*(psi).c3.im;
+   (chi).c2.im= (*(u)).c21.re*(psi).c1.im+(*(u)).c21.im*(psi).c1.re + (*(u)).c22.re*(psi).c2.im+(*(u)).c22.im*(psi).c2.re + (*(u)).c23.re*(psi).c3.im+(*(u)).c23.im*(psi).c3.re;
+   (chi).c3.re= (*(u)).c31.re*(psi).c1.re-(*(u)).c31.im*(psi).c1.im + (*(u)).c32.re*(psi).c2.re-(*(u)).c32.im*(psi).c2.im + (*(u)).c33.re*(psi).c3.re-(*(u)).c33.im*(psi).c3.im;
+   (chi).c3.im= (*(u)).c31.re*(psi).c1.im+(*(u)).c31.im*(psi).c1.re + (*(u)).c32.re*(psi).c2.im+(*(u)).c32.im*(psi).c2.re + (*(u)).c33.re*(psi).c3.im+(*(u)).c33.im*(psi).c3.re;
+
+   w.c11=chi.c1;
+   w.c21=chi.c2;
+   w.c31=chi.c3;
+
+   psi.c1=(*v).c12;
+   psi.c2=(*v).c22;
+   psi.c3=(*v).c32;
+
+   (chi).c1.re= (*(u)).c11.re*(psi).c1.re-(*(u)).c11.im*(psi).c1.im + (*(u)).c12.re*(psi).c2.re-(*(u)).c12.im*(psi).c2.im + (*(u)).c13.re*(psi).c3.re-(*(u)).c13.im*(psi).c3.im;
+   (chi).c1.im= (*(u)).c11.re*(psi).c1.im+(*(u)).c11.im*(psi).c1.re + (*(u)).c12.re*(psi).c2.im+(*(u)).c12.im*(psi).c2.re + (*(u)).c13.re*(psi).c3.im+(*(u)).c13.im*(psi).c3.re;
+   (chi).c2.re= (*(u)).c21.re*(psi).c1.re-(*(u)).c21.im*(psi).c1.im + (*(u)).c22.re*(psi).c2.re-(*(u)).c22.im*(psi).c2.im + (*(u)).c23.re*(psi).c3.re-(*(u)).c23.im*(psi).c3.im;
+   (chi).c2.im= (*(u)).c21.re*(psi).c1.im+(*(u)).c21.im*(psi).c1.re + (*(u)).c22.re*(psi).c2.im+(*(u)).c22.im*(psi).c2.re + (*(u)).c23.re*(psi).c3.im+(*(u)).c23.im*(psi).c3.re;
+   (chi).c3.re= (*(u)).c31.re*(psi).c1.re-(*(u)).c31.im*(psi).c1.im + (*(u)).c32.re*(psi).c2.re-(*(u)).c32.im*(psi).c2.im + (*(u)).c33.re*(psi).c3.re-(*(u)).c33.im*(psi).c3.im;
+   (chi).c3.im= (*(u)).c31.re*(psi).c1.im+(*(u)).c31.im*(psi).c1.re + (*(u)).c32.re*(psi).c2.im+(*(u)).c32.im*(psi).c2.re + (*(u)).c33.re*(psi).c3.im+(*(u)).c33.im*(psi).c3.re;
+
+   w.c12=chi.c1;
+   w.c22=chi.c2;
+   w.c32=chi.c3;
+
+   psi.c1=(*v).c13;
+   psi.c2=(*v).c23;
+   psi.c3=(*v).c33;
+
+   (chi).c1.re= (*(u)).c11.re*(psi).c1.re-(*(u)).c11.im*(psi).c1.im + (*(u)).c12.re*(psi).c2.re-(*(u)).c12.im*(psi).c2.im + (*(u)).c13.re*(psi).c3.re-(*(u)).c13.im*(psi).c3.im;
+   (chi).c1.im= (*(u)).c11.re*(psi).c1.im+(*(u)).c11.im*(psi).c1.re + (*(u)).c12.re*(psi).c2.im+(*(u)).c12.im*(psi).c2.re + (*(u)).c13.re*(psi).c3.im+(*(u)).c13.im*(psi).c3.re;
+   (chi).c2.re= (*(u)).c21.re*(psi).c1.re-(*(u)).c21.im*(psi).c1.im + (*(u)).c22.re*(psi).c2.re-(*(u)).c22.im*(psi).c2.im + (*(u)).c23.re*(psi).c3.re-(*(u)).c23.im*(psi).c3.im;
+   (chi).c2.im= (*(u)).c21.re*(psi).c1.im+(*(u)).c21.im*(psi).c1.re + (*(u)).c22.re*(psi).c2.im+(*(u)).c22.im*(psi).c2.re + (*(u)).c23.re*(psi).c3.im+(*(u)).c23.im*(psi).c3.re;
+   (chi).c3.re= (*(u)).c31.re*(psi).c1.re-(*(u)).c31.im*(psi).c1.im + (*(u)).c32.re*(psi).c2.re-(*(u)).c32.im*(psi).c2.im + (*(u)).c33.re*(psi).c3.re-(*(u)).c33.im*(psi).c3.im;
+   (chi).c3.im= (*(u)).c31.re*(psi).c1.im+(*(u)).c31.im*(psi).c1.re + (*(u)).c32.re*(psi).c2.im+(*(u)).c32.im*(psi).c2.re + (*(u)).c33.re*(psi).c3.im+(*(u)).c33.im*(psi).c3.re;
+
+   w.c13=chi.c1;
+   w.c23=chi.c2;
+   w.c33=chi.c3;
+
+   return w; 
+}
+
+su3_dble plaq_dble_su3dagxsu3dag_extern(su3_dble *u,su3_dble *v)
+{
+   su3_vector_dble psi,chi;
+   su3_dble w;
+
+   psi.c1.re= (*v).c11.re;
+   psi.c1.im=-(*v).c11.im;
+   psi.c2.re= (*v).c12.re;
+   psi.c2.im=-(*v).c12.im;
+   psi.c3.re= (*v).c13.re;
+   psi.c3.im=-(*v).c13.im;
+
+   (chi).c1.re= (*u).c11.re*(psi).c1.re+(*u).c11.im*(psi).c1.im + (*u).c21.re*(psi).c2.re+(*u).c21.im*(psi).c2.im + (*u).c31.re*(psi).c3.re+(*u).c31.im*(psi).c3.im;
+   (chi).c1.im= (*u).c11.re*(psi).c1.im-(*u).c11.im*(psi).c1.re + (*u).c21.re*(psi).c2.im-(*u).c21.im*(psi).c2.re + (*u).c31.re*(psi).c3.im-(*u).c31.im*(psi).c3.re;
+   (chi).c2.re= (*u).c12.re*(psi).c1.re+(*u).c12.im*(psi).c1.im + (*u).c22.re*(psi).c2.re+(*u).c22.im*(psi).c2.im + (*u).c32.re*(psi).c3.re+(*u).c32.im*(psi).c3.im;
+   (chi).c2.im= (*u).c12.re*(psi).c1.im-(*u).c12.im*(psi).c1.re + (*u).c22.re*(psi).c2.im-(*u).c22.im*(psi).c2.re + (*u).c32.re*(psi).c3.im-(*u).c32.im*(psi).c3.re;
+   (chi).c3.re= (*u).c13.re*(psi).c1.re+(*u).c13.im*(psi).c1.im + (*u).c23.re*(psi).c2.re+(*u).c23.im*(psi).c2.im + (*u).c33.re*(psi).c3.re+(*u).c33.im*(psi).c3.im;
+   (chi).c3.im= (*u).c13.re*(psi).c1.im-(*u).c13.im*(psi).c1.re + (*u).c23.re*(psi).c2.im-(*u).c23.im*(psi).c2.re + (*u).c33.re*(psi).c3.im-(*u).c33.im*(psi).c3.re;
+
+   w.c11=chi.c1;
+   w.c21=chi.c2;
+   w.c31=chi.c3;
+
+   psi.c1.re= (*v).c21.re;
+   psi.c1.im=-(*v).c21.im;
+   psi.c2.re= (*v).c22.re;
+   psi.c2.im=-(*v).c22.im;
+   psi.c3.re= (*v).c23.re;
+   psi.c3.im=-(*v).c23.im;
+   
+   (chi).c1.re= (*u).c11.re*(psi).c1.re+(*u).c11.im*(psi).c1.im + (*u).c21.re*(psi).c2.re+(*u).c21.im*(psi).c2.im + (*u).c31.re*(psi).c3.re+(*u).c31.im*(psi).c3.im;
+   (chi).c1.im= (*u).c11.re*(psi).c1.im-(*u).c11.im*(psi).c1.re + (*u).c21.re*(psi).c2.im-(*u).c21.im*(psi).c2.re + (*u).c31.re*(psi).c3.im-(*u).c31.im*(psi).c3.re;
+   (chi).c2.re= (*u).c12.re*(psi).c1.re+(*u).c12.im*(psi).c1.im + (*u).c22.re*(psi).c2.re+(*u).c22.im*(psi).c2.im + (*u).c32.re*(psi).c3.re+(*u).c32.im*(psi).c3.im;
+   (chi).c2.im= (*u).c12.re*(psi).c1.im-(*u).c12.im*(psi).c1.re + (*u).c22.re*(psi).c2.im-(*u).c22.im*(psi).c2.re + (*u).c32.re*(psi).c3.im-(*u).c32.im*(psi).c3.re;
+   (chi).c3.re= (*u).c13.re*(psi).c1.re+(*u).c13.im*(psi).c1.im + (*u).c23.re*(psi).c2.re+(*u).c23.im*(psi).c2.im + (*u).c33.re*(psi).c3.re+(*u).c33.im*(psi).c3.im;
+   (chi).c3.im= (*u).c13.re*(psi).c1.im-(*u).c13.im*(psi).c1.re + (*u).c23.re*(psi).c2.im-(*u).c23.im*(psi).c2.re + (*u).c33.re*(psi).c3.im-(*u).c33.im*(psi).c3.re;
+
+   w.c12=chi.c1;
+   w.c22=chi.c2;
+   w.c32=chi.c3;
+
+   psi.c1.re= (*v).c31.re;
+   psi.c1.im=-(*v).c31.im;
+   psi.c2.re= (*v).c32.re;
+   psi.c2.im=-(*v).c32.im;
+   psi.c3.re= (*v).c33.re;
+   psi.c3.im=-(*v).c33.im;
+   
+   (chi).c1.re= (*u).c11.re*(psi).c1.re+(*u).c11.im*(psi).c1.im + (*u).c21.re*(psi).c2.re+(*u).c21.im*(psi).c2.im + (*u).c31.re*(psi).c3.re+(*u).c31.im*(psi).c3.im;
+   (chi).c1.im= (*u).c11.re*(psi).c1.im-(*u).c11.im*(psi).c1.re + (*u).c21.re*(psi).c2.im-(*u).c21.im*(psi).c2.re + (*u).c31.re*(psi).c3.im-(*u).c31.im*(psi).c3.re;
+   (chi).c2.re= (*u).c12.re*(psi).c1.re+(*u).c12.im*(psi).c1.im + (*u).c22.re*(psi).c2.re+(*u).c22.im*(psi).c2.im + (*u).c32.re*(psi).c3.re+(*u).c32.im*(psi).c3.im;
+   (chi).c2.im= (*u).c12.re*(psi).c1.im-(*u).c12.im*(psi).c1.re + (*u).c22.re*(psi).c2.im-(*u).c22.im*(psi).c2.re + (*u).c32.re*(psi).c3.im-(*u).c32.im*(psi).c3.re;
+   (chi).c3.re= (*u).c13.re*(psi).c1.re+(*u).c13.im*(psi).c1.im + (*u).c23.re*(psi).c2.re+(*u).c23.im*(psi).c2.im + (*u).c33.re*(psi).c3.re+(*u).c33.im*(psi).c3.im;
+   (chi).c3.im= (*u).c13.re*(psi).c1.im-(*u).c13.im*(psi).c1.re + (*u).c23.re*(psi).c2.im-(*u).c23.im*(psi).c2.re + (*u).c33.re*(psi).c3.im-(*u).c33.im*(psi).c3.re;
+
+   w.c13=chi.c1;
+   w.c23=chi.c2;
+   w.c33=chi.c3;
+
+   return w; 
+}
+
+void su3xsu3_initialized(su3_dble *u,su3_dble *v,su3_dble *w, su3_vector_dble psi, su3_vector_dble chi)
+{
+   //su3_vector_dble psi,chi;
+
+   psi.c1=(*v).c11;
+   psi.c2=(*v).c21;
+   psi.c3=(*v).c31;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c11=chi.c1;
+   (*w).c21=chi.c2;
+   (*w).c31=chi.c3;
+
+   psi.c1=(*v).c12;
+   psi.c2=(*v).c22;
+   psi.c3=(*v).c32;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c12=chi.c1;
+   (*w).c22=chi.c2;
+   (*w).c32=chi.c3;
+
+   psi.c1=(*v).c13;
+   psi.c2=(*v).c23;
+   psi.c3=(*v).c33;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c13=chi.c1;
+   (*w).c23=chi.c2;
+   (*w).c33=chi.c3;
+}
 
 void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w)
 {
@@ -2167,6 +2369,68 @@ void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c13=chi.c1;
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
+}
+
+su3_dble su3dagxsu3dag_test(su3_dble *u,su3_dble *v)
+{
+   su3_vector_dble psi,chi;
+   su3_dble w;
+
+   psi.c1.re= (*v).c11.re;
+   psi.c1.im=-(*v).c11.im;
+   psi.c2.re= (*v).c12.re;
+   psi.c2.im=-(*v).c12.im;
+   psi.c3.re= (*v).c13.re;
+   psi.c3.im=-(*v).c13.im;
+   //su3dagxsu3vec(u,&psi,&chi);
+   chi.c1.re= (*u).c11.re*psi.c1.re+(*u).c11.im*psi.c1.im+(*u).c21.re*psi.c2.re+(*u).c21.im*psi.c2.im+(*u).c31.re*psi.c3.re+(*u).c31.im*psi.c3.im;
+   chi.c1.im= (*u).c11.re*psi.c1.im-(*u).c11.im*psi.c1.re+(*u).c21.re*psi.c2.im-(*u).c21.im*psi.c2.re+(*u).c31.re*psi.c3.im-(*u).c31.im*psi.c3.re;
+   chi.c2.re= (*u).c12.re*psi.c1.re+(*u).c12.im*psi.c1.im+(*u).c22.re*psi.c2.re+(*u).c22.im*psi.c2.im+(*u).c32.re*psi.c3.re+(*u).c32.im*psi.c3.im;
+   chi.c2.im= (*u).c12.re*psi.c1.im-(*u).c12.im*psi.c1.re+(*u).c22.re*psi.c2.im-(*u).c22.im*psi.c2.re+(*u).c32.re*psi.c3.im-(*u).c32.im*psi.c3.re;
+   chi.c3.re= (*u).c13.re*psi.c1.re+(*u).c13.im*psi.c1.im+(*u).c23.re*psi.c2.re+(*u).c23.im*psi.c2.im+(*u).c33.re*psi.c3.re+(*u).c33.im*psi.c3.im;
+   chi.c3.im= (*u).c13.re*psi.c1.im-(*u).c13.im*psi.c1.re+(*u).c23.re*psi.c2.im-(*u).c23.im*psi.c2.re+(*u).c33.re*psi.c3.im-(*u).c33.im*psi.c3.re;
+
+   w.c11=chi.c1;
+   w.c21=chi.c2;
+   w.c31=chi.c3;
+
+   psi.c1.re= (*v).c21.re;
+   psi.c1.im=-(*v).c21.im;
+   psi.c2.re= (*v).c22.re;
+   psi.c2.im=-(*v).c22.im;
+   psi.c3.re= (*v).c23.re;
+   psi.c3.im=-(*v).c23.im;
+   //su3dagxsu3vec(u,&psi,&chi);
+   chi.c1.re= (*u).c11.re*psi.c1.re+(*u).c11.im*psi.c1.im+(*u).c21.re*psi.c2.re+(*u).c21.im*psi.c2.im+(*u).c31.re*psi.c3.re+(*u).c31.im*psi.c3.im;
+   chi.c1.im= (*u).c11.re*psi.c1.im-(*u).c11.im*psi.c1.re+(*u).c21.re*psi.c2.im-(*u).c21.im*psi.c2.re+(*u).c31.re*psi.c3.im-(*u).c31.im*psi.c3.re;
+   chi.c2.re= (*u).c12.re*psi.c1.re+(*u).c12.im*psi.c1.im+(*u).c22.re*psi.c2.re+(*u).c22.im*psi.c2.im+(*u).c32.re*psi.c3.re+(*u).c32.im*psi.c3.im;
+   chi.c2.im= (*u).c12.re*psi.c1.im-(*u).c12.im*psi.c1.re+(*u).c22.re*psi.c2.im-(*u).c22.im*psi.c2.re+(*u).c32.re*psi.c3.im-(*u).c32.im*psi.c3.re;
+   chi.c3.re= (*u).c13.re*psi.c1.re+(*u).c13.im*psi.c1.im+(*u).c23.re*psi.c2.re+(*u).c23.im*psi.c2.im+(*u).c33.re*psi.c3.re+(*u).c33.im*psi.c3.im;
+   chi.c3.im= (*u).c13.re*psi.c1.im-(*u).c13.im*psi.c1.re+(*u).c23.re*psi.c2.im-(*u).c23.im*psi.c2.re+(*u).c33.re*psi.c3.im-(*u).c33.im*psi.c3.re;
+
+   w.c12=chi.c1;
+   w.c22=chi.c2;
+   w.c32=chi.c3;
+
+   psi.c1.re= (*v).c31.re;
+   psi.c1.im=-(*v).c31.im;
+   psi.c2.re= (*v).c32.re;
+   psi.c2.im=-(*v).c32.im;
+   psi.c3.re= (*v).c33.re;
+   psi.c3.im=-(*v).c33.im;
+   //su3dagxsu3vec(u,&psi,&chi);
+   chi.c1.re= (*u).c11.re*psi.c1.re+(*u).c11.im*psi.c1.im+(*u).c21.re*psi.c2.re+(*u).c21.im*psi.c2.im+(*u).c31.re*psi.c3.re+(*u).c31.im*psi.c3.im;
+   chi.c1.im= (*u).c11.re*psi.c1.im-(*u).c11.im*psi.c1.re+(*u).c21.re*psi.c2.im-(*u).c21.im*psi.c2.re+(*u).c31.re*psi.c3.im-(*u).c31.im*psi.c3.re;
+   chi.c2.re= (*u).c12.re*psi.c1.re+(*u).c12.im*psi.c1.im+(*u).c22.re*psi.c2.re+(*u).c22.im*psi.c2.im+(*u).c32.re*psi.c3.re+(*u).c32.im*psi.c3.im;
+   chi.c2.im= (*u).c12.re*psi.c1.im-(*u).c12.im*psi.c1.re+(*u).c22.re*psi.c2.im-(*u).c22.im*psi.c2.re+(*u).c32.re*psi.c3.im-(*u).c32.im*psi.c3.re;
+   chi.c3.re= (*u).c13.re*psi.c1.re+(*u).c13.im*psi.c1.im+(*u).c23.re*psi.c2.re+(*u).c23.im*psi.c2.im+(*u).c33.re*psi.c3.re+(*u).c33.im*psi.c3.im;
+   chi.c3.im= (*u).c13.re*psi.c1.im-(*u).c13.im*psi.c1.re+(*u).c23.re*psi.c2.im-(*u).c23.im*psi.c2.re+(*u).c33.re*psi.c3.im-(*u).c33.im*psi.c3.re;
+
+   w.c13=chi.c1;
+   w.c23=chi.c2;
+   w.c33=chi.c3;
+
+   return w; 
 }
 
 

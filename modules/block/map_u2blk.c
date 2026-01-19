@@ -3,7 +3,7 @@
 *
 * File map_u2blk.c
 *
-* Copyright (C) 2006, 2011, 2013, 2021, 2023 Martin Luescher
+* Copyright (C) 2006, 2011, 2013, 2021 Martin Luescher
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
@@ -69,6 +69,7 @@ static void alloc_ubuf(void)
    error(ipt==NULL,1,"alloc_ubuf [map_u2blk.c]",
          "Geometry arrays are not set");
 
+   bc=bc_type();
    np=(cpr[0]+cpr[1]+cpr[2]+cpr[3])&0x1;
 
    nbf[0]=FACE0/2;
@@ -320,7 +321,6 @@ void assign_ud2ubgr(blk_grid_t grid)
             "Parameter is not global");
    }
 
-   bc=bc_type();
    b=blk_list(grid,&nb,&isw);
 
    error((b==NULL)||((*b).u==NULL)||((*b).shf&0x4),1,

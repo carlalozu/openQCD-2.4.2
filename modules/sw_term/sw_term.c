@@ -3,7 +3,7 @@
 *
 * File sw_term.c
 *
-* Copyright (C) 2011-2018, 2021, 2023 Martin Luescher, Antonio Rago
+* Copyright (C) 2011-2018, 2021 Martin Luescher, Antonio Rago
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
@@ -111,7 +111,7 @@ int sw_order(void)
    if (swp.m0!=DBL_MAX)
    {
       n=0;
-      c=3.0*fabs(swp.csw/(4.0+swp.m0));
+      c=3.0*swp.csw/(4.0+swp.m0);
       a=c*exp(c);
       b=DBL_EPSILON;
 

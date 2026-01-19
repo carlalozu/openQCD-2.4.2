@@ -3,7 +3,7 @@
 *
 * File force0.c
 *
-* Copyright (C) 2005-2018, 2021, 2023 Martin Luescher, John Bulava
+* Copyright (C) 2005-2016, 2018, 2021 Martin Luescher, John Bulava
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
@@ -285,7 +285,6 @@ void plaq_frc(void)
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
 
-   set_uidx();
    udb=udfld();
    mdfs=mdflds();
    fdb=(*mdfs).frc;
@@ -563,7 +562,6 @@ void force0(double c)
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
 
-   set_uidx();
    udb=udfld();
    mdfs=mdflds();
    fdb=(*mdfs).frc;
@@ -733,9 +731,8 @@ qflt action0(int icom)
 
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
-
-   set_uidx();
    udb=udfld();
+
    lat=lat_parms();
 
    if (lat.c0==1.0)

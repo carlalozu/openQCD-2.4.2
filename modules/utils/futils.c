@@ -175,12 +175,12 @@ void acc_std_status(char *solver,int *ifail,int *sval,int io,int *status)
 }
 
 
-void add_std_status(int *new,int *status)
+void add_std_status(int *new_arr,int *status)
 {
    int k;
 
    for (k=0;k<NSTD_STATUS;k++)
-      status[k]+=new[k];
+      status[k]+=new_arr[k];
 }
 
 

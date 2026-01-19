@@ -451,7 +451,7 @@ double jack_err(int nx,int n,double **a,double (*f)(int nx,double *x),
       sig[bs-1]=jerr(nx,nbin,b,f,fbar);
    }
 
-   afree(b[0]);
+   afree(p);
    afree(b);
 
    return fbar;

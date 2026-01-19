@@ -274,31 +274,3 @@ void plaq_uidx(int n,int ix,int *ip)
       ip[3]=4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
    }
 }
-
-
-void set_plaq_uidx_array(int *plaq_uidx_array)
-{
-   int n, ix; 
-   for (n = 0; n < 6; n++)
-   {
-      for (ix = 0; ix < VOLUME; ix++)
-      {
-         plaq_uidx(n, ix, plaq_uidx_array+n*VOLUME*4+ix*4);
-      }  
-   }  
-}
-
-
-/*
-void set_plaq_uidx_array(int plaq_uidx_array[6][VOLUME][4])
-{
-   int n, ix; 
-   for (n = 0; n < 6; n++)
-   {
-      for (ix = 0; ix < VOLUME; ix++)
-      {
-         plaq_uidx(n, ix, plaq_uidx_array[n][ix]);
-      }  
-   }  
-}
-*/

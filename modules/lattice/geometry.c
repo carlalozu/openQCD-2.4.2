@@ -44,8 +44,8 @@
 #include "lattice.h"
 #include "global.h"
 
-static int *tms=NULL;
-
+int *tms=NULL;
+//static int *tms=NULL;
 
 static void cache_block_size(int *bs,int *cbs)
 {
@@ -307,6 +307,14 @@ void ipt_global(int *x,int *ip,int *ix)
    (*ix)=ipt[x3+x2*L3+x1*L2*L3+x0*L1*L2*L3];
 }
 
+
+int global_time_array(int ix, int *tms_arr)
+{
+   if ((ix>=0)&&(ix<VOLUME))
+      return tms_arr[ix];
+   else
+      return NPROC0*L0;
+}
 
 int global_time(int ix)
 {
