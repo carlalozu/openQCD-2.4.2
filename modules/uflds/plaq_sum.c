@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *
-* File plaq_sum.c
+* File plaq_sum.c WORKING GPU VERSION
 *
 * Copyright (C) 2005-2016, 2018, 2021 Martin Luescher
 *
@@ -63,197 +63,20 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 #pragma omp declare target
-static su3_dble *udb;
-static int plaq_uidx_array[6*VOLUME*4];
-static qflt rqsm;
+su3_dble *udb;
+su3_dble udb_test[4*VOLUME+7*(BNDRY/4)];
+int plaq_uidx_array[6*VOLUME*4];
+double pa_arr[VOLUME];
+qflt rqsm;
 #pragma omp end declare target
+
 
 static double plaq_dble(int n,int ix)
 {
-      int *ip = &plaq_uidx_array[n*VOLUME*4 + ix*4];
-      double sm;
-      su3_dble wd1;
-      su3_dble wd2;
-
-      su3xsu3(udb+ip[0],udb+ip[1],&wd1);
-      su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
-      cm3x3_retr(&wd1,&wd2,&sm);
-
-      return sm; 
-}
-
-static double plaq_dble_custom(int udb_index)
-{
-   double sm = 0.0; 
-
-   sm+=(*(udb+udb_index)).c11.re + (*(udb+udb_index)).c11.im;
-   sm+=(*(udb+udb_index)).c12.re + (*(udb+udb_index)).c12.im;
-   sm+=(*(udb+udb_index)).c13.re + (*(udb+udb_index)).c13.im;
-   sm+=(*(udb+udb_index)).c21.re + (*(udb+udb_index)).c21.im;
-   sm+=(*(udb+udb_index)).c22.re + (*(udb+udb_index)).c22.im;
-   sm+=(*(udb+udb_index)).c23.re + (*(udb+udb_index)).c23.im;
-   sm+=(*(udb+udb_index)).c31.re + (*(udb+udb_index)).c31.im;
-   sm+=(*(udb+udb_index)).c32.re + (*(udb+udb_index)).c32.im;
-   sm+=(*(udb+udb_index)).c33.re + (*(udb+udb_index)).c33.im;
-
-   return sm; 
-}
-
-static double plaq_dble_cm3x3_retr_indices(int udb_index_u, int udb_index_v)
-{
-   double r = 0.0;
-
-   r =(*(udb+udb_index_u)).c11.re*(*(udb+udb_index_v)).c11.re-(*(udb+udb_index_u)).c11.im*(*(udb+udb_index_v)).c11.im;
-   r+=(*(udb+udb_index_u)).c12.re*(*(udb+udb_index_v)).c21.re-(*(udb+udb_index_u)).c12.im*(*(udb+udb_index_v)).c21.im;
-   r+=(*(udb+udb_index_u)).c13.re*(*(udb+udb_index_v)).c31.re-(*(udb+udb_index_u)).c13.im*(*(udb+udb_index_v)).c31.im;
-   r+=(*(udb+udb_index_u)).c21.re*(*(udb+udb_index_v)).c12.re-(*(udb+udb_index_u)).c21.im*(*(udb+udb_index_v)).c12.im;
-   r+=(*(udb+udb_index_u)).c22.re*(*(udb+udb_index_v)).c22.re-(*(udb+udb_index_u)).c22.im*(*(udb+udb_index_v)).c22.im;
-   r+=(*(udb+udb_index_u)).c23.re*(*(udb+udb_index_v)).c32.re-(*(udb+udb_index_u)).c23.im*(*(udb+udb_index_v)).c32.im;
-   r+=(*(udb+udb_index_u)).c31.re*(*(udb+udb_index_v)).c13.re-(*(udb+udb_index_u)).c31.im*(*(udb+udb_index_v)).c13.im;
-   r+=(*(udb+udb_index_u)).c32.re*(*(udb+udb_index_v)).c23.re-(*(udb+udb_index_u)).c32.im*(*(udb+udb_index_v)).c23.im;
-   r+=(*(udb+udb_index_u)).c33.re*(*(udb+udb_index_v)).c33.re-(*(udb+udb_index_u)).c33.im*(*(udb+udb_index_v)).c33.im;
-
-   return r;
-}
-
-static double plaq_dble_cm3x3_retr(su3_dble *u, su3_dble *v)
-{
-   double r = 0.0;
-
-   r =(*(u)).c11.re*(*(v)).c11.re-(*(u)).c11.im*(*(v)).c11.im;
-   r+=(*(u)).c12.re*(*(v)).c21.re-(*(u)).c12.im*(*(v)).c21.im;
-   r+=(*(u)).c13.re*(*(v)).c31.re-(*(u)).c13.im*(*(v)).c31.im;
-   r+=(*(u)).c21.re*(*(v)).c12.re-(*(u)).c21.im*(*(v)).c12.im;
-   r+=(*(u)).c22.re*(*(v)).c22.re-(*(u)).c22.im*(*(v)).c22.im;
-   r+=(*(u)).c23.re*(*(v)).c32.re-(*(u)).c23.im*(*(v)).c32.im;
-   r+=(*(u)).c31.re*(*(v)).c13.re-(*(u)).c31.im*(*(v)).c13.im;
-   r+=(*(u)).c32.re*(*(v)).c23.re-(*(u)).c32.im*(*(v)).c23.im;
-   r+=(*(u)).c33.re*(*(v)).c33.re-(*(u)).c33.im*(*(v)).c33.im;
-
-   return r;
-}
-
-static su3_dble plaq_dble_su3xsu3(su3_dble *u,su3_dble *v)
-{
-   su3_vector_dble psi,chi;
-   su3_dble w;
-
-   psi.c1=(*v).c11;
-   psi.c2=(*v).c21;
-   psi.c3=(*v).c31;
-
-   (chi).c1.re= (*(u)).c11.re*(psi).c1.re-(*(u)).c11.im*(psi).c1.im + (*(u)).c12.re*(psi).c2.re-(*(u)).c12.im*(psi).c2.im + (*(u)).c13.re*(psi).c3.re-(*(u)).c13.im*(psi).c3.im;
-   (chi).c1.im= (*(u)).c11.re*(psi).c1.im+(*(u)).c11.im*(psi).c1.re + (*(u)).c12.re*(psi).c2.im+(*(u)).c12.im*(psi).c2.re + (*(u)).c13.re*(psi).c3.im+(*(u)).c13.im*(psi).c3.re;
-   (chi).c2.re= (*(u)).c21.re*(psi).c1.re-(*(u)).c21.im*(psi).c1.im + (*(u)).c22.re*(psi).c2.re-(*(u)).c22.im*(psi).c2.im + (*(u)).c23.re*(psi).c3.re-(*(u)).c23.im*(psi).c3.im;
-   (chi).c2.im= (*(u)).c21.re*(psi).c1.im+(*(u)).c21.im*(psi).c1.re + (*(u)).c22.re*(psi).c2.im+(*(u)).c22.im*(psi).c2.re + (*(u)).c23.re*(psi).c3.im+(*(u)).c23.im*(psi).c3.re;
-   (chi).c3.re= (*(u)).c31.re*(psi).c1.re-(*(u)).c31.im*(psi).c1.im + (*(u)).c32.re*(psi).c2.re-(*(u)).c32.im*(psi).c2.im + (*(u)).c33.re*(psi).c3.re-(*(u)).c33.im*(psi).c3.im;
-   (chi).c3.im= (*(u)).c31.re*(psi).c1.im+(*(u)).c31.im*(psi).c1.re + (*(u)).c32.re*(psi).c2.im+(*(u)).c32.im*(psi).c2.re + (*(u)).c33.re*(psi).c3.im+(*(u)).c33.im*(psi).c3.re;
-
-   w.c11=chi.c1;
-   w.c21=chi.c2;
-   w.c31=chi.c3;
-
-   psi.c1=(*v).c12;
-   psi.c2=(*v).c22;
-   psi.c3=(*v).c32;
-
-   (chi).c1.re= (*(u)).c11.re*(psi).c1.re-(*(u)).c11.im*(psi).c1.im + (*(u)).c12.re*(psi).c2.re-(*(u)).c12.im*(psi).c2.im + (*(u)).c13.re*(psi).c3.re-(*(u)).c13.im*(psi).c3.im;
-   (chi).c1.im= (*(u)).c11.re*(psi).c1.im+(*(u)).c11.im*(psi).c1.re + (*(u)).c12.re*(psi).c2.im+(*(u)).c12.im*(psi).c2.re + (*(u)).c13.re*(psi).c3.im+(*(u)).c13.im*(psi).c3.re;
-   (chi).c2.re= (*(u)).c21.re*(psi).c1.re-(*(u)).c21.im*(psi).c1.im + (*(u)).c22.re*(psi).c2.re-(*(u)).c22.im*(psi).c2.im + (*(u)).c23.re*(psi).c3.re-(*(u)).c23.im*(psi).c3.im;
-   (chi).c2.im= (*(u)).c21.re*(psi).c1.im+(*(u)).c21.im*(psi).c1.re + (*(u)).c22.re*(psi).c2.im+(*(u)).c22.im*(psi).c2.re + (*(u)).c23.re*(psi).c3.im+(*(u)).c23.im*(psi).c3.re;
-   (chi).c3.re= (*(u)).c31.re*(psi).c1.re-(*(u)).c31.im*(psi).c1.im + (*(u)).c32.re*(psi).c2.re-(*(u)).c32.im*(psi).c2.im + (*(u)).c33.re*(psi).c3.re-(*(u)).c33.im*(psi).c3.im;
-   (chi).c3.im= (*(u)).c31.re*(psi).c1.im+(*(u)).c31.im*(psi).c1.re + (*(u)).c32.re*(psi).c2.im+(*(u)).c32.im*(psi).c2.re + (*(u)).c33.re*(psi).c3.im+(*(u)).c33.im*(psi).c3.re;
-
-   w.c12=chi.c1;
-   w.c22=chi.c2;
-   w.c32=chi.c3;
-
-   psi.c1=(*v).c13;
-   psi.c2=(*v).c23;
-   psi.c3=(*v).c33;
-
-   (chi).c1.re= (*(u)).c11.re*(psi).c1.re-(*(u)).c11.im*(psi).c1.im + (*(u)).c12.re*(psi).c2.re-(*(u)).c12.im*(psi).c2.im + (*(u)).c13.re*(psi).c3.re-(*(u)).c13.im*(psi).c3.im;
-   (chi).c1.im= (*(u)).c11.re*(psi).c1.im+(*(u)).c11.im*(psi).c1.re + (*(u)).c12.re*(psi).c2.im+(*(u)).c12.im*(psi).c2.re + (*(u)).c13.re*(psi).c3.im+(*(u)).c13.im*(psi).c3.re;
-   (chi).c2.re= (*(u)).c21.re*(psi).c1.re-(*(u)).c21.im*(psi).c1.im + (*(u)).c22.re*(psi).c2.re-(*(u)).c22.im*(psi).c2.im + (*(u)).c23.re*(psi).c3.re-(*(u)).c23.im*(psi).c3.im;
-   (chi).c2.im= (*(u)).c21.re*(psi).c1.im+(*(u)).c21.im*(psi).c1.re + (*(u)).c22.re*(psi).c2.im+(*(u)).c22.im*(psi).c2.re + (*(u)).c23.re*(psi).c3.im+(*(u)).c23.im*(psi).c3.re;
-   (chi).c3.re= (*(u)).c31.re*(psi).c1.re-(*(u)).c31.im*(psi).c1.im + (*(u)).c32.re*(psi).c2.re-(*(u)).c32.im*(psi).c2.im + (*(u)).c33.re*(psi).c3.re-(*(u)).c33.im*(psi).c3.im;
-   (chi).c3.im= (*(u)).c31.re*(psi).c1.im+(*(u)).c31.im*(psi).c1.re + (*(u)).c32.re*(psi).c2.im+(*(u)).c32.im*(psi).c2.re + (*(u)).c33.re*(psi).c3.im+(*(u)).c33.im*(psi).c3.re;
-
-   w.c13=chi.c1;
-   w.c23=chi.c2;
-   w.c33=chi.c3;
-
-   return w; 
-}
-
-static su3_dble plaq_dble_su3dagxsu3dag(su3_dble *u,su3_dble *v)
-{
-   su3_vector_dble psi,chi;
-   su3_dble w;
-
-   psi.c1.re= (*v).c11.re;
-   psi.c1.im=-(*v).c11.im;
-   psi.c2.re= (*v).c12.re;
-   psi.c2.im=-(*v).c12.im;
-   psi.c3.re= (*v).c13.re;
-   psi.c3.im=-(*v).c13.im;
-
-   (chi).c1.re= (*u).c11.re*(psi).c1.re+(*u).c11.im*(psi).c1.im + (*u).c21.re*(psi).c2.re+(*u).c21.im*(psi).c2.im + (*u).c31.re*(psi).c3.re+(*u).c31.im*(psi).c3.im;
-   (chi).c1.im= (*u).c11.re*(psi).c1.im-(*u).c11.im*(psi).c1.re + (*u).c21.re*(psi).c2.im-(*u).c21.im*(psi).c2.re + (*u).c31.re*(psi).c3.im-(*u).c31.im*(psi).c3.re;
-   (chi).c2.re= (*u).c12.re*(psi).c1.re+(*u).c12.im*(psi).c1.im + (*u).c22.re*(psi).c2.re+(*u).c22.im*(psi).c2.im + (*u).c32.re*(psi).c3.re+(*u).c32.im*(psi).c3.im;
-   (chi).c2.im= (*u).c12.re*(psi).c1.im-(*u).c12.im*(psi).c1.re + (*u).c22.re*(psi).c2.im-(*u).c22.im*(psi).c2.re + (*u).c32.re*(psi).c3.im-(*u).c32.im*(psi).c3.re;
-   (chi).c3.re= (*u).c13.re*(psi).c1.re+(*u).c13.im*(psi).c1.im + (*u).c23.re*(psi).c2.re+(*u).c23.im*(psi).c2.im + (*u).c33.re*(psi).c3.re+(*u).c33.im*(psi).c3.im;
-   (chi).c3.im= (*u).c13.re*(psi).c1.im-(*u).c13.im*(psi).c1.re + (*u).c23.re*(psi).c2.im-(*u).c23.im*(psi).c2.re + (*u).c33.re*(psi).c3.im-(*u).c33.im*(psi).c3.re;
-
-   w.c11=chi.c1;
-   w.c21=chi.c2;
-   w.c31=chi.c3;
-
-   psi.c1.re= (*v).c21.re;
-   psi.c1.im=-(*v).c21.im;
-   psi.c2.re= (*v).c22.re;
-   psi.c2.im=-(*v).c22.im;
-   psi.c3.re= (*v).c23.re;
-   psi.c3.im=-(*v).c23.im;
-   
-   (chi).c1.re= (*u).c11.re*(psi).c1.re+(*u).c11.im*(psi).c1.im + (*u).c21.re*(psi).c2.re+(*u).c21.im*(psi).c2.im + (*u).c31.re*(psi).c3.re+(*u).c31.im*(psi).c3.im;
-   (chi).c1.im= (*u).c11.re*(psi).c1.im-(*u).c11.im*(psi).c1.re + (*u).c21.re*(psi).c2.im-(*u).c21.im*(psi).c2.re + (*u).c31.re*(psi).c3.im-(*u).c31.im*(psi).c3.re;
-   (chi).c2.re= (*u).c12.re*(psi).c1.re+(*u).c12.im*(psi).c1.im + (*u).c22.re*(psi).c2.re+(*u).c22.im*(psi).c2.im + (*u).c32.re*(psi).c3.re+(*u).c32.im*(psi).c3.im;
-   (chi).c2.im= (*u).c12.re*(psi).c1.im-(*u).c12.im*(psi).c1.re + (*u).c22.re*(psi).c2.im-(*u).c22.im*(psi).c2.re + (*u).c32.re*(psi).c3.im-(*u).c32.im*(psi).c3.re;
-   (chi).c3.re= (*u).c13.re*(psi).c1.re+(*u).c13.im*(psi).c1.im + (*u).c23.re*(psi).c2.re+(*u).c23.im*(psi).c2.im + (*u).c33.re*(psi).c3.re+(*u).c33.im*(psi).c3.im;
-   (chi).c3.im= (*u).c13.re*(psi).c1.im-(*u).c13.im*(psi).c1.re + (*u).c23.re*(psi).c2.im-(*u).c23.im*(psi).c2.re + (*u).c33.re*(psi).c3.im-(*u).c33.im*(psi).c3.re;
-
-   w.c12=chi.c1;
-   w.c22=chi.c2;
-   w.c32=chi.c3;
-
-   psi.c1.re= (*v).c31.re;
-   psi.c1.im=-(*v).c31.im;
-   psi.c2.re= (*v).c32.re;
-   psi.c2.im=-(*v).c32.im;
-   psi.c3.re= (*v).c33.re;
-   psi.c3.im=-(*v).c33.im;
-   
-   (chi).c1.re= (*u).c11.re*(psi).c1.re+(*u).c11.im*(psi).c1.im + (*u).c21.re*(psi).c2.re+(*u).c21.im*(psi).c2.im + (*u).c31.re*(psi).c3.re+(*u).c31.im*(psi).c3.im;
-   (chi).c1.im= (*u).c11.re*(psi).c1.im-(*u).c11.im*(psi).c1.re + (*u).c21.re*(psi).c2.im-(*u).c21.im*(psi).c2.re + (*u).c31.re*(psi).c3.im-(*u).c31.im*(psi).c3.re;
-   (chi).c2.re= (*u).c12.re*(psi).c1.re+(*u).c12.im*(psi).c1.im + (*u).c22.re*(psi).c2.re+(*u).c22.im*(psi).c2.im + (*u).c32.re*(psi).c3.re+(*u).c32.im*(psi).c3.im;
-   (chi).c2.im= (*u).c12.re*(psi).c1.im-(*u).c12.im*(psi).c1.re + (*u).c22.re*(psi).c2.im-(*u).c22.im*(psi).c2.re + (*u).c32.re*(psi).c3.im-(*u).c32.im*(psi).c3.re;
-   (chi).c3.re= (*u).c13.re*(psi).c1.re+(*u).c13.im*(psi).c1.im + (*u).c23.re*(psi).c2.re+(*u).c23.im*(psi).c2.im + (*u).c33.re*(psi).c3.re+(*u).c33.im*(psi).c3.im;
-   (chi).c3.im= (*u).c13.re*(psi).c1.im-(*u).c13.im*(psi).c1.re + (*u).c23.re*(psi).c2.im-(*u).c23.im*(psi).c2.re + (*u).c33.re*(psi).c3.im-(*u).c33.im*(psi).c3.re;
-
-   w.c13=chi.c1;
-   w.c23=chi.c2;
-   w.c33=chi.c3;
-
-   return w; 
-}
-
-static double plaq_dble_original(int n,int ix)
-{
    int *ip = &plaq_uidx_array[n*VOLUME*4 + ix*4];
    double sm;
-   su3_dble wd1;
-   su3_dble wd2;
+   su3_dble wd1;// = __runtime_alloc(18*sizeof(double));// ALIGNED16;
+   su3_dble wd2;// = __runtime_alloc(18*sizeof(double));// ALIGNED16;
 
    wd1 = su3xsu3_test(udb+ip[0],udb+ip[1]);
    wd2 = su3dagxsu3dag_test(udb+ip[3],udb+ip[2]);
@@ -262,12 +85,12 @@ static double plaq_dble_original(int n,int ix)
    return sm;
 }
 
+
 static qflt local_plaq_sum_dble(int iw)
 {
    int bc,k,ix,t,n;
-   double wp,pa,time_start,time_end;
+   double wp,pa;
    qflt rqsm;
-   int mysize = 4*VOLUME+7*(BNDRY/4); 
    
    bc=bc_type();
 
@@ -278,84 +101,210 @@ static qflt local_plaq_sum_dble(int iw)
 
 
    udb=udfld();
+   //udb_test = *udb; 
    set_plaq_uidx_array((plaq_uidx_array));
+
+   for(int idx = 0; idx< VOLUME; idx++) {
+      pa_arr[idx] = 0.0;
+   }
+
+
+   #pragma omp target update to(plaq_uidx_array)
+   #pragma omp target update to(tms)
+   //#pragma omp target update to(udb[4*VOLUME+7*(BNDRY/4)])
+   
+   #pragma omp target update to(pa_arr)
+
+   
 
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
 
    pa = 0.0;
+   //udb_test[0] = udb[0]; 
+   //udb_test[1] = 
 
-   #pragma omp target update to(plaq_uidx_array)
-
-   #pragma omp target data map(to:udb[0:4*VOLUME+7*(BNDRY/4)], tms[0:VOLUME])
-   {
-      MPI_Barrier(MPI_COMM_WORLD);
-      //time_start=MPI_Wtime();
-
-      //#pragma omp parallel for private(t,n) reduction(+ : pa)
-      #pragma omp target teams distribute parallel for reduction(+ : pa) thread_limit(8)
-      {
-         for (int ix = 0; ix < VOLUME; ix++)
-         {
-            t=tms[ix];
-
-            if ((t<(N0-1))||(bc!=0))
-            {
-               for (n=0;n<3;n++) 
-               {
-                  int *ip_test = &plaq_uidx_array[n*VOLUME*4 + ix*4];
-                  su3_dble wd1 = plaq_dble_su3xsu3(udb+ip_test[0],udb+ip_test[1]);
-                  su3_dble wd2 = plaq_dble_su3dagxsu3dag(udb+ip_test[3],udb+ip_test[2]);
-                  pa += plaq_dble_cm3x3_retr(&wd1, &wd2);
-               }
-            }
-
-            if (((t>0)&&(t<(N0-1)))||(bc==3))
-            {
-               for (n=3;n<6;n++)
-               {
-                  int *ip_test = &plaq_uidx_array[n*VOLUME*4 + ix*4];
-                  su3_dble wd1 = plaq_dble_su3xsu3(udb+ip_test[0],udb+ip_test[1]);
-                  su3_dble wd2 = plaq_dble_su3dagxsu3dag(udb+ip_test[3],udb+ip_test[2]);
-                  pa += plaq_dble_cm3x3_retr(&wd1, &wd2);
-               }
-            }
-            else if ((t==0)||(bc==0))
-            {
-               if (bc==1)
-                  pa+=wp*9.0;
-               else
-               {
-                  for (n=3;n<6;n++)
-                  {
-                     int *ip_test = &plaq_uidx_array[n*VOLUME*4 + ix*4];
-                     su3_dble wd1 = plaq_dble_su3xsu3(udb+ip_test[0],udb+ip_test[1]);
-                     su3_dble wd2 = plaq_dble_su3dagxsu3dag(udb+ip_test[3],udb+ip_test[2]);
-                     pa += wp*plaq_dble_cm3x3_retr(&wd1, &wd2);
-                  }
-               }
-            }
-            else
-            {
-               for (n=3;n<6;n++)
-               {
-                  int *ip_test = &plaq_uidx_array[n*VOLUME*4 + ix*4];
-                  su3_dble wd1 = plaq_dble_su3xsu3(udb+ip_test[0],udb+ip_test[1]);
-                  su3_dble wd2 = plaq_dble_su3dagxsu3dag(udb+ip_test[3],udb+ip_test[2]);
-                  pa += plaq_dble_cm3x3_retr(&wd1, &wd2);
-               }
-
-               pa+=wp*9.0;
-            }
-         }    
-      }
+   for(int idx = 0; idx< 4*VOLUME+7*(BNDRY/4); idx++) {
+      udb_test[idx] = udb[idx];
    }
 
-   acc_qflt(pa,rqsm.q);
+   #pragma omp target update to(udb_test)
 
-   MPI_Barrier(MPI_COMM_WORLD);
-   //time_end=MPI_Wtime();
-   //plaq_time += time_end-time_start; 
+
+#pragma omp target teams distribute parallel for reduction(+:pa)//tofrom:pa) private(pa) //reduction(sum_qflt:rqsm) private(ix,t,n,pa)
+   {
+      for (int ix=0;ix<VOLUME;ix++)
+      {
+         for (int n = 0; n<6; n++)
+         {
+         
+         //int n = 0; 
+         int *ip = &plaq_uidx_array[n*VOLUME*4 + ix*4];
+         double sm;
+         su3_dble wd1;
+         su3_dble wd2;
+
+         /*udb_test[1] = udb_test[0];
+         udb_test[1].c11.re = 2.3;*/
+
+         //wd1 = su3xsu3_test(udb+ip[0],udb+ip[1]);
+         su3_dble u = (udb_test[ip[0]]);
+         su3_dble v = (udb_test[ip[1]]);
+         /*su3_dble u = (udb_test[0]);
+         su3_dble v = (udb_test[0]);*/
+
+         
+
+         su3_vector_dble psi,chi;
+
+         psi.c1=v.c11;
+         psi.c2=v.c21;
+         psi.c3=v.c31;
+
+         //su3xsu3vec(u,&psi,&chi);
+         chi.c1.re= u.c11.re*psi.c1.re-u.c11.im*psi.c1.im+u.c12.re*psi.c2.re-u.c12.im*psi.c2.im+u.c13.re*psi.c3.re-u.c13.im*psi.c3.im;
+         chi.c1.im= u.c11.re*psi.c1.im+u.c11.im*psi.c1.re+u.c12.re*psi.c2.im+u.c12.im*psi.c2.re+u.c13.re*psi.c3.im+u.c13.im*psi.c3.re;
+         chi.c2.re= u.c21.re*psi.c1.re-u.c21.im*psi.c1.im+u.c22.re*psi.c2.re-u.c22.im*psi.c2.im+u.c23.re*psi.c3.re-u.c23.im*psi.c3.im;
+         chi.c2.im= u.c21.re*psi.c1.im+u.c21.im*psi.c1.re+u.c22.re*psi.c2.im+u.c22.im*psi.c2.re+u.c23.re*psi.c3.im+u.c23.im*psi.c3.re;
+         chi.c3.re= u.c31.re*psi.c1.re-u.c31.im*psi.c1.im+u.c32.re*psi.c2.re-u.c32.im*psi.c2.im+u.c33.re*psi.c3.re-u.c33.im*psi.c3.im;
+         chi.c3.im= u.c31.re*psi.c1.im+u.c31.im*psi.c1.re+u.c32.re*psi.c2.im+u.c32.im*psi.c2.re+u.c33.re*psi.c3.im+u.c33.im*psi.c3.re;
+
+         wd1.c11=chi.c1;
+         wd1.c21=chi.c2;
+         wd1.c31=chi.c3;
+
+         psi.c1=v.c12;
+         psi.c2=v.c22;
+         psi.c3=v.c32;
+         //su3xsu3vec(u,&psi,&chi);
+         chi.c1.re= u.c11.re*psi.c1.re-u.c11.im*psi.c1.im+u.c12.re*psi.c2.re-u.c12.im*psi.c2.im+u.c13.re*psi.c3.re-u.c13.im*psi.c3.im;
+         chi.c1.im= u.c11.re*psi.c1.im+u.c11.im*psi.c1.re+u.c12.re*psi.c2.im+u.c12.im*psi.c2.re+u.c13.re*psi.c3.im+u.c13.im*psi.c3.re;
+         chi.c2.re= u.c21.re*psi.c1.re-u.c21.im*psi.c1.im+u.c22.re*psi.c2.re-u.c22.im*psi.c2.im+u.c23.re*psi.c3.re-u.c23.im*psi.c3.im;
+         chi.c2.im= u.c21.re*psi.c1.im+u.c21.im*psi.c1.re+u.c22.re*psi.c2.im+u.c22.im*psi.c2.re+u.c23.re*psi.c3.im+u.c23.im*psi.c3.re;
+         chi.c3.re= u.c31.re*psi.c1.re-u.c31.im*psi.c1.im+u.c32.re*psi.c2.re-u.c32.im*psi.c2.im+u.c33.re*psi.c3.re-u.c33.im*psi.c3.im;
+         chi.c3.im= u.c31.re*psi.c1.im+u.c31.im*psi.c1.re+u.c32.re*psi.c2.im+u.c32.im*psi.c2.re+u.c33.re*psi.c3.im+u.c33.im*psi.c3.re;
+
+         wd1.c12=chi.c1;
+         wd1.c22=chi.c2;
+         wd1.c32=chi.c3;
+
+         psi.c1=v.c13;
+         psi.c2=v.c23;
+         psi.c3=v.c33;
+         //su3xsu3vec(u,&psi,&chi);
+         chi.c1.re= u.c11.re*psi.c1.re-u.c11.im*psi.c1.im+u.c12.re*psi.c2.re-u.c12.im*psi.c2.im+u.c13.re*psi.c3.re-u.c13.im*psi.c3.im;
+         chi.c1.im= u.c11.re*psi.c1.im+u.c11.im*psi.c1.re+u.c12.re*psi.c2.im+u.c12.im*psi.c2.re+u.c13.re*psi.c3.im+u.c13.im*psi.c3.re;
+         chi.c2.re= u.c21.re*psi.c1.re-u.c21.im*psi.c1.im+u.c22.re*psi.c2.re-u.c22.im*psi.c2.im+u.c23.re*psi.c3.re-u.c23.im*psi.c3.im;
+         chi.c2.im= u.c21.re*psi.c1.im+u.c21.im*psi.c1.re+u.c22.re*psi.c2.im+u.c22.im*psi.c2.re+u.c23.re*psi.c3.im+u.c23.im*psi.c3.re;
+         chi.c3.re= u.c31.re*psi.c1.re-u.c31.im*psi.c1.im+u.c32.re*psi.c2.re-u.c32.im*psi.c2.im+u.c33.re*psi.c3.re-u.c33.im*psi.c3.im;
+         chi.c3.im= u.c31.re*psi.c1.im+u.c31.im*psi.c1.re+u.c32.re*psi.c2.im+u.c32.im*psi.c2.re+u.c33.re*psi.c3.im+u.c33.im*psi.c3.re;
+
+         wd1.c13=chi.c1;
+         wd1.c23=chi.c2;
+         wd1.c33=chi.c3;
+         
+
+
+         //wd2 = su3dagxsu3dag_test(udb+ip[3],udb+ip[2]);
+         /*u = (udb_test[0]);
+         v = (udb_test[0]);*/
+         u = (udb_test[ip[3]]);
+         v = (udb_test[ip[2]]);
+
+         psi.c1.re= v.c11.re;
+         psi.c1.im=-v.c11.im;
+         psi.c2.re= v.c12.re;
+         psi.c2.im=-v.c12.im;
+         psi.c3.re= v.c13.re;
+         psi.c3.im=-v.c13.im;
+         //su3dagxsu3vec(u,&psi,&chi);
+         chi.c1.re= u.c11.re*psi.c1.re+u.c11.im*psi.c1.im+u.c21.re*psi.c2.re+u.c21.im*psi.c2.im+u.c31.re*psi.c3.re+u.c31.im*psi.c3.im;
+         chi.c1.im= u.c11.re*psi.c1.im-u.c11.im*psi.c1.re+u.c21.re*psi.c2.im-u.c21.im*psi.c2.re+u.c31.re*psi.c3.im-u.c31.im*psi.c3.re;
+         chi.c2.re= u.c12.re*psi.c1.re+u.c12.im*psi.c1.im+u.c22.re*psi.c2.re+u.c22.im*psi.c2.im+u.c32.re*psi.c3.re+u.c32.im*psi.c3.im;
+         chi.c2.im= u.c12.re*psi.c1.im-u.c12.im*psi.c1.re+u.c22.re*psi.c2.im-u.c22.im*psi.c2.re+u.c32.re*psi.c3.im-u.c32.im*psi.c3.re;
+         chi.c3.re= u.c13.re*psi.c1.re+u.c13.im*psi.c1.im+u.c23.re*psi.c2.re+u.c23.im*psi.c2.im+u.c33.re*psi.c3.re+u.c33.im*psi.c3.im;
+         chi.c3.im= u.c13.re*psi.c1.im-u.c13.im*psi.c1.re+u.c23.re*psi.c2.im-u.c23.im*psi.c2.re+u.c33.re*psi.c3.im-u.c33.im*psi.c3.re;
+
+         wd2.c11=chi.c1;
+         wd2.c21=chi.c2;
+         wd2.c31=chi.c3;
+
+         psi.c1.re= v.c21.re;
+         psi.c1.im=-v.c21.im;
+         psi.c2.re= v.c22.re;
+         psi.c2.im=-v.c22.im;
+         psi.c3.re= v.c23.re;
+         psi.c3.im=-v.c23.im;
+         //su3dagxsu3vec(u,&psi,&chi);
+         chi.c1.re= u.c11.re*psi.c1.re+u.c11.im*psi.c1.im+u.c21.re*psi.c2.re+u.c21.im*psi.c2.im+u.c31.re*psi.c3.re+u.c31.im*psi.c3.im;
+         chi.c1.im= u.c11.re*psi.c1.im-u.c11.im*psi.c1.re+u.c21.re*psi.c2.im-u.c21.im*psi.c2.re+u.c31.re*psi.c3.im-u.c31.im*psi.c3.re;
+         chi.c2.re= u.c12.re*psi.c1.re+u.c12.im*psi.c1.im+u.c22.re*psi.c2.re+u.c22.im*psi.c2.im+u.c32.re*psi.c3.re+u.c32.im*psi.c3.im;
+         chi.c2.im= u.c12.re*psi.c1.im-u.c12.im*psi.c1.re+u.c22.re*psi.c2.im-u.c22.im*psi.c2.re+u.c32.re*psi.c3.im-u.c32.im*psi.c3.re;
+         chi.c3.re= u.c13.re*psi.c1.re+u.c13.im*psi.c1.im+u.c23.re*psi.c2.re+u.c23.im*psi.c2.im+u.c33.re*psi.c3.re+u.c33.im*psi.c3.im;
+         chi.c3.im= u.c13.re*psi.c1.im-u.c13.im*psi.c1.re+u.c23.re*psi.c2.im-u.c23.im*psi.c2.re+u.c33.re*psi.c3.im-u.c33.im*psi.c3.re;
+
+         wd2.c12=chi.c1;
+         wd2.c22=chi.c2;
+         wd2.c32=chi.c3;
+
+         psi.c1.re= v.c31.re;
+         psi.c1.im=-v.c31.im;
+         psi.c2.re= v.c32.re;
+         psi.c2.im=-v.c32.im;
+         psi.c3.re= v.c33.re;
+         psi.c3.im=-v.c33.im;
+         //su3dagxsu3vec(u,&psi,&chi);
+         chi.c1.re= u.c11.re*psi.c1.re+u.c11.im*psi.c1.im+u.c21.re*psi.c2.re+u.c21.im*psi.c2.im+u.c31.re*psi.c3.re+u.c31.im*psi.c3.im;
+         chi.c1.im= u.c11.re*psi.c1.im-u.c11.im*psi.c1.re+u.c21.re*psi.c2.im-u.c21.im*psi.c2.re+u.c31.re*psi.c3.im-u.c31.im*psi.c3.re;
+         chi.c2.re= u.c12.re*psi.c1.re+u.c12.im*psi.c1.im+u.c22.re*psi.c2.re+u.c22.im*psi.c2.im+u.c32.re*psi.c3.re+u.c32.im*psi.c3.im;
+         chi.c2.im= u.c12.re*psi.c1.im-u.c12.im*psi.c1.re+u.c22.re*psi.c2.im-u.c22.im*psi.c2.re+u.c32.re*psi.c3.im-u.c32.im*psi.c3.re;
+         chi.c3.re= u.c13.re*psi.c1.re+u.c13.im*psi.c1.im+u.c23.re*psi.c2.re+u.c23.im*psi.c2.im+u.c33.re*psi.c3.re+u.c33.im*psi.c3.im;
+         chi.c3.im= u.c13.re*psi.c1.im-u.c13.im*psi.c1.re+u.c23.re*psi.c2.im-u.c23.im*psi.c2.re+u.c33.re*psi.c3.im-u.c33.im*psi.c3.re;
+
+         wd2.c13=chi.c1;
+         wd2.c23=chi.c2;
+         wd2.c33=chi.c3;
+
+
+
+
+         //cm3x3_retr(&wd1,&wd2,&sm);
+         double r; 
+         r =wd1.c11.re*wd2.c11.re-wd1.c11.im*wd2.c11.im;
+         r+=wd1.c12.re*wd2.c21.re-wd1.c12.im*wd2.c21.im;
+         r+=wd1.c13.re*wd2.c31.re-wd1.c13.im*wd2.c31.im;
+
+         r+=wd1.c21.re*wd2.c12.re-wd1.c21.im*wd2.c12.im;
+         r+=wd1.c22.re*wd2.c22.re-wd1.c22.im*wd2.c22.im;
+         r+=wd1.c23.re*wd2.c32.re-wd1.c23.im*wd2.c32.im;
+
+         r+=wd1.c31.re*wd2.c13.re-wd1.c31.im*wd2.c13.im;
+         r+=wd1.c32.re*wd2.c23.re-wd1.c32.im*wd2.c23.im;
+         r+=wd1.c33.re*wd2.c33.re-wd1.c33.im*wd2.c33.im;
+
+         //pa_arr[ix] = 1.0; 
+         //pa_arr[ix] = r;
+         pa += r; 
+         //pa += 2.0; 
+         }
+
+      }      
+   }
+
+   #pragma omp target update from(pa_arr)
+   //#pragma omp target update from(udb_test)
+
+
+   /*for(int idx = 0; idx< VOLUME; idx++) {
+      pa += pa_arr[idx];
+   }*/
+
+   /*printf("udb_test after offloading:\n");
+   printf("%f \n\n",udb_test[0].c11.re);
+   printf("%f \n\n",udb_test[1].c11.re);
+   printf("%f \n\n",udb[0].c11.re);*/
+
+   acc_qflt(pa,rqsm.q);
 
    return rqsm;
 }
