@@ -76,19 +76,27 @@ LIBPATH = $(MPI_HOME)/lib #/opt/cray/pe/cce/12.0.3/cce-clang/x86_64/lib
 #         -O -mfpmath=sse -mno-avx -DFMA3 -DPM
 
 
-CFLAGS = -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_60 -Wall \
-         -Wno-long-long -Wstrict-prototypes \
-         -O -mfpmath=sse -mno-avx -DFMA3 -DPM
+# CFLAGS = -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_60 -Wall \
+#          -Wno-long-long -Wstrict-prototypes \
+#          -O -mfpmath=sse -mno-avx -DFMA3 -DPM
 
-LFLAGS = -fopenmp -fopenmp-cuda-mode -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_60 
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+         -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_80 -Wall -Wno-long-long \
+         -Wstrict-prototypes -O3 -mfpmath=sse -mno-avx -DFMA3 -DPM
 
-#LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
+
+# LFLAGS = -fopenmp -fopenmp-cuda-mode -fopenmp-targets=nvptx64-nvidia-cuda
+# -Xopenmp-target -march=sm_60 
+
+
+LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
 
 
 ############################## do not change ###################################
 
 SHELL=/bin/bash
-CC=cc
+CC=mpicc
+# need to download clang and set export OMPI_CC="$(which clang)"
 
 CLINKER=$(CC)
 
@@ -100,7 +108,7 @@ PGMS= $(MAIN) $(MODULES)
 # rule to make dependencies
 
 $(addsuffix .d,$(PGMS)): %.d: %.c Makefile_GPU
-	@ $(GCC) -ansi $< -MM $(addprefix -I,$(INCPATH)) -o $@
+	@ $(GCC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs

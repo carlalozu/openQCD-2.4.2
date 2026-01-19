@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *
-* File plaq_sum.c
+* File plaq_sum.c WORKING GPU VERSION
 *
 * Copyright (C) 2005-2016, 2018, 2021 Martin Luescher
 *
@@ -63,11 +63,11 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 #pragma omp declare target
-static su3_dble *udb;
-static su3_dble udb_test[4*VOLUME+7*(BNDRY/4)];
-static int plaq_uidx_array[6*VOLUME*4];
-static double pa_arr[VOLUME];
-static qflt rqsm;
+su3_dble *udb;
+su3_dble udb_test[4*VOLUME+7*(BNDRY/4)];
+int plaq_uidx_array[6*VOLUME*4];
+double pa_arr[VOLUME];
+qflt rqsm;
 #pragma omp end declare target
 
 
