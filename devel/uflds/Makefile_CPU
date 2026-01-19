@@ -19,7 +19,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check1 check2 check3 check4 check5 check6 time1
+MAIN = time1
 
 DEVFCTS = dutils gtrans
 
@@ -61,14 +61,14 @@ INCPATH = $(MPI_INCLUDE) ../../include
 
 LIBS = m
 
-LIBPATH = $(MPI_HOME)/lib /opt/cray/pe/cce/12.0.3/cce-clang/x86_64/lib
+LIBPATH = $(MPI_HOME)/lib # /opt/cray/pe/cce/12.0.3/cce-clang/x86_64/lib
 
 
 # scheduling and optimization options
 
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
          -Wno-long-long -Wstrict-prototypes \
-         -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
+         -O -mfpmath=sse -mno-avx -DFMA3 -DPM # -DAVX
 
 LFLAGS = -fopenmp
 

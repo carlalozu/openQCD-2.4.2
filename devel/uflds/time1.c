@@ -21,6 +21,7 @@
 #include "uflds.h"
 #include "linalg.h"
 #include "global.h"
+#include <omp.h>
 
 
 
@@ -44,8 +45,17 @@ int main(int argc,char *argv[])
       printf("\n");
       printf("Timing of plaq_dble()\n");
       printf("--------------------------\n\n");
-
+      
       print_lattice_sizes();
+      
+      #pragma omp target
+      {
+         if (omp_is_initial_device()) {
+               printf("Running on CPU (initial device)\n");
+         } else {
+               printf("Running on GPU (target device)\n");
+         }
+      }
 
       if ((VOLUME*sizeof(float))<(64*1024))
       {
