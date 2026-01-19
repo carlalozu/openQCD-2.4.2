@@ -22,7 +22,10 @@ extern su3_dble *bstap(void);
 extern void set_bstap(void);
 
 /* PLAQ_SUM_C */
+#pragma omp declare target
+extern double plaq_time; 
 extern double plaq_sum_dble(int icom);
+#pragma omp end declare target
 extern double plaq_wsum_dble(int icom);
 extern double plaq_action_slices(double *asl);
 

@@ -120,9 +120,9 @@ extern void copy_file(char *in,char *out);
 
 /* QSUM_C */
 #pragma omp declare target
-extern void acc_qflt(double u,double *qr);
+extern inline void acc_qflt(double u,double *qr);
 //#pragma omp end declare target
-extern void add_qflt(double *qu,double *qv,double *qr);
+extern inline void add_qflt(double *qu,double *qv,double *qr);
 #pragma omp end declare target
 extern void scl_qflt(double u,double *qr);
 extern void mul_qflt(double *qu,double *qv,double *qr);
@@ -167,7 +167,7 @@ extern void print_wsp(void);
    initializer(omp_priv={{0.0,0.0}})
 
 #pragma omp declare \
-   reduction(sum_userdef : double : omp_out += omp_in) \
+   reduction(sum_userdef : int : omp_out += omp_in) \
    initializer(omp_priv=0)
 #endif
 

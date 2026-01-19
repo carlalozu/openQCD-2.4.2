@@ -15,25 +15,64 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#define NPROC0 2
+/*
+#define NPROC0 4
+#define NPROC1 2
+#define NPROC2 2
+#define NPROC3 2
+*/
+
+#define NPROC0 1
 #define NPROC1 1
 #define NPROC2 1
-#define NPROC3 2
+#define NPROC3 1
 
 #define NPROC0_BLK 1
 #define NPROC1_BLK 1
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 8
-#define L1 16
-#define L2 16
-#define L3 8
+//#define L0 96
+//#define L1 64
+//#define L2 64
+//#define L3 32
+//
+//#define L0_TRD 32
+//#define L1_TRD 32
+//#define L2_TRD 32
+//#define L3_TRD 32
 
-#define L0_TRD 8
-#define L1_TRD 16
+//#define L0 48
+//#define L1 32
+//#define L2 32
+//#define L3 16
+//
+//#define L0_TRD 16
+//#define L1_TRD 16
+//#define L2_TRD 16
+//#define L3_TRD 16
+
+//#define L0 64
+//#define L1 32
+//#define L2 32
+//#define L3 32
+//
+//#define L0_TRD 64
+//#define L1_TRD 32
+//#define L2_TRD 32
+//#define L3_TRD 32
+
+
+#define L0 12
+#define L1 8
+#define L2 8
+#define L3 4
+
+#define L0_TRD 12
+#define L1_TRD 8
 #define L2_TRD 8
-#define L3_TRD 8
+#define L3_TRD 4
+
 
 #define NAME_SIZE 128
 

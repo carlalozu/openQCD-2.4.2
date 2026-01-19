@@ -70,6 +70,7 @@ typedef struct
    float c1,c2,c3,c4,c5,c6,c7,c8,c9;
 } u3_alg;
 
+#pragma omp declare target
 typedef struct
 {
    double re,im;
@@ -84,6 +85,7 @@ typedef struct
 {
    complex_dble c11,c12,c13,c21,c22,c23,c31,c32,c33;
 } su3_dble;
+#pragma omp end declare target
 
 typedef struct
 {
@@ -412,7 +414,6 @@ typedef struct
 * r.c2=(u*s).c2
 * r.c3=(u*s).c3
 */
-
 #define _su3_multiply(r,u,s) \
    (r).c1.re= (u).c11.re*(s).c1.re-(u).c11.im*(s).c1.im  \
              +(u).c12.re*(s).c2.re-(u).c12.im*(s).c2.im  \

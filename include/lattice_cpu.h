@@ -61,11 +61,7 @@ extern void set_map(void);
 
 /* GEOMETRY_C */
 extern void geometry(void);
-#pragma omp declare target
-extern int *tms; 
 extern int global_time(int ix);
-extern int global_time_array(int ix, int *tms_arr);
-#pragma omp end declare target
 extern void ipt_global(int *x,int *ip,int *ix);
 
 /* UIDX_C */

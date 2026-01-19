@@ -13,6 +13,6 @@
 #ifndef VERSION_H
 #define VERSION_H
 
-#define openQCD_RELEASE "openQCD-2.4.2"
+#define openQCD_RELEASE "openQCD-2.4"
 
 #endif

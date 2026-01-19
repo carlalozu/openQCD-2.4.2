@@ -59,7 +59,7 @@ extern void cm3x3_dagger(su3_dble *u,su3_dble *v);
 extern void cm3x3_tr(su3_dble *u,su3_dble *v,complex_dble *tr);
 #pragma omp declare target
 extern void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr);
-extern double plaq_dble_cm3x3_retr_extern(su3_dble *u, su3_dble *v);
+extern inline double plaq_dble_cm3x3_retr_extern(su3_dble *u, su3_dble *v);
 #pragma omp end declare target
 extern void cm3x3_imtr(su3_dble *u,su3_dble *v,double *tr);
 extern void cm3x3_add(su3_dble *u,su3_dble *v);
@@ -84,14 +84,14 @@ extern void project_to_su3_dble(su3_dble *u);
 extern void add_one(double *d, su3_dble *s);
 extern su3_dble su3xsu3_test(su3_dble *u,su3_dble *v);
 extern void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w);
-extern su3_dble plaq_dble_su3xsu3_extern(su3_dble *u,su3_dble *v);
+extern inline su3_dble plaq_dble_su3xsu3_extern(su3_dble *u,su3_dble *v);
 #pragma omp end declare target
 extern void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w);
 extern void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
 #pragma omp declare target
 extern void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
 extern su3_dble su3dagxsu3dag_test(su3_dble *u,su3_dble *v); 
-extern su3_dble plaq_dble_su3dagxsu3dag_extern(su3_dble *u,su3_dble *v);
+extern inline su3_dble plaq_dble_su3dagxsu3dag_extern(su3_dble *u,su3_dble *v);
 #pragma omp end declare target
 extern void su3xu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v);
 extern void su3dagxu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v);
