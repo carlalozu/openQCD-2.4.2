@@ -28,19 +28,24 @@
 int main(int argc,char *argv[])
 {
    
-   double plaq_time = 0.0, start_time;
    int my_rank,bc,count,nt,n_iter;
    double sm;
    double phi[2],phi_prime[2],theta[3];
    double wt1,wt2,wdt;
    FILE *flog=NULL;
-
+   
    mpi_init(argc,argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
-
+   
+   // get logfile name from command line argument
+   char *logfile = "time1.log";
+   int arg_idx = find_opt(argc, argv, "-logfile");
+   if (arg_idx != -1 && arg_idx + 1 < argc) {
+       logfile = argv[arg_idx + 1];
+   }
    if (my_rank==0)
    {
-      flog=freopen("time1_16x16x16x16_xx.log","w",stdout);
+      flog=freopen(logfile,"w",stdout);
 
       printf("\n");
       printf("Timing of plaq_dble()\n");
@@ -54,6 +59,7 @@ int main(int argc,char *argv[])
                printf("Running on CPU (initial device)\n");
          } else {
                printf("Running on GPU (target device)\n");
+               printf("There are %d devices\n", omp_get_num_devices());
          }
       }
 
@@ -133,10 +139,7 @@ int main(int argc,char *argv[])
          random_ud();
          MPI_Barrier(MPI_COMM_WORLD);
          wt1=MPI_Wtime();
-
-         start_time = MPI_Wtime();
          sm = plaq_sum_dble(1);
-         plaq_time += MPI_Wtime() - start_time;
 	      n_iter += 1; 
 
          MPI_Barrier(MPI_COMM_WORLD);
@@ -145,14 +148,16 @@ int main(int argc,char *argv[])
       }
       
       nt*=2;
-   } while (wdt<5.0);
+   } while (wdt<2.0);
 
    wdt=1e6*wdt/((double)(count));
 
-   plaq_time=1e6*plaq_time/((double)(count));
+   double plaq_time=wdt;
 
    if (my_rank==0)
    {
+      printf("Result check sum:\n"); 
+      printf("sm = %f\n\n",sm);
       printf("Time call to plaq_sum_dble:\n");
       printf("%f micro sec\n\n",plaq_time);
       printf("Time per plaq plaq_time:\n"); 
