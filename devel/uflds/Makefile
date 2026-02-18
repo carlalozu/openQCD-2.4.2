@@ -19,7 +19,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check1 check2 check3 check4 check5
+MAIN = check1 check2 check3 check4 check5 time
 
 DEVFCTS = dutils gtrans
 
@@ -66,7 +66,7 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c89 -pedantic -fstrict-aliasing -fopenmp -Wall \
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
          -Wno-long-long -Wno-format-overflow -Wstrict-prototypes -Werror \
          -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
 
