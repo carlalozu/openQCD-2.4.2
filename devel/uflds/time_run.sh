@@ -3,6 +3,10 @@ export PATH=$LLVM_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$LLVM_HOME/lib:$LD_LIBRARY_PATH
 export GCC="$(which clang)"
 
+export MPI_HOME="/usr/lib/x86_64-linux-gnu/openmpi"
+export MPI_INCLUDE="/usr/lib/x86_64-linux-gnu/openmpi/include"
+export OMPI_CC="$(which clang)"
+
 export GOMP_CPU_AFFINITY=0-16
 
 ROOT=$SCRATCH/openQCD-2.4.2

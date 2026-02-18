@@ -142,7 +142,7 @@ int main(int argc,char *argv[])
    }
 
 
-   nt=(int)(1.0e6/(double)(VOLUME_TRD));
+   nt=(int)(1.0e6/(double)(VOLUME));
    if (nt<2)
       nt=2;
       
@@ -176,7 +176,7 @@ int main(int argc,char *argv[])
       printf("Total time for plaq_wsum_dble():\n");
       printf("%4.3f micro sec (%d Mflops)\n\n",wdt,(int)(432.0*VOLUME/wdt));
       printf("Time per lattice point & thread for plaq_wsum_dble():\n");
-      wdt=wdt/((double)(nt)*(double)(VOLUME_TRD))
+      wdt=wdt/((double)(nt)*(double)(VOLUME_TRD));
       printf("%4.3f micro sec (%d Mflops)\n\n",wdt,(int)(432.0/wdt));
       printf("Number of repetitions %f: \n",nt/2.0);
       printf("Print so result doesn't get discarded %f: \n",p1);
