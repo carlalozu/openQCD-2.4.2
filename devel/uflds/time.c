@@ -173,9 +173,9 @@ int main(int argc, char *argv[])
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
-      printf("Total performance for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * VOLUME * 1e-6 / wdt)); 
+      printf("Total performance for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * 6 * VOLUME * 1e-6 / wdt)); 
       printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * VOLUME_TRD * 1e-6 / wdt));
+      printf("Performance per thread for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * 6 * VOLUME_TRD * 1e-6 / wdt));
       printf("Result: %f\n", p1);
    }
 

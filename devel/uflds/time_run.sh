@@ -31,4 +31,4 @@ do
 done
 
 
-# python parse.py < ../output/volume_geno_cpu_float.log > ../output/volume_geno_cpu_float.csv
+cat time_threads.log | python parse.py > time_threads.csv

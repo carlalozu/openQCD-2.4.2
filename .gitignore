@@ -42,3 +42,5 @@
 
 # Output
 *.log
+*.csv
+output/*
