@@ -44,7 +44,7 @@
 #include "lattice.h"
 #include "global.h"
 
-static int *tms=NULL;
+int *tms=NULL;
 
 
 static void cache_block_size(int *bs,int *cbs)
@@ -244,6 +244,7 @@ static void alloc_tms(void)
 
    error(tms==NULL,1,"alloc_tms [geometry.c]",
          "Unable to allocate time array");
+   #pragma omp target enter data map(to : tms[0:VOLUME])
 }
 
 
@@ -265,6 +266,7 @@ static void set_tms(void)
          tms[ix]=x0+cpr[0]*L0;
       }
    }
+   #pragma omp target update to(tms)
 }
 
 
