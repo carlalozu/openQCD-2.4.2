@@ -66,11 +66,11 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
-         -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+         -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_86 -Wall -Wno-long-long \
+         -Wstrict-prototypes -O -mfpmath=sse -mno-avx -DFMA3 -DPM
 
-LFLAGS = -fopenmp
+LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
 
 
 ############################## do not change ###################################
