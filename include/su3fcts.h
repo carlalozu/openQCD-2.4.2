@@ -57,7 +57,9 @@ extern void cm3x3_assign(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_swap(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_dagger(su3_dble *u,su3_dble *v);
 extern void cm3x3_tr(su3_dble *u,su3_dble *v,complex_dble *tr);
+#pragma omp declare target
 extern void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr);
+#pragma omp end declare target
 extern void cm3x3_imtr(su3_dble *u,su3_dble *v,double *tr);
 extern void cm3x3_add(su3_dble *u,su3_dble *v);
 extern void cm3x3_mul_add(su3_dble *u,su3_dble *v,su3_dble *w);
@@ -77,10 +79,12 @@ extern void project_to_su3(su3 *u);
 extern void project_to_su3_dble(su3_dble *u);
 
 /* SU3PROD_C */
+#pragma omp declare target
 extern void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w);
+extern void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
+#pragma omp end declare target
 extern void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w);
 extern void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
-extern void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
 extern void su3xu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v);
 extern void su3dagxu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v);
 extern void u3algxsu3(u3_alg_dble *X,su3_dble *u,su3_dble *v);
