@@ -161,8 +161,6 @@ int main(int argc, char *argv[])
       nt *= 2;
    }
 
-   // originally had a 4 here, probably related to the 4 directions
-   // TODO: ask Tim
    wdt = 2.0 * wdt / ((double)(nt));
    p1 = 2.0 * p1 / ((double)(nt));
 

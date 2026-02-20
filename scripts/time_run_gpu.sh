@@ -7,29 +7,25 @@ export MPI_HOME="/usr/lib/x86_64-linux-gnu/openmpi"
 export MPI_INCLUDE="/usr/lib/x86_64-linux-gnu/openmpi/include"
 export OMPI_CC="$(which clang)"
 
-export GOMP_CPU_AFFINITY=0-16
-
-DIR=$(pwd)
 ROOT=$SCRATCH/openQCD-2.4.2
-file=time_threads.log
-> $file
+DIR=$ROOT/scripts
+file=time_gpu_2
+
+cd $ROOT/devel/uflds
+> $file.log
 
 base_t1=64
 
 perl -i -pe "s/#define L0 \\d+/#define L0 $base_t1/" $ROOT/include/global.h
 perl -i -pe "s/#define L0_TRD \\d+/#define L0_TRD $base_t1/" $ROOT/include/global.h
 
-for t in 1 2 4 8 16
-do
-    thread_t1=$((base_t1 / t))
-    perl -i -pe "s/#define L0_TRD \\d+/#define L0_TRD $thread_t1/" $ROOT/include/global.h
-    make clean
-    make time
-    ./time
 
-    cat time.log >> $file
-    
-done
+make clean
+make time
+./time
+
+cat time.log >> $file.log
+cp $file.log $ROOT/output/$file.log
 
 
-cat time_threads.log | python parse.py > time_threads.csv
+cat $ROOT/output/$file.log | python $DIR/parse.py > $ROOT/output/$file.csv
