@@ -195,9 +195,6 @@ static void alloc_iupdn(void)
 
    error((iup==NULL)||(idn==NULL),1,"alloc_iupdn [geogen.c]",
          "Unable to allocate index arrays");
-
-   #pragma omp target enter data map(to : iup[0:VOLUME])
-   #pragma omp target enter data map(to : idn[0:VOLUME])
 }
 
 
@@ -276,8 +273,6 @@ void set_iupdn(void)
          }
       }
    }
-   #pragma omp target update to(iup)
-   #pragma omp target update to(idn)
 }
 
 

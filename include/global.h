@@ -90,8 +90,8 @@ int sbvol[16];
 int *ipt=NULL;
 #pragma omp declare target
 int (*iup)[4]=NULL;
-#pragma omp end declare target
 int (*idn)[4]=NULL;
+#pragma omp end declare target
 int *map=NULL;
 #else
 extern int cpr[4];
@@ -102,8 +102,8 @@ extern int sbvol[16];
 extern int *ipt;
 #pragma omp declare target
 extern int (*iup)[4];
-#pragma omp end declare target
 extern int (*idn)[4];
+#pragma omp end declare target
 extern int *map;
 #endif
 

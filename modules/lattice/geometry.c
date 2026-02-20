@@ -244,7 +244,6 @@ static void alloc_tms(void)
 
    error(tms==NULL,1,"alloc_tms [geometry.c]",
          "Unable to allocate time array");
-   #pragma omp target enter data map(to : tms[0:VOLUME])
 }
 
 
@@ -266,7 +265,6 @@ static void set_tms(void)
          tms[ix]=x0+cpr[0]*L0;
       }
    }
-   #pragma omp target update to(tms)
 }
 
 
@@ -309,11 +307,13 @@ void ipt_global(int *x,int *ip,int *ix)
    (*ix)=ipt[x3+x2*L3+x1*L2*L3+x0*L1*L2*L3];
 }
 
-
+#pragma omp declare target
 int global_time(int ix)
 {
    if ((ix>=0)&&(ix<VOLUME))
       return tms[ix];
+      
    else
       return NPROC0*L0;
 }
+#pragma omp end declare target
