@@ -113,13 +113,13 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (n=0;n<3;n++)
-            local_pa+=plaq_dble(udb, n,ix);
+            local_pa+=plaq_dble(udb,n,ix);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (n=3;n<6;n++)
-            local_pa+=plaq_dble(udb, n,ix);
+            local_pa+=plaq_dble(udb,n,ix);
       }
       else if ((t==0)||(bc==0))
       {
@@ -128,23 +128,21 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (n=3;n<6;n++)
-               local_pa+=wp*plaq_dble(udb, n,ix);
+               local_pa+=wp*plaq_dble(udb,n,ix);
          }
       }
       else
       {
          for (n=3;n<6;n++)
-            local_pa+=plaq_dble(udb, n,ix);
+            local_pa+=plaq_dble(udb,n,ix);
 
          local_pa+=wp*9.0;
       }
       pa += local_pa;
-      // printf("local_pa:%f\n", local_pa);
       
    }
    #pragma omp target update from(pa)
    acc_qflt(pa,rqsm.q);
-   printf("rqsm.q[0]:%f\n", rqsm.q[0]);
 
    return rqsm;
 }
@@ -230,13 +228,13 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb, n,ix));
+               smE+=(3.0-plaq_dble(udb,n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(udb, n,ix));
+               smB+=(3.0-plaq_dble(udb,n,ix));
          }
 
          acc_qflt(smE,rqsmE[t].q);
