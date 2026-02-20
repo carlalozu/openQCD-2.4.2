@@ -266,7 +266,7 @@ static void set_tms(void)
          tms[ix]=x0+cpr[0]*L0;
       }
    }
-   #pragma omp target update to(tms)
+   #pragma omp target update to(tms[:VOLUME])
 }
 
 
