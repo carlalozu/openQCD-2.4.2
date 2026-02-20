@@ -144,6 +144,7 @@ static void alloc_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
+   #pragma omp target enter data map(to: udb[:n])
 }
 
 
@@ -218,6 +219,7 @@ void random_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
+   #pragma omp target update to(udb)
 }
 
 

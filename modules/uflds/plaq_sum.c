@@ -100,10 +100,7 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udb=udfld();
 
-   #pragma omp target enter data map(to: udb[:4*VOLUME+7*(BNDRY/4)])
    #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
-   #pragma omp target enter data map(to : tms[:VOLUME])
-
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (ix=0;ix<VOLUME_TRD;ix++)

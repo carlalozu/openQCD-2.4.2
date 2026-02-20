@@ -206,7 +206,7 @@ static void set_idx(void)
          }
       }
    }
-   #pragma omp target update to(bc, nfc, ofs, snu, init, idx)
+   #pragma omp target update to(nfc, ofs, snu, idx)
 }
 
 
@@ -220,8 +220,9 @@ void set_uidx(void)
          set_idx();
       else
          bc=bc_type();
-
+         
       init=1;
+      #pragma omp target update to(bc, init)
    }
 }
 
