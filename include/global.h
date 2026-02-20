@@ -25,12 +25,12 @@
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 8
+#define L0 64
 #define L1 8
 #define L2 8
 #define L3 8
 
-#define L0_TRD 8
+#define L0_TRD 64
 #define L1_TRD 8
 #define L2_TRD 8
 #define L3_TRD 8
@@ -90,8 +90,8 @@ int sbvol[16];
 int *ipt=NULL;
 #pragma omp declare target
 int (*iup)[4]=NULL;
-int (*idn)[4]=NULL;
 #pragma omp end declare target
+int (*idn)[4]=NULL;
 int *map=NULL;
 #else
 extern int cpr[4];
@@ -102,8 +102,8 @@ extern int sbvol[16];
 extern int *ipt;
 #pragma omp declare target
 extern int (*iup)[4];
-extern int (*idn)[4];
 #pragma omp end declare target
+extern int (*idn)[4];
 extern int *map;
 #endif
 
