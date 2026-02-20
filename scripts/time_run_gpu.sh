@@ -9,7 +9,7 @@ export OMPI_CC="$(which clang)"
 
 ROOT=$SCRATCH/openQCD-2.4.2
 DIR=$ROOT/scripts
-file=time_gpu_2
+file=time_gpu
 
 cd $ROOT/devel/uflds
 > $file.log
@@ -25,7 +25,7 @@ make time
 ./time
 
 cat time.log >> $file.log
-cp $file.log $ROOT/output/$file.log
+mv $file.log $ROOT/output/$file.log
 
 
 cat $ROOT/output/$file.log | python $DIR/parse.py > $ROOT/output/$file.csv
