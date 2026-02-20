@@ -16,7 +16,7 @@ plot_file = "time_threads.pdf"
 
 threads = [1,2,4,8,16]
 
-perf_1core = 12 # in GFlops/s
+perf_1core = 12*2 # in GFlops/s, AVX on
 memb_1core = 30 # in GB/s
 socket_bw = 460.8 # in GB/s
 
