@@ -6,6 +6,11 @@
 #SBATCH --environment=cpe-cray-24.07
 #SBATCH --exclusive
 
+# CC=cc
+# CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
+#          -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
+#          -O  -DFMA3 -DPM
+         
 export GOMP_CPU_AFFINITY=0-71
 
 ROOT=$SCRATCH/openQCD-2.4.2
