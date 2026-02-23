@@ -51,6 +51,8 @@ for i, t in enumerate(threads):
 
 # Plot roofline GPU
 df_gpu = pd.read_csv(input_file_gpu)
+df_gpu["op_int"]= aos_I
+
 labels_gpu = ["FP64 A2000", "FP32 A2000"]
 peak_performances_gpu = np.array([124.8, 7987.2])   # in GFlops/s
 memory_bandwidths_gpu = np.array([288, 288])        # in GB/s
@@ -64,12 +66,12 @@ for i in range(2):
     ridge_x = peak_performances_gpu[i] / memory_bandwidths_gpu[i]
     label_y = peak_performances_gpu[i] * 0.9
     plt.text(90, label_y, labels_gpu[i], color=line.get_color(), fontsize=9, ha="left", va="top")
-plt.scatter(aos_I, df_gpu["total_mflops"]*1e-3, zorder=3, color=colors_gpu[0], label=labels_gpu[0])
+plt.scatter(df_gpu["op_int"]+0.5, df_gpu["total_mflops"]*1e-3, zorder=3, color=colors_gpu[0], label=labels_gpu[0])
 
 
 # Problem size label
-for x, y, v in zip(aost["op_int"], aost["total_mflops"]*1e-3, aost["volume"]):
-    plt.text(x+0.5,y,str(v),fontsize=9,color="tab:brown",ha="left",va="center")
+for x, y, v in zip(df_gpu["op_int"], df_gpu["total_mflops"]*1e-3, df_gpu["volume"]):
+    plt.text(x+0.5,y,str(v),fontsize=9,color="tab:pink",ha="left",va="center")
 
 
 # Add labels and legend
