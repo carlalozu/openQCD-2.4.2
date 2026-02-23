@@ -46,4 +46,4 @@ done
 mv $file.log $ROOT/output/$file.log
 
 cat $ROOT/output/$file.log | python $DIR/parse.py > $ROOT/output/$file.csv
-python $DIR/plot_roofline_cpu_geno.py 
+python $DIR/plot_roofline_cpu.py 

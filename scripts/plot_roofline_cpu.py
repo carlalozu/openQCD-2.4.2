@@ -7,18 +7,26 @@ import pandas as pd
 plt.figure(figsize=(5, 3))
 plt.style.use("seaborn-v0_8-whitegrid")
 
-# Parameters
+# Kernel parameters, plaqsum
 aos_I = 0.7397 #flops/byte
 aos_P = 432 #flops
 
-input_file = "../output/time_threads.csv"
-plot_file = "../output/time_threads.pdf"
+computer="daint"
 
-threads = [1,2,4,8,16]
+input_file = f"../output/time_threads_{computer}.csv"
+plot_file = f"../output/time_threads_{computer}.pdf"
 
-perf_1core = 12*2 # in GFlops/s, AVX on
-memb_1core = 30 # in GB/s
-socket_bw = 460.8 # in GB/s
+if computer=="geno":
+    threads = [1,2,4,8,16]
+    perf_1core = 12*2   # in GFlops/s, AVX on
+    memb_1core = 30     # in GB/s
+    socket_bw = 460.8   # in GB/s
+else if computer=="daint":
+    threads = [1,4,8,16,32,64,72]
+    perf_1core = 24.8*2 # in GFlops/s, AVX on
+    memb_1core = 28     # in GB/s
+    socket_bw = 480     # in GB/s
+
 
 # CPU architecture
 peak_performances_cpu = [perf_1core*t for t in threads]  # in GFlops/s
