@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
+      printf("Number of teams: %i\n", N_TEAMS);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Total performance for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * 6 * VOLUME * 1e-6 / wdt)); 

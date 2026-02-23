@@ -36,6 +36,8 @@
 #define L3_TRD 8
 
 #define NAME_SIZE 128
+#define N_TEAMS ((VOLUME+128-1)/128)
+
 
 /****************************** do not change *********************************/
 
