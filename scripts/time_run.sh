@@ -10,25 +10,40 @@ export OMPI_CC="$(which clang)"
 export GOMP_CPU_AFFINITY=0-16
 
 ROOT=$SCRATCH/openQCD-2.4.2
-file=time_threads.log
-> $file
+DIR=$ROOT/scripts
+file=time_threads
 
-base_t1=64
+cd $ROOT/devel/uflds
+> $file.log
 
-perl -i -pe "s/#define L0 \\d+/#define L0 $base_t1/" $ROOT/include/global.h
-perl -i -pe "s/#define L0_TRD \\d+/#define L0_TRD $base_t1/" $ROOT/include/global.h
+perl -i -pe "s/#define L1 \\d+/#define L1 8/" $ROOT/include/global.h
+perl -i -pe "s/#define L2 \\d+/#define L2 8/" $ROOT/include/global.h
+perl -i -pe "s/#define L3 \\d+/#define L3 8/" $ROOT/include/global.h
 
-for t in 1 2 4 8 16
+perl -i -pe "s/#define L1_TRD \\d+/#define L1_TRD 8/" $ROOT/include/global.h
+perl -i -pe "s/#define L2_TRD \\d+/#define L2_TRD 8/" $ROOT/include/global.h
+perl -i -pe "s/#define L3_TRD \\d+/#define L3_TRD 8/" $ROOT/include/global.h
+
+for i in 8 16 32 64 128
 do
-    thread_t1=$((base_t1 / t))
-    perl -i -pe "s/#define L0_TRD \\d+/#define L0_TRD $thread_t1/" $ROOT/include/global.h
-    make clean
-    make time
-    ./time
+    base_t1=$((4 * i))
+    echo $base_t1
+    perl -i -pe "s/#define L0 \\d+/#define L0 $base_t1/" $ROOT/include/global.h
 
-    cat time.log >> $file
-    
+    for t in 1 2 4 8 16
+    do
+        thread_t1=$((base_t1 / t))
+        perl -i -pe "s/#define L0_TRD \\d+/#define L0_TRD $thread_t1/" $ROOT/include/global.h
+        make clean
+        make time
+        ./time
+
+        cat time.log >> $file.log
+    done
+
 done
 
+mv $file.log $ROOT/output/$file.log
 
-cat time_threads.log | python parse.py > time_threads.csv
+cat $ROOT/output/$file.log | python $DIR/parse.py > $ROOT/output/$file.csv
+python $DIR/plot_roofline_cpu_geno.py 

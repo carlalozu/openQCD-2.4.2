@@ -11,8 +11,8 @@ plt.style.use("seaborn-v0_8-whitegrid")
 aos_I = 0.7397 #flops/byte
 aos_P = 432 #flops
 
-input_file = "time_threads.csv"
-plot_file = "time_threads.pdf"
+input_file = "../output/time_threads.csv"
+plot_file = "../output/time_threads.pdf"
 
 threads = [1,2,4,8,16]
 
