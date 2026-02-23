@@ -1,7 +1,7 @@
 
 ROOT=$SCRATCH/openQCD-2.4.2
 DIR=$ROOT/scripts
-file=time_gpu
+file=time_gpu_daint
 
 cd $ROOT/devel/uflds
 > $file.log
