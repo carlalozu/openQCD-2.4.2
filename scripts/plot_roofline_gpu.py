@@ -9,20 +9,26 @@ plt.figure(figsize=(5, 3))
 plt.style.use("seaborn-v0_8-whitegrid")
 markers = Line2D.filled_markers
 
-# Kernel plaqsum
+# Kernel parameters, plaqsum
 aos_I = 0.7397  #flops/byte
 aos_P = 432     #flops
 
-# Files
-input_file_gpu = "../output/time_gpu.csv"
-input_file_cpu = "../output/time_threads.csv"
-plot_file = "../output/time_gpu.pdf"
+computer="daint"
 
-# GENO details
-threads = [1, 8, 16]
-perf_1core = 12*2   # in GFlops/s, with AVX on
-memb_1core = 30     # in GB/s
-socket_bw = 460.8   # in GB/s
+input_file = f"../output/time_gpu_{computer}.csv"
+plot_file = f"../output/time_gpu_{computer}.pdf"
+
+if computer=="geno":
+    threads = [1,2,4,8,16]
+    perf_1core = 12*2   # in GFlops/s, AVX on
+    memb_1core = 30     # in GB/s
+    socket_bw = 460.8   # in GB/s
+elif computer=="daint":
+    threads = [1,4,8,16,32,64]
+    perf_1core = 24.8*2 # in GFlops/s, AVX on
+    memb_1core = 28     # in GB/s
+    socket_bw = 480     # in GB/s
+
 
 peak_performances_cpu = [perf_1core*t for t in threads]
 memory_bandwidths_cpu = [memb_1core*t if memb_1core*t<socket_bw else socket_bw for t in threads]
