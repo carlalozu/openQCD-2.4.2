@@ -46,7 +46,7 @@ for i, t in enumerate(threads):
     plt.text(90, label_y, f"CPU {t} cores", color=line.get_color(), fontsize=9, ha="left", va="bottom")
     
     aost = df_soa[df_soa["threads"] == t]
-    plt.scatter(aost["op_int"]+0.005*t, aost["total_mflops"]*1e-3, marker=markers[-i], zorder=4, label=f"{t} cores")
+    plt.scatter(aost["op_int"], aost["total_mflops"]*1e-3, marker=markers[-i], zorder=4, label=f"{t} cores")
 
 
 # Plot roofline GPU
@@ -64,7 +64,7 @@ for i in range(2):
     ridge_x = peak_performances_gpu[i] / memory_bandwidths_gpu[i]
     label_y = peak_performances_gpu[i] * 0.9
     plt.text(90, label_y, labels_gpu[i], color=line.get_color(), fontsize=9, ha="left", va="top")
-plt.scatter(aos_I, df_gpu["total_mflops"]*1e-3, zorder=4, color=colors_gpu[0], label=labels_gpu[0])
+plt.scatter(aos_I, df_gpu["total_mflops"]*1e-3, zorder=3, color=colors_gpu[0], label=labels_gpu[0])
 
 
 # Problem size label
