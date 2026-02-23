@@ -15,7 +15,8 @@ aos_P = 432     #flops
 
 computer="daint"
 
-input_file = f"../output/time_gpu_{computer}.csv"
+input_file_gpu = f"../output/time_gpu_{computer}.csv"
+input_file_cpu = f"../output/time_threads_{computer}.csv"
 plot_file = f"../output/time_gpu_{computer}.pdf"
 
 if computer=="geno":
@@ -23,12 +24,19 @@ if computer=="geno":
     perf_1core = 12*2   # in GFlops/s, AVX on
     memb_1core = 30     # in GB/s
     socket_bw = 460.8   # in GB/s
+
+    labels_gpu = ["FP64 A2000", "FP32 A2000"]
+    peak_performances_gpu = [124.8, 7987.2]   # in GFlops/s
+    memory_bandwidths_gpu = [288, 288]        # in GB/s
 elif computer=="daint":
     threads = [1,4,8,16,32,64]
     perf_1core = 24.8*2 # in GFlops/s, AVX on
     memb_1core = 28     # in GB/s
     socket_bw = 480     # in GB/s
 
+    labels_gpu = ["FP64 H200", "FP32 H200"]
+    peak_performances_gpu = [34000, 67000]  # in GFlops/s
+    memory_bandwidths_gpu = [4000, 4000]  # in GB/s
 
 peak_performances_cpu = [perf_1core*t for t in threads]
 memory_bandwidths_cpu = [memb_1core*t if memb_1core*t<socket_bw else socket_bw for t in threads]
@@ -59,9 +67,6 @@ for i, t in enumerate(threads):
 df_gpu = pd.read_csv(input_file_gpu)
 df_gpu["op_int"]= aos_I
 
-labels_gpu = ["FP64 A2000", "FP32 A2000"]
-peak_performances_gpu = np.array([124.8, 7987.2])   # in GFlops/s
-memory_bandwidths_gpu = np.array([288, 288])        # in GB/s
 colors_gpu = ["tab:pink", "tab:brown"]
 for i in range(2):
     x = np.linspace(0.001,  2**10, 100000)
