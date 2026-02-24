@@ -11,7 +11,7 @@ plt.style.use("seaborn-v0_8-whitegrid")
 aos_I = 0.7397 #flops/byte
 aos_P = 432 #flops
 
-computer="daint"
+computer="geno"
 
 input_file = f"../output/time_threads_{computer}.csv"
 plot_file = f"../output/time_threads_{computer}.pdf"
@@ -21,7 +21,7 @@ if computer=="geno":
     perf_1core = 12*2   # in GFlops/s, AVX on
     memb_1core = 30     # in GB/s
     socket_bw = 460.8   # in GB/s
-else if computer=="daint":
+elif computer=="daint":
     threads = [1,4,8,16,32,64,72]
     perf_1core = 24.8*2 # in GFlops/s, AVX on
     memb_1core = 28     # in GB/s
@@ -56,7 +56,7 @@ for i, t in enumerate(threads):
     # print(aost.head(10))
 
 for x, y, v in zip(aost["op_int"], aost["total_mflops"]*1e-3, aost["volume"]):
-    plt.text(x+0.5,y,str(v),fontsize=9,color="tab:brown",ha="left",va="center")
+    plt.text(x+0.5,y,str(v),fontsize=9,color="tab:purple",ha="left",va="center")
 
 # Add labels and legend
 plt.xlabel('Operational Intensity (FLOPs/Byte)')
