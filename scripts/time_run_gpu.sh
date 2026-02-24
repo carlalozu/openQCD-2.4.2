@@ -1,4 +1,6 @@
 
+export CUDA_VISIBLE_DEVICES=0
+
 ROOT=$SCRATCH/openQCD-2.4.2
 DIR=$ROOT/scripts
 file=time_gpu_daint
