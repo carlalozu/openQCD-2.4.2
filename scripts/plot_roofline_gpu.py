@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,7 +14,8 @@ markers = Line2D.filled_markers
 aos_I = 0.7397  #flops/byte
 aos_P = 432     #flops
 
-computer="daint"
+computer = sys.argv[1] if len(sys.argv) > 1 else "geno"
+
 
 input_file_gpu = f"../output/time_gpu_{computer}.csv"
 input_file_cpu = f"../output/time_threads_{computer}.csv"
@@ -43,9 +45,9 @@ memory_bandwidths_cpu = [memb_1core*t if memb_1core*t<socket_bw else socket_bw f
 
 
 # add kernel lines plaq_sum
-plt.vlines(aos_I, 0.001, 1e5, linestyles='dashed', color="black", label="plaq_sum", alpha=0.7, zorder=-1)
+plt.vlines(aos_I, 0.001, 1e5, linestyles='dashed', color="black", label="plaq_sum", alpha=0.7)
 
-
+marker_count = 0
 # Plot cpu roofline and performance
 df_soa = pd.read_csv(input_file_cpu)
 df_soa["op_int"]= aos_I
@@ -60,14 +62,15 @@ for i, t in enumerate(threads):
     plt.text(90, label_y, f"CPU {t} cores", color=line.get_color(), fontsize=9, ha="left", va="bottom")
     
     aost = df_soa[df_soa["threads"] == t]
-    plt.scatter(aost["op_int"], aost["total_mflops"]*1e-3, marker=markers[-i], zorder=4, label=f"{t} cores")
+    plt.scatter(aost["op_int"], aost["total_mflops"]*1e-3, marker=markers[marker_count], label=f"{t} cores", zorder=10-marker_count)
+    marker_count+=1
 
 
 # Plot roofline GPU
 df_gpu = pd.read_csv(input_file_gpu)
 df_gpu["op_int"]= aos_I
 
-colors_gpu = ["tab:pink", "tab:brown"]
+colors_gpu = ["tab:pink", "tab:grey"]
 for i in range(2):
     x = np.linspace(0.001,  2**10, 100000)
     y = np.minimum(x * memory_bandwidths_gpu[i], peak_performances_gpu[i])
@@ -77,12 +80,12 @@ for i in range(2):
     ridge_x = peak_performances_gpu[i] / memory_bandwidths_gpu[i]
     label_y = peak_performances_gpu[i] * 0.9
     plt.text(90, label_y, labels_gpu[i], color=line.get_color(), fontsize=9, ha="left", va="top")
-plt.scatter(df_gpu["op_int"]+0.5, df_gpu["total_mflops"]*1e-3, zorder=3, color=colors_gpu[0], label=labels_gpu[0])
+plt.scatter(df_gpu["op_int"]+0.5, df_gpu["total_mflops"]*1e-3, color=colors_gpu[0], label=labels_gpu[0], marker=markers[marker_count], zorder=marker_count)
 
 
 # Problem size label
 for x, y, v in zip(df_gpu["op_int"], df_gpu["total_mflops"]*1e-3, df_gpu["volume"]):
-    plt.text(x+0.5,y,str(v),fontsize=9,color="tab:pink",ha="left",va="center")
+    plt.text(x+0.8,y,str(v),fontsize=9,color=colors_gpu[0],ha="left",va="center")
 
 
 # Add labels and legend
