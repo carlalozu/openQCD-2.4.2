@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
    double phi[2], phi_prime[2], theta[3];
    double nplaq1, nplaq2, p1, p2;
    double d1, d2;
-   double wt1, wt2, wdt;
+   double wt1, wt2, wdt, wdti, wt0;
    FILE *flog = NULL;
 
    mpi_init(argc, argv);
@@ -144,20 +144,25 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
 
-   wdt = 0.0;
-   while (wdt < 5.0)
+   wdti = 0.0;
+   while (wdti < 5.0)
    {
       p1 = 0.0;
-      MPI_Barrier(MPI_COMM_WORLD);
-      wt1 = MPI_Wtime();
+      wdt = 0.0;
       for (count = 0; count < nt; count++)
       {
+         MPI_Barrier(MPI_COMM_WORLD);
+         wt0 = MPI_Wtime();
+         MPI_Barrier(MPI_COMM_WORLD);
+         random_ud();
+         wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
+         MPI_Barrier(MPI_COMM_WORLD);
+         wt2 = MPI_Wtime();
+         wdt += wt2 - wt1;
+         wdti += wt2 - wt0;
       }
-      MPI_Barrier(MPI_COMM_WORLD);
-      wt2 = MPI_Wtime();
 
-      wdt = wt2 - wt1;
       nt *= 2;
    }
 

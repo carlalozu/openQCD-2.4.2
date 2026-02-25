@@ -3,7 +3,10 @@ export CUDA_VISIBLE_DEVICES=0
 
 ROOT=$SCRATCH/openQCD-2.4.2
 DIR=$ROOT/scripts
-file=time_gpu_daint
+
+computer=geno
+
+file=time_gpu_$computer
 
 cd $ROOT/devel/uflds
 > $file.log
@@ -35,4 +38,5 @@ done
 mv $file.log $ROOT/output/$file.log
 
 cat $ROOT/output/$file.log | python $DIR/parse.py > $ROOT/output/$file.csv
-python $DIR/plot_roofline_gpu.py daint
+cd $DIR
+python plot_roofline_gpu.py $computer
