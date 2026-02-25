@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
    while (wdt < 5.0)
    {
       p1 = 0.0;
+      random_ud();
       MPI_Barrier(MPI_COMM_WORLD);
       wt1 = MPI_Wtime();
       for (count = 0; count < nt; count++)
