@@ -45,7 +45,7 @@ memory_bandwidths_cpu = [memb_1core*t if memb_1core*t<socket_bw else socket_bw f
 
 
 # add kernel lines plaq_sum
-plt.vlines(aos_I, 0.001, 1e5, linestyles='dashed', color="black", label="plaq_sum", alpha=0.7)
+plt.vlines(aos_I, 0.001, 1e5, linestyles='dashed', color="black", label="plaq_sum_dble", alpha=0.7)
 
 marker_count = 0
 # Plot cpu roofline and performance
