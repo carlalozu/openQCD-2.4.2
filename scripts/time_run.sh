@@ -1,3 +1,4 @@
+SCRATCH="/scratch/calopez"
 export LLVM_HOME=$SCRATCH/clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04
 export PATH=$LLVM_HOME/bin:$PATH
 export LD_LIBRARY_PATH=$LLVM_HOME/lib:$LD_LIBRARY_PATH
@@ -11,7 +12,7 @@ export GOMP_CPU_AFFINITY=0-16
 
 ROOT=$SCRATCH/openQCD-2.4.2
 DIR=$ROOT/scripts
-file=time_threads
+file=time_threads_geno
 
 cd $ROOT/devel/uflds
 > $file.log
