@@ -96,7 +96,8 @@ plt.xlim([1e-2, 1e3])
 plt.xscale('log')
 plt.yscale('log')
 plt.legend(fontsize=9)
-
+plt.tick_params(which='minor', length=2, color='grey')
+plt.tick_params(which='major', length=3, color='grey')
 
 # Show plot
 plt.grid(True)
