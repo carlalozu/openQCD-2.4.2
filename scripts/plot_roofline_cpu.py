@@ -22,7 +22,7 @@ if computer=="geno":
     memb_1core = 30     # in GB/s
     socket_bw = 460.8   # in GB/s
 elif computer=="daint":
-    threads = [1,4,8,16,32,64,72]
+    threads = [1,2,4,8,16,32,64]
     perf_1core = 24.8*2 # in GFlops/s, AVX on
     memb_1core = 28     # in GB/s
     socket_bw = 480     # in GB/s

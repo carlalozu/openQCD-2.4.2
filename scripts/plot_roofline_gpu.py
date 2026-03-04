@@ -31,8 +31,8 @@ if computer=="geno":
     peak_performances_gpu = [124.8, 7987.2]   # in GFlops/s
     memory_bandwidths_gpu = [288, 288]        # in GB/s
 elif computer=="daint":
-    threads = [1,4,8,16,32,64]
-    perf_1core = 24.8*2 # in GFlops/s, AVX on
+    threads = [1,2,4,8,16,32,64]
+    perf_1core = 24.8 # in GFlops/s, AVX on
     memb_1core = 28     # in GB/s
     socket_bw = 480     # in GB/s
 
@@ -70,7 +70,7 @@ for i, t in enumerate(threads):
 df_gpu = pd.read_csv(input_file_gpu)
 df_gpu["op_int"]= aos_I
 
-colors_gpu = ["tab:pink", "tab:grey"]
+colors_gpu = ["tab:grey", "tab:blue"]
 for i in range(2):
     x = np.linspace(0.001,  2**10, 100000)
     y = np.minimum(x * memory_bandwidths_gpu[i], peak_performances_gpu[i])

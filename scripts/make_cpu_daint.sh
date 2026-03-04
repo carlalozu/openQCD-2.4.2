@@ -34,7 +34,7 @@ do
     echo $base_t1
     perl -i -pe "s/#define L0 \\d+/#define L0 $base_t1/" $ROOT/include/global.h
 
-    for t in 1 4 8 16 64 72
+    for t in 1 2 4 8 16 32 64 72
     do
         thread_t1=$((base_t1 / t))
         perl -i -pe "s/#define L0_TRD \\d+/#define L0_TRD $thread_t1/" $ROOT/include/global.h

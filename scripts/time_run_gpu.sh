@@ -19,7 +19,7 @@ perl -i -pe "s/#define L1_TRD \\d+/#define L1_TRD 8/" $ROOT/include/global.h
 perl -i -pe "s/#define L2_TRD \\d+/#define L2_TRD 8/" $ROOT/include/global.h
 perl -i -pe "s/#define L3_TRD \\d+/#define L3_TRD 8/" $ROOT/include/global.h
 
-for i in 4 8 16 32 64
+for i in 8 16 32 64 128
 do
     base_t1=$((4 * i))
     echo $base_t1
