@@ -35,6 +35,14 @@
 #define N2 (NPROC2 * L2)
 #define N3 (NPROC3 * L3)
 
+void flush_cache(size_t flush_size, double* flush_buf)
+{
+    #pragma omp parallel for schedule(static)
+    for (size_t j = 0; j < flush_size; j++) {
+        flush_buf[j] += 1.0; 
+    }
+}
+
 int main(int argc, char *argv[])
 {
    int my_rank, bc, nt, count;
@@ -144,6 +152,12 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
 
+   size_t flush_size = 64 * 4 * 1024 * 1024 / sizeof(double);
+   double *flush_buf = malloc(flush_size * sizeof(double));
+    
+   flush_cache(flush_size, flush_buf);
+   random_ud();
+
    wdti = 0.0;
    while (wdti < 5.0)
    {
@@ -151,17 +165,17 @@ int main(int argc, char *argv[])
       wdt = 0.0;
       for (count = 0; count < nt; count++)
       {
+         flush_cache(flush_size, flush_buf);
+         
          MPI_Barrier(MPI_COMM_WORLD);
          wt0 = MPI_Wtime();
-         MPI_Barrier(MPI_COMM_WORLD);
-         random_ud();
-         wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
          MPI_Barrier(MPI_COMM_WORLD);
-         wt2 = MPI_Wtime();
-         wdti += wt2 - wt0;
-         wdt += wt2 - wt1;
+         wt1 = MPI_Wtime();
+         
+         wdt += wt1 - wt0;
       }
+      wdti += wdt;
 
       nt *= 2;
    }
