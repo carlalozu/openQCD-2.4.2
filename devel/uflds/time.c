@@ -29,6 +29,7 @@
 #include "devfcts.h"
 #include "uflds.h"
 #include "global.h"
+#include "profiler.h"
 
 #define N0 (NPROC0 * L0)
 #define N1 (NPROC1 * L1)
@@ -37,6 +38,15 @@
 
 int main(int argc, char *argv[])
 {
+   prof_section init_program = {.name = "init_program"};
+   prof_section set_params = {.name = "set_params"};
+   prof_section benchmark = {.name = "benchmark"};
+   prof_section total = {.name = "total"};
+   prof_section prepare_data = {.name = "prepare_data"};
+   prof_section compute = {.name = "compute"};
+
+   prof_begin(&total);
+   prof_begin(&init_program);
    int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
    double nplaq1, nplaq2, p1, p2;
@@ -63,7 +73,9 @@ int main(int argc, char *argv[])
          error_root(sscanf(argv[bc + 1], "%d", &bc) != 1, 1, "main [time.c]",
                     "Syntax: time [-bc <type>]");
    }
+   prof_end(&init_program);
 
+   prof_begin(&set_params);
    check_machine();
    MPI_Bcast(&bc, 1, MPI_INT, 0, MPI_COMM_WORLD);
    phi[0] = 0.123;
@@ -144,6 +156,9 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
 
+   prof_end(&set_params);
+   
+   prof_begin(&benchmark);
    wdti = 0.0;
    while (wdti < 5.0)
    {
@@ -152,13 +167,20 @@ int main(int argc, char *argv[])
       for (count = 0; count < nt; count++)
       {
          MPI_Barrier(MPI_COMM_WORLD);
+         prof_begin(&prepare_data);
          wt0 = MPI_Wtime();
-         MPI_Barrier(MPI_COMM_WORLD);
          random_ud();
+         prof_end(&prepare_data);
+         
+         MPI_Barrier(MPI_COMM_WORLD);
+         prof_begin(&compute);
          wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
          MPI_Barrier(MPI_COMM_WORLD);
          wt2 = MPI_Wtime();
+         prof_end(&compute);
+
+
          wdt += wt2 - wt1;
          wdti += wt2 - wt0;
       }
@@ -168,19 +190,30 @@ int main(int argc, char *argv[])
 
    wdt = 2.0 * wdt / ((double)(nt));
    p1 = 2.0 * p1 / ((double)(nt));
+   prof_end(&benchmark);
+   prof_end(&total);
 
    if (my_rank == 0)
    {
+      int flops = 432.0 * 6 * VOLUME;
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of teams: %i\n", N_TEAMS);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
-      printf("Total performance for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * 6 * VOLUME * 1e-6 / wdt)); 
+      printf("Flops: %d\n", flops); 
+      printf("Total performance for plaq_sum_dble (MFlops/s): %d\n", (int)(flops * 1e-6 / wdt)); 
       printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_sum_dble (MFlops/s): %d\n", (int)(432.0 * 6 * VOLUME_TRD * 1e-6 / wdt));
-      printf("Result: %f\n", p1);
+      printf("Performance per thread for plaq_sum_dble (MFlops/s): %d\n", (int)(flops * 1e-6 / wdt));
+      printf("Result: %f\n\n", p1);
+
+      prof_report(&init_program);
+      prof_report(&set_params);
+      prof_report(&benchmark);
+      prof_report(&prepare_data);
+      prof_report(&compute);
+      prof_report(&total);
    }
 
    if (my_rank == 0)
