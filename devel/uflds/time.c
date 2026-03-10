@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
 
-   size_t flush_size = 64 * 4 * 1024 * 1024 / sizeof(double);
+   size_t flush_size = 114 * 4 * 1024 * 1024 / sizeof(double);
    double *flush_buf = malloc(flush_size * sizeof(double));
     
    flush_cache(flush_size, flush_buf);
@@ -165,17 +165,19 @@ int main(int argc, char *argv[])
       wdt = 0.0;
       for (count = 0; count < nt; count++)
       {
+         MPI_Barrier(MPI_COMM_WORLD);
+         wt0 = MPI_Wtime();
          flush_cache(flush_size, flush_buf);
          
          MPI_Barrier(MPI_COMM_WORLD);
-         wt0 = MPI_Wtime();
+         wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
          MPI_Barrier(MPI_COMM_WORLD);
-         wt1 = MPI_Wtime();
+         wt2 = MPI_Wtime();
          
-         wdt += wt1 - wt0;
+         wdt += wt2 - wt1;
+         wdti += wt2 - wt0;
       }
-      wdti += wdt;
 
       nt *= 2;
    }
