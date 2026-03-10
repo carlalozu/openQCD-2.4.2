@@ -36,6 +36,14 @@
 #define N2 (NPROC2 * L2)
 #define N3 (NPROC3 * L3)
 
+void flush_cache(size_t flush_size, double* flush_buf)
+{
+    #pragma omp parallel for schedule(static)
+    for (size_t j = 0; j < flush_size; j++) {
+        flush_buf[j] += 1.0; 
+    }
+}
+
 int main(int argc, char *argv[])
 {
    prof_section init_program = {.name = "init_program"};
@@ -51,7 +59,7 @@ int main(int argc, char *argv[])
    double phi[2], phi_prime[2], theta[3];
    double nplaq1, nplaq2, p1, p2;
    double d1, d2;
-   double wt1, wt2, wdt, wdti, wt0;
+   double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
 
    mpi_init(argc, argv);
@@ -155,7 +163,12 @@ int main(int argc, char *argv[])
    nt = (int)(1.0e6 / (double)(VOLUME));
    if (nt < 2)
       nt = 2;
-
+   
+   size_t flush_size = 114 * 4 * 1024 * 1024 / sizeof(double);
+   double *flush_buf = malloc(flush_size * sizeof(double));
+   
+   flush_cache(flush_size, flush_buf);
+   random_ud();
    prof_end(&set_params);
    
    prof_begin(&benchmark);
@@ -169,7 +182,7 @@ int main(int argc, char *argv[])
          MPI_Barrier(MPI_COMM_WORLD);
          prof_begin(&prepare_data);
          wt0 = MPI_Wtime();
-         random_ud();
+         flush_cache(flush_size, flush_buf);
          prof_end(&prepare_data);
          
          MPI_Barrier(MPI_COMM_WORLD);
@@ -179,7 +192,6 @@ int main(int argc, char *argv[])
          MPI_Barrier(MPI_COMM_WORLD);
          wt2 = MPI_Wtime();
          prof_end(&compute);
-
 
          wdt += wt2 - wt1;
          wdti += wt2 - wt0;
