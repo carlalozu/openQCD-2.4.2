@@ -68,7 +68,7 @@ LIBPATH = $(MPI_HOME)/lib
 
 CFLAGS += -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
          -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
-         -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
+         -O -DFMA3 -DPM
 
 LFLAGS = -fopenmp
 
@@ -87,7 +87,7 @@ PGMS= $(MAIN) $(MODULES)
 # rule to make dependencies
 
 $(addsuffix .d,$(PGMS)): %.d: %.c Makefile
-	@ $(GCC) -ansi $< -MM $(addprefix -I,$(INCPATH)) -o $@
+	@ $(GCC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
