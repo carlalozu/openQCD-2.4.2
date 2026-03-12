@@ -66,9 +66,10 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS += -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
-         -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -Wall -Wno-long-long \
-         -Wstrict-prototypes -O -mfpmath=sse -mno-avx -DFMA3 -DPM
+
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+         -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
+         -Wstrict-prototypes -O -DFMA3 -DPM
 
 LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
 
@@ -76,7 +77,6 @@ LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
 ############################## do not change ###################################
 
 SHELL=/bin/bash
-CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)
