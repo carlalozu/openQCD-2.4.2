@@ -53,85 +53,28 @@
 #include "global.h"
 
 
-static void cache_block_size(int *bs,int *cbs)
-{
-   int mu;
-
-   cbs[0]=bs[0];
-
-   for (mu=1;mu<4;mu++)
-   {
-      if ((bs[mu]%4)==0)
-         cbs[mu]=4;
-      else if ((bs[mu]%3)==0)
-         cbs[mu]=3;
-      else
-         cbs[mu]=2;
-   }
-}
-
-
-static void update_ipt0(block_t *b,int *cbs,int *cbo,int *ofs)
-{
-   int x0,x1,x2,x3,ix,ieo;
-   int y0,y1,y2,y3,*bs;
-
-   bs=(*b).bs;
-
-   for (x0=0;x0<cbs[0];x0++)
-   {
-      for (x1=0;x1<cbs[1];x1++)
-      {
-         for (x2=0;x2<cbs[2];x2++)
-         {
-            for (x3=0;x3<cbs[3];x3++)
-            {
-               y0=x0+cbo[0];
-               y1=x1+cbo[1];
-               y2=x2+cbo[2];
-               y3=x3+cbo[3];
-
-               ix=y3+y2*bs[3]+y1*bs[2]*bs[3]+y0*bs[1]*bs[2]*bs[3];
-               ieo=((y0+y1+y2+y3)&0x1);
-               (*b).ipt[ix]=ofs[ieo];
-               ofs[ieo]+=1;
-            }
-         }
-      }
-   }
-}
-
-
 static void set_blk_ipt(block_t *b)
 {
-   int i0,i1,i2,i3,*bs;
-   int cbs[4],cbo[4],nbs[4],ofs[2];
+   int x0,x1,x2,x3,ix,ieo,*bs;
+   int ofs[2];
 
    ofs[0]=0;
    ofs[1]=(*b).vol/2;
 
    bs=(*b).bs;
-   cache_block_size(bs,cbs);
 
-   nbs[0]=bs[0]/cbs[0];
-   nbs[1]=bs[1]/cbs[1];
-   nbs[2]=bs[2]/cbs[2];
-   nbs[3]=bs[3]/cbs[3];
-
-   for (i0=0;i0<nbs[0];i0++)
+   for (x0=0;x0<bs[0];x0++)
    {
-      for (i1=0;i1<nbs[1];i1++)
+      for (x1=0;x1<bs[1];x1++)
       {
-         for (i2=0;i2<nbs[2];i2++)
+         for (x2=0;x2<bs[2];x2++)
          {
-            for (i3=0;i3<nbs[3];i3++)
+            for (x3=0;x3<bs[3];x3++)
             {
-               cbo[0]=i0*cbs[0];
-               cbo[1]=i1*cbs[1];
-               cbo[2]=i2*cbs[2];
-               cbo[3]=i3*cbs[3];
-
-               update_ipt0(b,cbs,cbo,ofs);
+               ix=x3+x2*bs[3]+x1*bs[2]*bs[3]+x0*bs[1]*bs[2]*bs[3];
+               ieo=((x0+x1+x2+x3)&0x1);
+               (*b).ipt[ix]=ofs[ieo];
+               ofs[ieo]+=1;
             }
          }
       }
