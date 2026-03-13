@@ -64,6 +64,7 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
+static su3_mat_field *udbv;
 
 #pragma omp declare target
 static double plaq_dble(su3_dble *udb, int n,int ix)
@@ -111,7 +112,7 @@ static qflt local_plaq_sum_dble(int iw)
 
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
-   udb=udfld();
+   udbv=udfldv();
 
    su3_mat_field *wd1 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
    su3_mat_field *wd2 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
@@ -134,13 +135,13 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (n=0;n<3;n++)
-            local_pa+=plaq_dblev(udb,n,ix,wd1,wd2,sm);
+            local_pa+=plaq_dblev(udbv,n,ix,wd1,wd2,sm);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (n=3;n<6;n++)
-            local_pa+=plaq_dblev(udb,n,ix,wd1,wd2,sm);
+            local_pa+=plaq_dblev(udbv,n,ix,wd1,wd2,sm);
       }
       else if ((t==0)||(bc==0))
       {
@@ -149,13 +150,13 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (n=3;n<6;n++)
-               local_pa+=wp*plaq_dblev(udb,n,ix,wd1,wd2,sm);
+               local_pa+=wp*plaq_dblev(udbv,n,ix,wd1,wd2,sm);
          }
       }
       else
       {
          for (n=3;n<6;n++)
-            local_pa+=plaq_dblev(udb,n,ix,wd1,wd2,sm);
+            local_pa+=plaq_dblev(udbv,n,ix,wd1,wd2,sm);
 
          local_pa+=wp*9.0;
       }

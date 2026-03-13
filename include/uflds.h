@@ -17,6 +17,10 @@
 #include "su3.h"
 #endif
 
+#ifndef SU3V_H
+#include "su3v.h"
+#endif
+
 /* BSTAP_C */
 extern su3_dble *bstap(void);
 extern void set_bstap(void);
@@ -35,6 +39,7 @@ extern void copy_bnd_ud(void);
 /* UFLDS_C */
 extern su3 *ufld(void);
 extern su3_dble *udfld(void);
+extern su3_mat_field *udfldv(void);
 extern void random_ud(void);
 extern void set_ud_phase(void);
 extern void unset_ud_phase(void);

@@ -92,6 +92,7 @@ typedef union
 static complex_dble phase[3] ALIGNED16 ={{0.0,0.0}};
 static su3 *ub=NULL;
 static su3_dble *udb=NULL;
+static su3_mat_field *udbv=NULL;
 
 
 static void alloc_u(void)
@@ -147,6 +148,34 @@ static void alloc_ud(void)
    #pragma omp target enter data map(to: udb[:n])
 }
 
+static void alloc_udv(void)
+{
+   int bc;
+   size_t n;
+
+   error_root(sizeof(su3_dble)!=(18*sizeof(double)),1,"alloc_ud [uflds.c]",
+              "The su3_dble structures are not properly packed");
+
+   error(ipt==NULL,1,"alloc_ud [uflds.c]","Geometry arrays are not set");
+
+   bc=bc_type();
+   n=4*VOLUME+7*(BNDRY/4);
+
+   if ((cpr[0]==(NPROC0-1))&&((bc==1)||(bc==2)))
+      n+=3;
+
+   udbv = (su3_mat_field*)malloc(sizeof(su3_mat_field));
+   su3_mat_field_init(udbv, n);
+   error(udbv==NULL,1,"alloc_ud [uflds.c]",
+         "Unable to allocate memory space for the gauge field");
+   set_ud2unityv(4*VOLUME_TRD,2,udbv);
+
+   set_flags(UPDATED_UD);
+   set_flags(UNSET_UD_PHASE);
+   set_bc();
+   enter_su3_mat_field(u_fieldv);
+}
+
 
 su3_dble *udfld(void)
 {
@@ -154,6 +183,14 @@ su3_dble *udfld(void)
       alloc_ud();
 
    return udb;
+}
+
+su3_mat_field *udfldv(void)
+{
+   if (udbv==NULL)
+      alloc_udv();
+
+   return udbv;
 }
 
 

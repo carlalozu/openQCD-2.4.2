@@ -1534,6 +1534,33 @@ void cm3x3_unity(int vol,su3_dble *u)
    }
 }
 
+void cm3x3_unityv(int vol,su3_mat_field *u,int i0)
+{
+   for (int i=i0;i<i0+vol;i++)
+   {
+      (*u).c1.c1re[i]=1.0;
+      (*u).c1.c1im[i]=0.0;
+      (*u).c1.c2re[i]=0.0;
+      (*u).c1.c2im[i]=0.0;
+      (*u).c1.c3re[i]=0.0;
+      (*u).c1.c3im[i]=0.0;
+
+      (*u).c2.c1re[i]=0.0;
+      (*u).c2.c1im[i]=0.0;
+      (*u).c2.c2re[i]=1.0;
+      (*u).c2.c2im[i]=0.0;
+      (*u).c2.c3re[i]=0.0;
+      (*u).c2.c3im[i]=0.0;
+
+      (*u).c3.c1re[i]=0.0;
+      (*u).c3.c1im[i]=0.0;
+      (*u).c3.c2re[i]=0.0;
+      (*u).c3.c2im[i]=0.0;
+      (*u).c3.c3re[i]=1.0;
+      (*u).c3.c3im[i]=0.0;
+   }
+}
+
 
 void cm3x3_assign(int vol,su3_dble *u,su3_dble *v)
 {
