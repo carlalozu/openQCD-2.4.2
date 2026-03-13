@@ -270,7 +270,7 @@ void plaq_uidx(int n,int ix,int *ip)
 #pragma omp declare target
 int plaq_uidx0(int n,int ix)
 {
-   int mu,nu;
+   int mu;
    mu=plns[n][0];
    return offset(ix,mu);
 }
@@ -309,7 +309,7 @@ int plaq_uidx1(int n,int ix)
 #pragma omp end declare target
 
 #pragma omp declare target
-int plaq_uidx2(int n,int ix,int)
+int plaq_uidx2(int n,int ix)
 {
    int nu;
    nu=plns[n][1];

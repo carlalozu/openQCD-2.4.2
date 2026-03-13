@@ -17,6 +17,10 @@
 #include "su3.h"
 #endif
 
+#ifndef SU3V_H
+#include "su3v.h"
+#endif
+
 typedef struct
 {
    double t,d;
@@ -53,6 +57,7 @@ extern void expXsu3(double eps,su3_alg_dble *X,su3_dble *u);
 /* CM3X3_C */
 extern void cm3x3_zero(int vol,su3_dble *u);
 extern void cm3x3_unity(int vol,su3_dble *u);
+extern void cm3x3_unityv(int vol,su3_mat_field *u,int i0);
 extern void cm3x3_assign(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_swap(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_dagger(su3_dble *u,su3_dble *v);
@@ -93,5 +98,13 @@ extern double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X);
 extern void prod2u3alg(su3_dble *u,su3_dble *v,u3_alg_dble *X);
 extern void rotate_su3alg(su3_dble *u,su3_alg_dble *X);
 extern void lieprod_u3alg(u3_alg_dble *X,u3_alg_dble *Y,u3_alg_dble *Z);
+
+/* SU3PRODV_C */
+#pragma omp declare target
+void fsu3matxsu3mat(const su3_mat_field *u, const su3_mat_field *v, su3_mat_field *res, const int n, const size_t i);
+void fsu3matdagxsu3matdag(const su3_mat_field *u, const su3_mat_field *v, su3_mat_field *res, const int n, const size_t i);
+extern void fsu3matxsu3mat_retrace(const su3_mat_field *u, const su3_mat_field *v, doublev *res, const size_t i);
+#pragma omp end declare target
+
 
 #endif
