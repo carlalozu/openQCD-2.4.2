@@ -47,7 +47,7 @@ typedef struct
 
 } su3_mat_field;
 
-void doublev_init(doublev *x, size_t volume)
+static inline void doublev_init(doublev *x, size_t volume)
 {
     // Round up to nearest 8
     size_t padded_volume = (volume + 7) & ~7; 
@@ -61,7 +61,7 @@ void doublev_init(doublev *x, size_t volume)
     }
 }
 
-void su3_vec_field_init(su3_vec_field *v, size_t volume)
+static inline void su3_vec_field_init(su3_vec_field *v, size_t volume)
 {
     // Round up to nearest 8
     size_t padded_volume = (volume + 7) & ~7; 
@@ -82,19 +82,19 @@ void su3_vec_field_init(su3_vec_field *v, size_t volume)
     v->c3im = v->base + 5*padded_volume;
 }
 
-void su3_mat_field_init(su3_mat_field *m_field, size_t volume)
+static inline void su3_mat_field_init(su3_mat_field *m_field, size_t volume)
 {
     su3_vec_field_init(&m_field->c1, volume);
     su3_vec_field_init(&m_field->c2, volume);
     su3_vec_field_init(&m_field->c3, volume);
 }
 
-void enter_double_field(doublev* d_field){
+static inline void enter_double_field(doublev* d_field){
     #pragma omp target enter data \
     map(to : d_field[0], d_field->base[0:d_field->volume])
 }
 
-void enter_su3_mat_field(su3_mat_field* m_field){
+static inline void enter_su3_mat_field(su3_mat_field* m_field){
     #pragma omp target enter data map(to: m_field[0]) \
     map(to: m_field->c1.base[0 : 6*m_field->c1.volume]) \
     map(to: m_field->c2.base[0 : 6*m_field->c2.volume]) \
