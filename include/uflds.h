@@ -49,6 +49,7 @@ extern void assign_ud2u(void);
 /* UINIT_C */
 extern void set_u2unity(int vol,int icom,su3 *u);
 extern void set_ud2unity(int vol,int icom,su3_dble *ud);
+extern void set_ud2unityv(int vol,int icom,su3_mat_field *udv);
 extern void assign_ud2ud(int vol,int icom,su3_dble *ud,su3_dble *vd);
 
 #endif

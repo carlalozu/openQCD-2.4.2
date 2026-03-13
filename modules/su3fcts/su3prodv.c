@@ -72,6 +72,7 @@
 *
 *******************************************************************************/
 
+#ifndef SU3PRODV_C
 #define SU3PRODV_C
 
 #include <stdlib.h>
@@ -239,3 +240,5 @@ void fsu3matdagxsu3matdag(
                      u->c3.c3re[ip2] * -v->c3.c3im[ip3] - u->c3.c3im[ip2] * v->c3.c3re[ip3];
 }
 #pragma omp end declare target
+
+#endif

@@ -84,14 +84,14 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 #pragma omp end declare target
 
 #pragma omp declare target
-static double plaq_dblev(su3_dble *udb, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2, doublev *sm)
+static double plaq_dblev(su3_mat_field *udbv, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2, doublev *sm)
 {
    int ip0, ip1, ip2, ip3;
 
    printf("n: %i, ix: %i, ip: (%i, %i, %i, %i) \n", n, ix, ip0, ip1, ip2, ip3);
 
-   fsu3matxsu3mat(udb, udb, wd1, n, ix);
-   fsu3matdagxsu3matdag(udb, udb, wd2, n, ix);
+   fsu3matxsu3mat(udbv, udbv, wd1, n, ix);
+   fsu3matdagxsu3matdag(udbv, udbv, wd2, n, ix);
    fsu3matxsu3mat_retrace(wd1, wd2, sm, ix);
 
 }

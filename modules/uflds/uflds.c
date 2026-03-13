@@ -173,7 +173,7 @@ static void alloc_udv(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   enter_su3_mat_field(u_fieldv);
+   enter_su3_mat_field(udbv);
 }
 
 
