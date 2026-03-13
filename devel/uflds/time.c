@@ -53,18 +53,18 @@ int main(int argc, char *argv[])
    prof_section prepare_data = {.name = "prepare_data"};
    prof_section compute = {.name = "compute"};
 
-   prof_begin(&total);
-   prof_begin(&init_program);
    int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
    double nplaq1, nplaq2, p1, p2;
    double d1, d2;
    double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
-
+   
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-
+   
+   prof_begin(&total);
+   prof_begin(&init_program);
    if (my_rank == 0)
    {
       flog = freopen("time.log", "w", stdout);
