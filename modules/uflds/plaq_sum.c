@@ -79,21 +79,17 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
    cm3x3_retr(&wd1,&wd2,&sm);
+   return sm;
 
 }
 #pragma omp end declare target
 
 #pragma omp declare target
-static double plaq_dblev(su3_mat_field *udbv, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2, doublev *sm)
+static void plaq_dblev(su3_mat_field *udbv, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2, doublev *sm)
 {
-   int ip0, ip1, ip2, ip3;
-
-   printf("n: %i, ix: %i, ip: (%i, %i, %i, %i) \n", n, ix, ip0, ip1, ip2, ip3);
-
    fsu3matxsu3mat(udbv, udbv, wd1, n, ix);
    fsu3matdagxsu3matdag(udbv, udbv, wd2, n, ix);
    fsu3matxsu3mat_retrace(wd1, wd2, sm, ix);
-
 }
 #pragma omp end declare target
 
@@ -135,13 +131,19 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (n=0;n<3;n++)
-            local_pa+=plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+         {
+            plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+            local_pa += sm->base[ix];
+         }
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (n=3;n<6;n++)
-            local_pa+=plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+         {
+            plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+            local_pa += sm->base[ix];
+         }
       }
       else if ((t==0)||(bc==0))
       {
@@ -150,13 +152,19 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (n=3;n<6;n++)
-               local_pa+=wp*plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+            {
+               plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+               local_pa += wp*sm->base[ix];
+            }
          }
       }
       else
       {
          for (n=3;n<6;n++)
-            local_pa+=plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+         {
+            plaq_dblev(udbv,n,ix,wd1,wd2,sm);
+            local_pa += sm->base[ix];
+         }
 
          local_pa+=wp*9.0;
       }

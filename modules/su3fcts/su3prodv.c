@@ -113,6 +113,8 @@ void fsu3matxsu3mat(
     int ip0 = plaq_uidx0(n,i);
     int ip1 = plaq_uidx1(n,i);
 
+    printf("n: %i, ix: %zu, ip: (%i, %i) \n", n, i, ip0, ip1);
+
    res->c1.c1re[i] = u->c1.c1re[ip0] * v->c1.c1re[ip1] - u->c1.c1im[ip0] * v->c1.c1im[ip1] +
                       u->c1.c2re[ip0] * v->c1.c2re[ip1] - u->c1.c2im[ip0] * v->c1.c2im[ip1] +
                       u->c1.c3re[ip0] * v->c1.c3re[ip1] - u->c1.c3im[ip0] * v->c1.c3im[ip1];
@@ -181,6 +183,8 @@ void fsu3matdagxsu3matdag(
 {
    int ip2 = plaq_uidx2(n,i);
    int ip3 = plaq_uidx3(n,i);
+
+   printf("n: %i, ix: %zu, ip: (%i, %i) \n", n, i, ip2, ip3);
 
    res->c1.c1re[i] = u->c1.c1re[ip2] * v->c1.c1re[ip3] + u->c1.c1im[ip2] * -v->c1.c1im[ip3] +
                      u->c2.c1re[ip2] * v->c1.c2re[ip3] + u->c2.c1im[ip2] * -v->c1.c2im[ip3] +
