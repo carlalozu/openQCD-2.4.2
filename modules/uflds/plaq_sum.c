@@ -74,6 +74,8 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 
    plaq_uidx(n,ix,ip);
 
+   // printf("n: %i, ix: %i, ip: (%i, %i, %i, %i) \n", n, ix, ip[0], ip[1], ip[2], ip[3]);
+
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
    cm3x3_retr(&wd1,&wd2,&sm);
@@ -101,7 +103,7 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
 
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(NTHREAD)
+   #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(N_TEAMS)
    for (ix=0;ix<VOLUME;ix++)
    {
       double local_pa=0.0;

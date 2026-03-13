@@ -125,23 +125,7 @@ static void alloc_idx(void)
 #pragma omp declare target
 static int offset(int ix,int mu)
 {
-   int iy,ib;
-
-   if (ix<(VOLUME/2))
-   {
-      iy=iup[ix][mu];
-
-      if (iy<VOLUME)
-         return 8*(iy-(VOLUME/2))+2*mu+1;
-      else
-      {
-         ib=iy-ofs[mu]-(BNDRY/2);
-
-         return 4*VOLUME+snu[mu]+ib;
-      }
-   }
-   else
-      return 8*(ix-(VOLUME/2))+2*mu;
+   return mu*VOLUME+ix;
 }
 #pragma omp end declare target
 
@@ -177,7 +161,7 @@ static void set_idx(void)
             {
                iy=ib+ofs[mu]+(BNDRY/2);
                iz=map[iy-VOLUME];
-               iu0[ib]=8*(iz-(VOLUME/2))+2*mu+1;
+               iu0[ib]=mu*VOLUME+idn[iz][mu];
             }
 
             for (ib=ib0;ib<ib1;ib++)

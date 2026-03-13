@@ -160,7 +160,7 @@ su3_dble *udfld(void)
 void random_ud(void)
 {
    int bc;
-   int k,ix,t,ifc;
+   int k,ix,mu,t;
    su3_dble *ud;
 
    if (udb==NULL)
@@ -168,49 +168,26 @@ void random_ud(void)
 
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,t,ifc,ud)
+#pragma omp parallel private(k,ix,mu,t,ud)
    {
       k=omp_get_thread_num();
-      ud=udb+k*4*VOLUME_TRD;
 
-      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+      for (mu=0;mu<4;mu++)
       {
-         t=global_time(ix+(VOLUME/2));
-
-         if (t==0)
+         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
          {
-            random_su3_dble(ud);
-            ud+=1;
+            t=global_time(ix);
+            ud=udb+mu*VOLUME+ix;
 
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
-
-            for (ifc=2;ifc<8;ifc++)
+            if (mu==0)
             {
-               if (bc!=1)
+               if ((t!=(N0-1))||(bc!=0))
                   random_su3_dble(ud);
-               ud+=1;
             }
-         }
-         else if (t==(N0-1))
-         {
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
-
-            for (ifc=1;ifc<8;ifc++)
+            else
             {
-               random_su3_dble(ud);
-               ud+=1;
-            }
-         }
-         else
-         {
-            for (ifc=0;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
+               if ((t!=0)||(bc!=1))
+                  random_su3_dble(ud);
             }
          }
       }
@@ -262,20 +239,14 @@ static void mul_ud_phase(void)
 #pragma omp parallel private(k,l,ud,um)
    {
       k=omp_get_thread_num();
-      ud=udb+k*4*VOLUME_TRD;
-      um=ud+4*VOLUME_TRD;
 
-      for (;ud<um;)
+      for (l=0;l<3;l++)
       {
-         ud+=2;
+         ud=udb+(l+1)*VOLUME+k*VOLUME_TRD;
+         um=ud+VOLUME_TRD;
 
-         for (l=0;l<3;l++)
-         {
+         for (;ud<um;ud++)
             cm3x3_mulc(phase+l,ud,ud);
-            ud+=1;
-            cm3x3_mulc(phase+l,ud,ud);
-            ud+=1;
-         }
       }
    }
 }
@@ -386,7 +357,7 @@ void unset_ud_phase(void)
 void renormalize_ud(void)
 {
    int bc;
-   int k,ix,t,ifc;
+   int k,ix,mu,t;
    su3_dble *ud;
 
    if (query_flags(UD_PHASE_SET)==0)
@@ -397,49 +368,26 @@ void renormalize_ud(void)
 
       bc=bc_type();
 
-#pragma omp parallel private(k,ix,t,ifc,ud)
+#pragma omp parallel private(k,ix,mu,t,ud)
       {
          k=omp_get_thread_num();
-         ud=udb+k*4*VOLUME_TRD;
 
-         for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+         for (mu=0;mu<4;mu++)
          {
-            t=global_time(ix+(VOLUME/2));
-
-            if (t==0)
+            for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
             {
-               project_to_su3_dble(ud);
-               ud+=1;
+               t=global_time(ix);
+               ud=udb+mu*VOLUME+ix;
 
-               if (bc!=0)
-                  project_to_su3_dble(ud);
-               ud+=1;
-
-               for (ifc=2;ifc<8;ifc++)
+               if (mu==0)
                {
-                  if (bc!=1)
+                  if ((t!=(N0-1))||(bc!=0))
                      project_to_su3_dble(ud);
-                  ud+=1;
                }
-            }
-            else if (t==(N0-1))
-            {
-               if (bc!=0)
-                  project_to_su3_dble(ud);
-               ud+=1;
-
-               for (ifc=1;ifc<8;ifc++)
+               else
                {
-                  project_to_su3_dble(ud);
-                  ud+=1;
-               }
-            }
-            else
-            {
-               for (ifc=0;ifc<8;ifc++)
-               {
-                  project_to_su3_dble(ud);
-                  ud+=1;
+                  if ((t!=0)||(bc!=1))
+                     project_to_su3_dble(ud);
                }
             }
          }
@@ -455,7 +403,7 @@ void renormalize_ud(void)
 
 void assign_ud2u(void)
 {
-   int k,l;
+   int k,l,mu;
    float *r;
    double *rd;
    umat_t *u,*um;
@@ -467,22 +415,26 @@ void assign_ud2u(void)
       error_loc(1,1,"assign_ud2u [uflds.c]",
                 "Double-precision gauge field is not allocated");
 
-#pragma omp parallel private(k,l,u,um,ud,r,rd)
+#pragma omp parallel private(k,l,mu,u,um,ud,r,rd)
    {
       k=omp_get_thread_num();
-      u=(umat_t*)(ub+k*4*VOLUME_TRD);
-      um=u+4*VOLUME_TRD;
-      ud=(umat_dble_t*)(udb+k*4*VOLUME_TRD);
 
-      for (;u<um;u++)
+      for (mu=0;mu<4;mu++)
       {
-         r=(*u).r;
-         rd=(*ud).r;
+         u=(umat_t*)(ub+mu*VOLUME+k*VOLUME_TRD);
+         um=u+VOLUME_TRD;
+         ud=(umat_dble_t*)(udb+mu*VOLUME+k*VOLUME_TRD);
 
-         for (l=0;l<18;l++)
-            r[l]=(float)(rd[l]);
+         for (;u<um;u++)
+         {
+            r=(*u).r;
+            rd=(*ud).r;
 
-         ud+=1;
+            for (l=0;l<18;l++)
+               r[l]=(float)(rd[l]);
+
+            ud+=1;
+         }
       }
    }
 
