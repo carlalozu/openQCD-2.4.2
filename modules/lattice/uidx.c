@@ -265,3 +265,79 @@ void plaq_uidx(int n,int ix,int *ip)
    }
 }
 #pragma omp end declare target
+
+
+#pragma omp declare target
+int plaq_uidx0(int n,int ix)
+{
+   int mu,nu;
+   mu=plns[n][0];
+   return offset(ix,mu);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx1(int n,int ix)
+{
+   int mu,nu;
+   int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
+
+   if ((mu==0)&&(global_time(ix)==(N0-1))&&((bc==1)||(bc==2)))
+   {
+      return 4*VOLUME+7*(BNDRY/4)+nu-1;
+   }
+   else
+   {
+      iy=iup[ix][mu];
+
+      if (iy<VOLUME)
+         return offset(iy,nu);
+      else
+      {
+         if (iy<(VOLUME+(BNDRY/2)))
+            ic=iy-VOLUME-nfc[mu];
+         else
+            ic=iy-VOLUME-(BNDRY/2);
+
+         return 4*VOLUME+(BNDRY/4)+3*ic+nu-(nu>mu);
+      }
+   }
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx2(int n,int ix,int)
+{
+   int nu;
+   nu=plns[n][1];
+   return offset(ix,nu);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx3(int n,int ix)
+{
+   int mu,nu;
+   int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
+
+   iy=iup[ix][nu];
+
+   if (iy<VOLUME)
+      return offset(iy,mu);
+   else
+   {
+      if (iy<(VOLUME+(BNDRY/2)))
+         ic=iy-VOLUME-nfc[nu];
+      else
+         ic=iy-VOLUME-(BNDRY/2);
+
+      return 4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
+   }
+}
+#pragma omp end declare target
