@@ -36,8 +36,8 @@
 
 
 #pragma omp declare target
-void fsu3matxsu3mat_retrace(
-   const su3_mat_field *u, const su3_mat_field *v, doublev *res, int i)
+double fsu3matxsu3mat_retrace(
+   const su3_mat_field *u, const su3_mat_field *v, int i)
 {
     double tr_1 = 0.0;
     double tr_2 = 0.0;
@@ -55,7 +55,7 @@ void fsu3matxsu3mat_retrace(
     tr_3 += u->c3.c2re[i] * v->c2.c3re[i] - u->c3.c2im[i] * v->c2.c3im[i];
     tr_3 += u->c3.c3re[i] * v->c3.c3re[i] - u->c3.c3im[i] * v->c3.c3im[i];
 
-   res->base[i] = tr_1 + tr_2 + tr_3;
+   return tr_1 + tr_2 + tr_3;
 }
 #pragma omp end declare target
 

@@ -85,11 +85,13 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 #pragma omp end declare target
 
 #pragma omp declare target
-static void plaq_dblev(su3_mat_field *udbv, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2, doublev *sm)
+static double plaq_dblev(su3_mat_field *udbv, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2)
 {
+   double sm;
    fsu3matxsu3mat(udbv, udbv, wd1, n, ix);
    fsu3matdagxsu3matdag(udbv, udbv, wd2, n, ix);
-   fsu3matxsu3mat_retrace(wd1, wd2, sm, ix);
+   sm = fsu3matxsu3mat_retrace(wd1, wd2, ix);
+   return sm;
 }
 #pragma omp end declare target
 
@@ -112,15 +114,12 @@ static qflt local_plaq_sum_dble(int iw)
 
    su3_mat_field *wd1 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
    su3_mat_field *wd2 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
-   doublev *sm = (doublev*)malloc(sizeof(doublev));
 
    su3_mat_field_init(wd1, VOLUME);
    su3_mat_field_init(wd2, VOLUME);
-   doublev_init(sm, VOLUME);
 
    enter_su3_mat_field(wd1);
    enter_su3_mat_field(wd2);   
-   enter_double_field(sm);
 
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(N_TEAMS)
@@ -131,19 +130,13 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (n=0;n<3;n++)
-         {
-            plaq_dblev(udbv,n,ix,wd1,wd2,sm);
-            local_pa += sm->base[ix];
-         }
+            local_pa += plaq_dblev(udbv,n,ix,wd1,wd2);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (n=3;n<6;n++)
-         {
-            plaq_dblev(udbv,n,ix,wd1,wd2,sm);
-            local_pa += sm->base[ix];
-         }
+            local_pa += plaq_dblev(udbv,n,ix,wd1,wd2);
       }
       else if ((t==0)||(bc==0))
       {
@@ -152,19 +145,13 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (n=3;n<6;n++)
-            {
-               plaq_dblev(udbv,n,ix,wd1,wd2,sm);
-               local_pa += wp*sm->base[ix];
-            }
+               local_pa += wp*plaq_dblev(udbv,n,ix,wd1,wd2);
          }
       }
       else
       {
          for (n=3;n<6;n++)
-         {
-            plaq_dblev(udbv,n,ix,wd1,wd2,sm);
-            local_pa += sm->base[ix];
-         }
+            local_pa += plaq_dblev(udbv,n,ix,wd1,wd2);
 
          local_pa+=wp*9.0;
       }
