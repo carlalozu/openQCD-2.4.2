@@ -29,7 +29,7 @@ LATTICE = bcnds geogen geometry uidx
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
-SU3FCTS = su3prod su3ren cm3x3 random_su3
+SU3FCTS = su3prod su3ren cm3x3 random_su3 su3prodv
 
 UFLDS = bstap plaq_sum shift udcom uflds uinit
 
@@ -69,7 +69,7 @@ LIBPATH = $(MPI_HOME)/lib
 
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
          -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
-         -Wstrict-prototypes -O -DFMA3 -DPM
+         -Wstrict-prototypes -O -DFMA3 -DPM $(CFLAGS_ARCH)
 
 LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
 
