@@ -101,8 +101,8 @@ extern void lieprod_u3alg(u3_alg_dble *X,u3_alg_dble *Y,u3_alg_dble *Z);
 
 /* SU3PRODV_C */
 #pragma omp declare target
-void fsu3matxsu3mat(const su3_mat_field *u, const su3_mat_field *v, su3_mat_field *res, int n, int i);
-void fsu3matdagxsu3matdag(const su3_mat_field *u, const su3_mat_field *v, su3_mat_field *res, int n, int i);
+void fsu3matxsu3mat(const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int n, int i);
+void fsu3matdagxsu3matdag(const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int n, int i);
 extern double fsu3matxsu3mat_retrace(const su3_mat_field *u, const su3_mat_field *v, int i);
 #pragma omp end declare target
 

@@ -85,12 +85,15 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 #pragma omp end declare target
 
 #pragma omp declare target
-static double plaq_dblev(su3_mat_field *udbv, int n, int ix, su3_mat_field *wd1, su3_mat_field *wd2)
+static double plaq_dblev(su3_mat_field *udbv, int n, int ix)
 {
    double sm;
-   fsu3matxsu3mat(udbv, udbv, wd1, n, ix);
-   fsu3matdagxsu3matdag(udbv, udbv, wd2, n, ix);
-   sm = fsu3matxsu3mat_retrace(wd1, wd2, ix);
+   su3_dble wd1 ALIGNED16;
+   su3_dble wd2 ALIGNED16;
+
+   fsu3matxsu3mat(udbv, udbv, &wd1, n, ix);
+   fsu3matdagxsu3matdag(udbv, udbv, &wd2, n, ix);
+   cm3x3_retr(&wd1,&wd2,&sm);
    return sm;
 }
 #pragma omp end declare target
@@ -112,14 +115,14 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udbv=udfldv();
 
-   su3_mat_field *wd1 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
-   su3_mat_field *wd2 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
-
-   su3_mat_field_init(wd1, VOLUME);
-   su3_mat_field_init(wd2, VOLUME);
-
-   enter_su3_mat_field(wd1);
-   enter_su3_mat_field(wd2);   
+//    su3_mat_field *wd1 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
+//    su3_mat_field *wd2 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
+// 
+//    su3_mat_field_init(wd1, VOLUME);
+//    su3_mat_field_init(wd2, VOLUME);
+// 
+//    enter_su3_mat_field(wd1);
+//    enter_su3_mat_field(wd2);   
 
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(N_TEAMS)
@@ -130,13 +133,13 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (n=0;n<3;n++)
-            local_pa += plaq_dblev(udbv,n,ix,wd1,wd2);
+            local_pa += plaq_dblev(udbv,n,ix);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (n=3;n<6;n++)
-            local_pa += plaq_dblev(udbv,n,ix,wd1,wd2);
+            local_pa += plaq_dblev(udbv,n,ix);
       }
       else if ((t==0)||(bc==0))
       {
@@ -145,13 +148,13 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (n=3;n<6;n++)
-               local_pa += wp*plaq_dblev(udbv,n,ix,wd1,wd2);
+               local_pa += wp*plaq_dblev(udbv,n,ix);
          }
       }
       else
       {
          for (n=3;n<6;n++)
-            local_pa += plaq_dblev(udbv,n,ix,wd1,wd2);
+            local_pa += plaq_dblev(udbv,n,ix);
 
          local_pa+=wp*9.0;
       }
@@ -159,7 +162,12 @@ static qflt local_plaq_sum_dble(int iw)
       
    }
    #pragma omp target update from(pa)
+   // release_su3_mat_field(wd1);
+   // release_su3_mat_field(wd2);
    acc_qflt(pa,rqsm.q);
+
+   // su3_mat_field_free(wd1);
+   // su3_mat_field_free(wd2);
 
    return rqsm;
 }
