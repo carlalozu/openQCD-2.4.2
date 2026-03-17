@@ -197,7 +197,7 @@ su3_mat_field *udfldv(void)
 void random_ud(void)
 {
    int bc;
-   int k,ix,mu,t;
+   int k,ix,t,ifc;
    su3_dble *ud;
 
    if (udb==NULL)
@@ -205,26 +205,49 @@ void random_ud(void)
 
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,mu,t,ud)
+#pragma omp parallel private(k,ix,t,ifc,ud)
    {
       k=omp_get_thread_num();
+      ud=udb+k*4*VOLUME_TRD;
 
-      for (mu=0;mu<4;mu++)
+      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
       {
-         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
-         {
-            t=global_time(ix);
-            ud=udb+mu*VOLUME+ix;
+         t=global_time(ix+(VOLUME/2));
 
-            if (mu==0)
+         if (t==0)
+         {
+            random_su3_dble(ud);
+            ud+=1;
+
+            if (bc!=0)
+               random_su3_dble(ud);
+            ud+=1;
+
+            for (ifc=2;ifc<8;ifc++)
             {
-               if ((t!=(N0-1))||(bc!=0))
+               if (bc!=1)
                   random_su3_dble(ud);
+               ud+=1;
             }
-            else
+         }
+         else if (t==(N0-1))
+         {
+            if (bc!=0)
+               random_su3_dble(ud);
+            ud+=1;
+
+            for (ifc=1;ifc<8;ifc++)
             {
-               if ((t!=0)||(bc!=1))
-                  random_su3_dble(ud);
+               random_su3_dble(ud);
+               ud+=1;
+            }
+         }
+         else
+         {
+            for (ifc=0;ifc<8;ifc++)
+            {
+               random_su3_dble(ud);
+               ud+=1;
             }
          }
       }
