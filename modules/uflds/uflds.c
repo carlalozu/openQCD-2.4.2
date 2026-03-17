@@ -236,6 +236,46 @@ void random_ud(void)
    #pragma omp target update to(udb)
 }
 
+void random_udv(void)
+{
+   int bc;
+   int k,ix,mu,t;
+   su3_mat_field *udv;
+
+   if (udbv==NULL)
+      alloc_udv();
+
+   bc=bc_type();
+
+#pragma omp parallel private(k,ix,mu,t,udv)
+   {
+      k=omp_get_thread_num();
+
+      for (mu=0;mu<4;mu++)
+      {
+         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+         {
+            t=global_time(ix);
+
+            if (mu==0)
+            {
+               if ((t!=(N0-1))||(bc!=0))
+                  random_su3_mat_field(udbv, ix);
+            }
+            else
+            {
+               if ((t!=0)||(bc!=1))
+                  random_su3_mat_field(udbv, ix);
+            }
+         }
+      }
+   }
+
+   set_flags(UPDATED_UD);
+   set_flags(UNSET_UD_PHASE);
+   set_bc();
+   #pragma omp target update to(udbv)
+}
 
 static int set_phase(int pm,double *theta)
 {

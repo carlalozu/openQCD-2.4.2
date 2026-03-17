@@ -179,3 +179,8 @@ void random_su3_dble(su3_dble *u)
 
    _vector_cross_prod(v[1],v[2],v[0]);
 }
+
+void random_su3_mat_field(su3_mat_field *uv, int ix)
+{
+   // TODO: complete this
+}

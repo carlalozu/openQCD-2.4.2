@@ -41,6 +41,7 @@ extern su3 *ufld(void);
 extern su3_dble *udfld(void);
 extern su3_mat_field *udfldv(void);
 extern void random_ud(void);
+extern void random_udv(void);
 extern void set_ud_phase(void);
 extern void unset_ud_phase(void);
 extern void renormalize_ud(void);

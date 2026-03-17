@@ -78,6 +78,7 @@ extern void cm3x3_lc2(complex_dble *c,su3_dble *u,su3_dble *v);
 /* RANDOM_SU3_C */
 extern void random_su3(su3 *u);
 extern void random_su3_dble(su3_dble *u);
+extern void random_su3_mat_field(su3_mat_field *uv, int ix);
 
 /* SU3REN_C */
 extern void project_to_su3(su3 *u);
