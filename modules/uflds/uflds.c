@@ -92,7 +92,6 @@ typedef union
 static complex_dble phase[3] ALIGNED16 ={{0.0,0.0}};
 static su3 *ub=NULL;
 static su3_dble *udb=NULL;
-static su3_mat_field *udbv=NULL;
 
 
 static void alloc_u(void)
@@ -148,34 +147,6 @@ static void alloc_ud(void)
    #pragma omp target enter data map(to: udb[:n])
 }
 
-static void alloc_udv(void)
-{
-   int bc;
-   size_t n;
-
-   error_root(sizeof(su3_dble)!=(18*sizeof(double)),1,"alloc_ud [uflds.c]",
-              "The su3_dble structures are not properly packed");
-
-   error(ipt==NULL,1,"alloc_ud [uflds.c]","Geometry arrays are not set");
-
-   bc=bc_type();
-   n=4*VOLUME+7*(BNDRY/4);
-
-   if ((cpr[0]==(NPROC0-1))&&((bc==1)||(bc==2)))
-      n+=3;
-
-   udbv = (su3_mat_field*)malloc(sizeof(su3_mat_field));
-   su3_mat_field_init(udbv, n);
-   error(udbv==NULL,1,"alloc_ud [uflds.c]",
-         "Unable to allocate memory space for the gauge field");
-   set_ud2unityv(4*VOLUME_TRD,2,udbv);
-
-   set_flags(UPDATED_UD);
-   set_flags(UNSET_UD_PHASE);
-   set_bc();
-   enter_su3_mat_field(udbv);
-}
-
 
 su3_dble *udfld(void)
 {
@@ -183,14 +154,6 @@ su3_dble *udfld(void)
       alloc_ud();
 
    return udb;
-}
-
-su3_mat_field *udfldv(void)
-{
-   if (udbv==NULL)
-      alloc_udv();
-
-   return udbv;
 }
 
 
@@ -259,46 +222,6 @@ void random_ud(void)
    #pragma omp target update to(udb)
 }
 
-void random_udv(void)
-{
-   int bc;
-   int k,ix,mu,t;
-   su3_mat_field *udv;
-
-   if (udbv==NULL)
-      alloc_udv();
-
-   bc=bc_type();
-
-#pragma omp parallel private(k,ix,mu,t,udv)
-   {
-      k=omp_get_thread_num();
-
-      for (mu=0;mu<4;mu++)
-      {
-         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
-         {
-            t=global_time(ix);
-
-            if (mu==0)
-            {
-               if ((t!=(N0-1))||(bc!=0))
-                  random_su3_mat_field(udbv, ix);
-            }
-            else
-            {
-               if ((t!=0)||(bc!=1))
-                  random_su3_mat_field(udbv, ix);
-            }
-         }
-      }
-   }
-
-   set_flags(UPDATED_UD);
-   set_flags(UNSET_UD_PHASE);
-   set_bc();
-   #pragma omp target update to(udbv)
-}
 
 static int set_phase(int pm,double *theta)
 {
@@ -339,14 +262,20 @@ static void mul_ud_phase(void)
 #pragma omp parallel private(k,l,ud,um)
    {
       k=omp_get_thread_num();
+      ud=udb+k*4*VOLUME_TRD;
+      um=ud+4*VOLUME_TRD;
 
-      for (l=0;l<3;l++)
+      for (;ud<um;)
       {
-         ud=udb+(l+1)*VOLUME+k*VOLUME_TRD;
-         um=ud+VOLUME_TRD;
+         ud+=2;
 
-         for (;ud<um;ud++)
+         for (l=0;l<3;l++)
+         {
             cm3x3_mulc(phase+l,ud,ud);
+            ud+=1;
+            cm3x3_mulc(phase+l,ud,ud);
+            ud+=1;
+         }
       }
    }
 }
@@ -457,7 +386,7 @@ void unset_ud_phase(void)
 void renormalize_ud(void)
 {
    int bc;
-   int k,ix,mu,t;
+   int k,ix,t,ifc;
    su3_dble *ud;
 
    if (query_flags(UD_PHASE_SET)==0)
@@ -468,26 +397,49 @@ void renormalize_ud(void)
 
       bc=bc_type();
 
-#pragma omp parallel private(k,ix,mu,t,ud)
+#pragma omp parallel private(k,ix,t,ifc,ud)
       {
          k=omp_get_thread_num();
+         ud=udb+k*4*VOLUME_TRD;
 
-         for (mu=0;mu<4;mu++)
+         for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
          {
-            for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
-            {
-               t=global_time(ix);
-               ud=udb+mu*VOLUME+ix;
+            t=global_time(ix+(VOLUME/2));
 
-               if (mu==0)
+            if (t==0)
+            {
+               project_to_su3_dble(ud);
+               ud+=1;
+
+               if (bc!=0)
+                  project_to_su3_dble(ud);
+               ud+=1;
+
+               for (ifc=2;ifc<8;ifc++)
                {
-                  if ((t!=(N0-1))||(bc!=0))
+                  if (bc!=1)
                      project_to_su3_dble(ud);
+                  ud+=1;
                }
-               else
+            }
+            else if (t==(N0-1))
+            {
+               if (bc!=0)
+                  project_to_su3_dble(ud);
+               ud+=1;
+
+               for (ifc=1;ifc<8;ifc++)
                {
-                  if ((t!=0)||(bc!=1))
-                     project_to_su3_dble(ud);
+                  project_to_su3_dble(ud);
+                  ud+=1;
+               }
+            }
+            else
+            {
+               for (ifc=0;ifc<8;ifc++)
+               {
+                  project_to_su3_dble(ud);
+                  ud+=1;
                }
             }
          }
@@ -503,7 +455,7 @@ void renormalize_ud(void)
 
 void assign_ud2u(void)
 {
-   int k,l,mu;
+   int k,l;
    float *r;
    double *rd;
    umat_t *u,*um;
@@ -515,26 +467,22 @@ void assign_ud2u(void)
       error_loc(1,1,"assign_ud2u [uflds.c]",
                 "Double-precision gauge field is not allocated");
 
-#pragma omp parallel private(k,l,mu,u,um,ud,r,rd)
+#pragma omp parallel private(k,l,u,um,ud,r,rd)
    {
       k=omp_get_thread_num();
+      u=(umat_t*)(ub+k*4*VOLUME_TRD);
+      um=u+4*VOLUME_TRD;
+      ud=(umat_dble_t*)(udb+k*4*VOLUME_TRD);
 
-      for (mu=0;mu<4;mu++)
+      for (;u<um;u++)
       {
-         u=(umat_t*)(ub+mu*VOLUME+k*VOLUME_TRD);
-         um=u+VOLUME_TRD;
-         ud=(umat_dble_t*)(udb+mu*VOLUME+k*VOLUME_TRD);
+         r=(*u).r;
+         rd=(*ud).r;
 
-         for (;u<um;u++)
-         {
-            r=(*u).r;
-            rd=(*ud).r;
+         for (l=0;l<18;l++)
+            r[l]=(float)(rd[l]);
 
-            for (l=0;l<18;l++)
-               r[l]=(float)(rd[l]);
-
-            ud+=1;
-         }
+         ud+=1;
       }
    }
 
