@@ -47,29 +47,6 @@
 int *tms=NULL;
 
 
-static void set_ipt_thread0(int *ofs)
-{
-   int x0,x1,x2,x3,ix,ieo;
-
-   for (x0=0;x0<L0_TRD;x0++)
-   {
-      for (x1=0;x1<L1_TRD;x1++)
-      {
-         for (x2=0;x2<L2_TRD;x2++)
-         {
-            for (x3=0;x3<L3_TRD;x3++)
-            {
-               ix=x3+x2*L3+x1*L2*L3+x0*L1*L2*L3;
-               ieo=((x0+x1+x2+x3)&0x1);
-               ipt[ix]=ofs[ieo];
-               ofs[ieo]+=1;
-            }
-         }
-      }
-   }
-}
-
-
 static void alloc_ipt(void)
 {
    ipt=malloc(VOLUME*sizeof(*ipt));
@@ -85,10 +62,6 @@ static void set_ipt(void)
    int nt1,nt2,nt3,ofs[2];
 
    alloc_ipt();
-
-   ofs[0]=0;
-   ofs[1]=(VOLUME/2);
-   set_ipt_thread0(ofs);
 
    nt1=(L1/L1_TRD);
    nt2=(L2/L2_TRD);
@@ -114,8 +87,6 @@ static void set_ipt(void)
          n2*=L2_TRD;
          n3*=L3_TRD;
 
-         is=n3+n2*L3+n1*L2*L3+n0*L1*L2*L3;
-
          for (n0=0;n0<L0_TRD;n0++)
          {
             for (n1=0;n1<L1_TRD;n1++)
@@ -125,7 +96,7 @@ static void set_ipt(void)
                   for (n3=0;n3<L3_TRD;n3++)
                   {
                      ix=n3+n2*L3+n1*L2*L3+n0*L1*L2*L3;
-                     ipt[ix+is]=ipt[ix]+k*(VOLUME_TRD/2);
+                     ipt[ix]=ix+k*VOLUME_TRD;
                   }
                }
             }

@@ -56,10 +56,7 @@
 static void set_blk_ipt(block_t *b)
 {
    int x0,x1,x2,x3,ix,ieo,*bs;
-   int ofs[2];
-
-   ofs[0]=0;
-   ofs[1]=(*b).vol/2;
+   int ofs;
 
    bs=(*b).bs;
 
@@ -72,9 +69,8 @@ static void set_blk_ipt(block_t *b)
             for (x3=0;x3<bs[3];x3++)
             {
                ix=x3+x2*bs[3]+x1*bs[2]*bs[3]+x0*bs[1]*bs[2]*bs[3];
-               ieo=((x0+x1+x2+x3)&0x1);
-               (*b).ipt[ix]=ofs[ieo];
-               ofs[ieo]+=1;
+               (*b).ipt[ix]=ofs;
+               ofs+=1;
             }
          }
       }
