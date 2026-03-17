@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *
-* File bcnds.c
+* File bcndsv.c
 *
 * Copyright (C) 2005, 2010-2014, 2021 Martin Luescher, John Bulava
 *
@@ -117,12 +117,9 @@ static int *alloc_lks(void)
    error(ipt==NULL,1,"alloc_lks [bcnds.c]",
          "Geometry arrays are not set");
 
-   if ((cpr[0]==0)||(cpr[0]==(NPROC0-1)))
+   if (cpr[0]==(NPROC0-1))
    {
-      if (NPROC0>1)
-         nlks=(L1*L2*L3)/2;
-      else
-         nlks=L1*L2*L3;
+      nlks=L1*L2*L3;
 
       lks=malloc(nlks*sizeof(*lks));
       ofs_lks=malloc(NTHREAD*sizeof(*ofs_lks));
@@ -169,11 +166,11 @@ static void set_lks(void)
          k=omp_get_thread_num();
          n=0;
 
-         for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
          {
-            t=global_time(ix+(VOLUME/2));
+            t=global_time(ix);
 
-            if ((t==0)||(t==(N0-1)))
+            if (t==(N0-1))
                n+=1;
          }
 
@@ -187,18 +184,13 @@ static void set_lks(void)
             for (l=0;l<k;l++)
                lk+=a[l];
 
-            for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+            for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
             {
-               t=global_time(ix+(VOLUME/2));
+               t=global_time(ix);
 
-               if (t==0)
+               if (t==(N0-1))
                {
-                  (*lk)=8*ix+1;
-                  lk+=1;
-               }
-               else if (t==(N0-1))
-               {
-                  (*lk)=8*ix;
+                  (*lk)=ix;
                   lk+=1;
                }
             }
@@ -408,48 +400,27 @@ static int is_equal(double tol,su3_dble *u,su3_dble *v)
 
 static int check_zero(int bc)
 {
-   int it,k,ix,t,ifc;
-   su3_dble *ub,*ud;
+   int it,k,ix,t,mu;
+   su3_dble *ub;
 
    ub=udfld();
    it=1;
 
-#pragma omp parallel private(k,ix,t,ifc,ud) reduction(& : it)
+#pragma omp parallel private(k,ix,t,mu) reduction(& : it)
    {
       k=omp_get_thread_num();
-      ud=ub+8*k*(VOLUME_TRD/2);
 
-      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
       {
-         t=global_time(ix+(VOLUME/2));
+         t=global_time(ix);
 
-         if ((bc==0)&&(t==0))
-         {
-            it&=(0x1^is_zero(ud));
-            ud+=1;
-            it&=is_zero(ud);
-            ud+=1;
-         }
-         else if ((bc==0)&&(t==(N0-1)))
-         {
-            it&=is_zero(ud);
-            ud+=1;
-            it&=(0x1^is_zero(ud));
-            ud+=1;
-         }
+         if ((bc==0)&&(t==(N0-1)))
+            it&=is_zero(&ub[ix]);
          else
-         {
-            it&=(0x1^is_zero(ud));
-            ud+=1;
-            it&=(0x1^is_zero(ud));
-            ud+=1;
-         }
+            it&=(0x1^is_zero(&ub[ix]));
 
-         for (ifc=2;ifc<8;ifc++)
-         {
-            it&=(0x1^is_zero(ud));
-            ud+=1;
-         }
+         for (mu=1;mu<4;mu++)
+            it&=(0x1^is_zero(&ub[mu*VOLUME+ix]));
       }
    }
 
@@ -528,22 +499,17 @@ static void SF_bc(void)
 
    if (npts>0)
    {
-#pragma omp parallel private(k,pt,ptm,ud)
+#pragma omp parallel private(k,pt,ptm)
       {
          k=omp_get_thread_num();
 
-         pt=pts+ofs_odd_pts[k][0];
-         ptm=pt+ofs_odd_pts[k][1];
+         pt=pts+ofs_all_pts[k][0];
+         ptm=pt+ofs_all_pts[k][1];
 
          for (;pt<ptm;pt++)
          {
-            ud=ub+8*(pt[0]-(VOLUME/2));
-
             for (k=0;k<3;k++)
-            {
-               ud[2+2*k]=ubnd[0][k];
-               ud[3+2*k]=ubnd[0][k];
-            }
+               ub[(k+1)*VOLUME+pt[0]]=ubnd[0][k];
          }
       }
    }
@@ -618,22 +584,17 @@ static int check_SF(double tol)
 
    if (npts>0)
    {
-#pragma omp parallel private(k,pt,ptm,ud) reduction(& : it)
+#pragma omp parallel private(k,pt,ptm) reduction(& : it)
       {
          k=omp_get_thread_num();
 
-         pt=pts+ofs_odd_pts[k][0];
-         ptm=pt+ofs_odd_pts[k][1];
+         pt=pts+ofs_all_pts[k][0];
+         ptm=pt+ofs_all_pts[k][1];
 
          for (;pt<ptm;pt++)
          {
-            ud=ub+8*(pt[0]-(VOLUME/2));
-
             for (k=0;k<3;k++)
-            {
-               it&=is_equal(tol,ud+2+2*k,ubnd[0]+k);
-               it&=is_equal(tol,ud+3+2*k,ubnd[0]+k);
-            }
+               it&=is_equal(tol,&ub[(k+1)*VOLUME+pt[0]],ubnd[0]+k);
          }
       }
    }

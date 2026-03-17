@@ -81,7 +81,7 @@
 #define VOLUME_TRD (L0_TRD*L1_TRD*L2_TRD*L3_TRD)
 #define NTHREAD (VOLUME/VOLUME_TRD)
 
-#define ALIGN 6
+#define ALIGN 8
 
 #if defined MAIN_PROGRAM
 int cpr[4];

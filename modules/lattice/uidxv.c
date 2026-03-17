@@ -66,10 +66,11 @@
 
 #define N0 (NPROC0*L0)
 
+#pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
-static int bc,nfc[4],ofs[4],snu[4],init=0;
-static uidx_t idx[4]={{0,0,NULL,NULL}};
-
+int bc,nfc[4],ofs[4],snu[4],init=0;
+uidx_t idx[4]={{0,0,NULL,NULL}};
+#pragma omp end declare target
 
 static void alloc_idx(void)
 {
@@ -121,26 +122,12 @@ static void alloc_idx(void)
 }
 
 
+#pragma omp declare target
 static int offset(int ix,int mu)
 {
-   int iy,ib;
-
-   if (ix<(VOLUME/2))
-   {
-      iy=iup[ix][mu];
-
-      if (iy<VOLUME)
-         return 8*(iy-(VOLUME/2))+2*mu+1;
-      else
-      {
-         ib=iy-ofs[mu]-(BNDRY/2);
-
-         return 4*VOLUME+snu[mu]+ib;
-      }
-   }
-   else
-      return 8*(ix-(VOLUME/2))+2*mu;
+   return mu*VOLUME+ix;
 }
+#pragma omp end declare target
 
 
 static void set_idx(void)
@@ -174,7 +161,7 @@ static void set_idx(void)
             {
                iy=ib+ofs[mu]+(BNDRY/2);
                iz=map[iy-VOLUME];
-               iu0[ib]=8*(iz-(VOLUME/2))+2*mu+1;
+               iu0[ib]=mu*VOLUME+idn[iz][mu];
             }
 
             for (ib=ib0;ib<ib1;ib++)
@@ -203,6 +190,7 @@ static void set_idx(void)
          }
       }
    }
+   #pragma omp target update to(nfc, ofs, snu, idx)
 }
 
 
@@ -216,8 +204,9 @@ void set_uidx(void)
          set_idx();
       else
          bc=bc_type();
-
+         
       init=1;
+      #pragma omp target update to(bc, init)
    }
 }
 
@@ -228,6 +217,7 @@ uidx_t *uidx(void)
 }
 
 
+#pragma omp declare target
 void plaq_uidx(int n,int ix,int *ip)
 {
    int mu,nu;
@@ -274,3 +264,81 @@ void plaq_uidx(int n,int ix,int *ip)
       ip[3]=4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
    }
 }
+#pragma omp end declare target
+
+
+#pragma omp declare target
+int plaq_uidx0(int n,int ix)
+{
+   int mu;
+   mu=plns[n][0];
+   return offset(ix,mu);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx1(int n,int ix)
+{
+   int mu,nu;
+   int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
+
+   if ((mu==0)&&(global_time(ix)==(N0-1))&&((bc==1)||(bc==2)))
+   {
+      return 4*VOLUME+7*(BNDRY/4)+nu-1;
+   }
+   else
+   {
+      iy=iup[ix][mu];
+
+      if (iy<VOLUME)
+         return offset(iy,nu);
+      else
+      {
+         if (iy<(VOLUME+(BNDRY/2)))
+            ic=iy-VOLUME-nfc[mu];
+         else
+            ic=iy-VOLUME-(BNDRY/2);
+
+         return 4*VOLUME+(BNDRY/4)+3*ic+nu-(nu>mu);
+      }
+   }
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx2(int n,int ix)
+{
+   int nu;
+   nu=plns[n][1];
+   return offset(ix,nu);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx3(int n,int ix)
+{
+   int mu,nu;
+   int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
+
+   iy=iup[ix][nu];
+
+   if (iy<VOLUME)
+      return offset(iy,mu);
+   else
+   {
+      if (iy<(VOLUME+(BNDRY/2)))
+         ic=iy-VOLUME-nfc[nu];
+      
+      else-(BNDRY/2);
+         ic=iy-VOLUME-(BNDRY/2);
+
+      return 4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
+   }
+}
+#pragma omp end declare target
