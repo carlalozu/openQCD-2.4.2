@@ -58,46 +58,27 @@ static void alloc_ipt(void)
 
 static void set_ipt(void)
 {
-   int k,n,n0,n1,n2,n3,is,ix;
-   int nt1,nt2,nt3,ofs[2];
+   int k,n0,n1,n2,n3,ix;
+   int ofs;
 
    alloc_ipt();
 
-   nt1=(L1/L1_TRD);
-   nt2=(L2/L2_TRD);
-   nt3=(L3/L3_TRD);
-
-#pragma omp parallel private(k,n,n0,n1,n2,n3,is,ix)
+#pragma omp parallel private(k,n0,n1,n2,n3,ix)
    {
       k=omp_get_thread_num();
 
-      if (k>0)
+      ofs = k*VOLUME_TRD;
+      // ix=n3+n2*L3_TRD+L1_TRD*L2_TRD*L3_TRD+n0*L1_TRD*L2_TRD*L3_TRD;
+      for (n0=0;n0<L0_TRD;n0++)
       {
-         n=k;
-         n3=n%nt3;
-         n/=nt3;
-         n2=n%nt2;
-         n/=nt2;
-         n1=n%nt1;
-         n/=nt1;
-         n0=n;
-
-         n0*=L0_TRD;
-         n1*=L1_TRD;
-         n2*=L2_TRD;
-         n3*=L3_TRD;
-
-         for (n0=0;n0<L0_TRD;n0++)
+         for (n1=0;n1<L1_TRD;n1++)
          {
-            for (n1=0;n1<L1_TRD;n1++)
+            for (n2=0;n2<L2_TRD;n2++)
             {
-               for (n2=0;n2<L2_TRD;n2++)
+               for (n3=0;n3<L3_TRD;n3++)
                {
-                  for (n3=0;n3<L3_TRD;n3++)
-                  {
-                     ix=n3+n2*L3+n1*L2*L3+n0*L1*L2*L3;
-                     ipt[ix]=ix+k*VOLUME_TRD;
-                  }
+                  ipt[ofs]=ofs;
+                  ofs+=1;
                }
             }
          }
