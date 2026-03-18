@@ -53,7 +53,7 @@
 *
 *******************************************************************************/
 
-#define UIDX_C
+#define UIDXV_C
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -125,7 +125,18 @@ static void alloc_idx(void)
 #pragma omp declare target
 static int offset(int ix,int mu)
 {
-   return mu*VOLUME+ix;
+   int CBS,cb,pos;
+
+   /* Number of sites per spatial cache block (4x4x4 spatial * full time extent). */
+   CBS=4*4*4*L0_TRD;
+
+   cb=ix/CBS;    /* which cache block                     */
+   pos=ix%CBS;   /* position of site within cache block   */
+
+   /* Cache-block-interleaved SoA layout:
+    *   block cb occupies 4*CBS link entries starting at 4*CBS*cb.
+    *   Within the block, direction mu occupies positions [mu*CBS, (mu+1)*CBS). */
+   return 4*CBS*cb+mu*CBS+pos;
 }
 #pragma omp end declare target
 

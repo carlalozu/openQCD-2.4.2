@@ -20,6 +20,22 @@
 *     the rank of the associated MPI process is assigned to ip and the
 *     local index of the point to ix.
 *
+*     Fills ipt for the thread block owned by thread k, whose origin in the
+*     local lattice is (n0_ofs, n1_ofs, n2_ofs, n3_ofs).
+*
+*     The memory layout groups points into spatial cache blocks of size 4x4x4.
+*     Within each cache block the full time extent L0_TRD is kept together, so
+*     consecutive memory indices belong to the set
+*
+*     { (t, x1, x2, x3) : t in [n0_ofs, n0_ofs+L0_TRD),
+*                        x1 in [n1_ofs+4*cb1, n1_ofs+4*cb1+4),
+*                        x2 in [n2_ofs+4*cb2, n2_ofs+4*cb2+4),
+*                        x3 in [n3_ofs+4*cb3, n3_ofs+4*cb3+4) }
+*
+*     for each cache-block triple (cb1, cb2, cb3).
+*
+* Requires L1_TRD, L2_TRD and L3_TRD to be multiples of 4.
+*
 *   int global_time(int ix)
 *     Returns the (global) time coordinate of the lattice point with local
 *     index ix. If ix is out of range, NPROC0*L0 is returned.
@@ -51,38 +67,86 @@ static void alloc_ipt(void)
 {
    ipt=malloc(VOLUME*sizeof(*ipt));
 
-   error(ipt==NULL,1,"alloc_ipt [geometry.c]",
+   error(ipt==NULL,1,"alloc_ipt [geometryv.c]",
          "Unable to allocate index array");
+}
+
+
+static void update_ipt_cbs4(int k, int n0_ofs, int n1_ofs, int n2_ofs, int n3_ofs)
+{
+   int cb1,cb2,cb3;
+   int x0,x1,x2,x3;
+   int y0,y1,y2,y3;
+   int lex,mem;
+   int nbs1,nbs2,nbs3;
+
+   nbs1=L1_TRD/4;
+   nbs2=L2_TRD/4;
+   nbs3=L3_TRD/4;
+
+   mem=k*VOLUME_TRD;
+
+   for (cb1=0;cb1<nbs1;cb1++)
+   {
+      for (cb2=0;cb2<nbs2;cb2++)
+      {
+         for (cb3=0;cb3<nbs3;cb3++)
+         {
+            for (x0=0;x0<L0_TRD;x0++)
+            {
+               for (x1=0;x1<4;x1++)
+               {
+                  for (x2=0;x2<4;x2++)
+                  {
+                     for (x3=0;x3<4;x3++)
+                     {
+                        y0=n0_ofs+x0;
+                        y1=n1_ofs+cb1*4+x1;
+                        y2=n2_ofs+cb2*4+x2;
+                        y3=n3_ofs+cb3*4+x3;
+
+                        lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
+                        ipt[lex]=mem;
+                        mem+=1;
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
 }
 
 
 static void set_ipt(void)
 {
-   int k,n0,n1,n2,n3,ix;
-   int ofs;
+   int k,n,n0,n1,n2,n3;
+   int nt1,nt2,nt3;
 
    alloc_ipt();
 
-#pragma omp parallel private(k,n0,n1,n2,n3,ix)
+   error((L1_TRD%4)!=0,1,"set_ipt [geometryv.c]",
+         "L1_TRD must be a multiple of 4 for cache-block layout");
+   error((L2_TRD%4)!=0,1,"set_ipt [geometryv.c]",
+         "L2_TRD must be a multiple of 4 for cache-block layout");
+   error((L3_TRD%4)!=0,1,"set_ipt [geometryv.c]",
+         "L3_TRD must be a multiple of 4 for cache-block layout");
+
+   nt1=L1/L1_TRD;
+   nt2=L2/L2_TRD;
+   nt3=L3/L3_TRD;
+
+#pragma omp parallel private(k,n,n0,n1,n2,n3)
    {
       k=omp_get_thread_num();
 
-      ofs = k*VOLUME_TRD;
-      // ix=n3+n2*L3_TRD+L1_TRD*L2_TRD*L3_TRD+n0*L1_TRD*L2_TRD*L3_TRD;
-      for (n0=0;n0<L0_TRD;n0++)
-      {
-         for (n1=0;n1<L1_TRD;n1++)
-         {
-            for (n2=0;n2<L2_TRD;n2++)
-            {
-               for (n3=0;n3<L3_TRD;n3++)
-               {
-                  ipt[ofs]=ofs;
-                  ofs+=1;
-               }
-            }
-         }
-      }
+      n=k;
+      n3=n%nt3;   n/=nt3;
+      n2=n%nt2;   n/=nt2;
+      n1=n%nt1;   n/=nt1;
+      n0=n;
+
+      update_ipt_cbs4(k,n0*L0_TRD,n1*L1_TRD,n2*L2_TRD,n3*L3_TRD);
    }
 }
 
