@@ -93,6 +93,20 @@
 
 #define N0 (NPROC0*L0)
 
+static int offset(int ix,int mu)
+{
+   int CBS,cb,pos,t,sp;
+
+   CBS=4*4*4*L0_TRD;
+   cb=ix/CBS;
+   pos=ix%CBS;
+   t=pos/64;
+   sp=pos%64;
+
+   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(64)] */
+   return cb*(L0_TRD*4*64)+t*(4*64)+mu*64+sp;
+}
+
 typedef union
 {
    su3_dble u;
@@ -415,12 +429,12 @@ static int check_zero(int bc)
          t=global_time(ix);
 
          if ((bc==0)&&(t==(N0-1)))
-            it&=is_zero(&ub[ix]);
+            it&=is_zero(&ub[offset(ix,0)]);
          else
-            it&=(0x1^is_zero(&ub[ix]));
+            it&=(0x1^is_zero(&ub[offset(ix,0)]));
 
          for (mu=1;mu<4;mu++)
-            it&=(0x1^is_zero(&ub[mu*VOLUME+ix]));
+            it&=(0x1^is_zero(&ub[offset(ix,mu)]));
       }
    }
 
@@ -509,7 +523,7 @@ static void SF_bc(void)
          for (;pt<ptm;pt++)
          {
             for (k=0;k<3;k++)
-               ub[(k+1)*VOLUME+pt[0]]=ubnd[0][k];
+               ub[offset(pt[0],k+1)]=ubnd[0][k];
          }
       }
    }
@@ -594,7 +608,7 @@ static int check_SF(double tol)
          for (;pt<ptm;pt++)
          {
             for (k=0;k<3;k++)
-               it&=is_equal(tol,&ub[(k+1)*VOLUME+pt[0]],ubnd[0]+k);
+               it&=is_equal(tol,&ub[offset(pt[0],k+1)],ubnd[0]+k);
          }
       }
    }

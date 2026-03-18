@@ -125,18 +125,16 @@ static void alloc_idx(void)
 #pragma omp declare target
 static int offset(int ix,int mu)
 {
-   int CBS,cb,pos;
+   int CBS,cb,pos,t,sp;
 
-   /* Number of sites per spatial cache block (4x4x4 spatial * full time extent). */
    CBS=4*4*4*L0_TRD;
+   cb=ix/CBS;
+   pos=ix%CBS;
+   t=pos/64;
+   sp=pos%64;
 
-   cb=ix/CBS;    /* which cache block                     */
-   pos=ix%CBS;   /* position of site within cache block   */
-
-   /* Cache-block-interleaved SoA layout:
-    *   block cb occupies 4*CBS link entries starting at 4*CBS*cb.
-    *   Within the block, direction mu occupies positions [mu*CBS, (mu+1)*CBS). */
-   return 4*CBS*cb+mu*CBS+pos;
+   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(64)] */
+   return cb*(L0_TRD*4*64)+t*(4*64)+mu*64+sp;
 }
 #pragma omp end declare target
 
