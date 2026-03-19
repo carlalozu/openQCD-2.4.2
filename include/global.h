@@ -25,18 +25,20 @@
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 64
+#define L0 8
 #define L1 8
 #define L2 8
 #define L3 8
 
-#define L0_TRD 64
+#define L0_TRD 8
 #define L1_TRD 8
 #define L2_TRD 8
 #define L3_TRD 8
 
 #define NAME_SIZE 128
 #define N_TEAMS ((VOLUME+128-1)/128)
+#define BLOCK_SIZE 8
+#define BLOCK_VLM ((BLOCK_SIZE*BLOCK_SIZE*BLOCK_SIZE))
 
 
 /****************************** do not change *********************************/
@@ -81,7 +83,7 @@
 #define VOLUME_TRD (L0_TRD*L1_TRD*L2_TRD*L3_TRD)
 #define NTHREAD (VOLUME/VOLUME_TRD)
 
-#define ALIGN 6
+#define ALIGN 8
 
 #if defined MAIN_PROGRAM
 int cpr[4];

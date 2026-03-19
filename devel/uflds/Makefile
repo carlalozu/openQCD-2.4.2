@@ -25,7 +25,7 @@ DEVFCTS = dutils gtrans
 
 FLAGS = flags lat_parms dfl_parms
 
-LATTICE = bcnds geogen geometry uidx
+LATTICE = bcndsv geogen geometryv uidxv
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
@@ -69,7 +69,7 @@ LIBPATH = $(MPI_HOME)/lib
 
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
          -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
-         -Wstrict-prototypes -O -DFMA3 -DPM
+         -Wstrict-prototypes -O -DFMA3 -DPM $(CFLAGS_ARCH)
 
 LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
 
