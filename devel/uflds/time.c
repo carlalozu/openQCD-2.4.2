@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
    double *flush_buf = malloc(flush_size * sizeof(double));
    
    flush_cache(flush_size, flush_buf);
-   random_ud();
+   random_udv();
    prof_end(&set_params);
    
    prof_begin(&benchmark);

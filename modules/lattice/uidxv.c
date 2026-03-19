@@ -53,7 +53,7 @@
 *
 *******************************************************************************/
 
-#define UIDXV_C
+#define UIDX_C
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -127,14 +127,14 @@ static int offset(int ix,int mu)
 {
    int CBS,cb,pos,t,sp;
 
-   CBS=4*4*4*L0_TRD;
+   CBS=BLOCK_VLM*L0_TRD;
    cb=ix/CBS;
    pos=ix%CBS;
-   t=pos/64;
-   sp=pos%64;
+   t=pos/BLOCK_VLM;
+   sp=pos%BLOCK_VLM;
 
-   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(64)] */
-   return cb*(L0_TRD*4*64)+t*(4*64)+mu*64+sp;
+   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(BLOCK_VLM)] */
+   return cb*(L0_TRD*4*BLOCK_VLM)+t*(4*BLOCK_VLM)+mu*BLOCK_VLM+sp;
 }
 #pragma omp end declare target
 
