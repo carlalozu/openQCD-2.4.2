@@ -101,41 +101,38 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
 
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(N_TEAMS)
-   for (ix=0;ix<VOLUME_TRD;ix++)
-{
-      double local_pa=0.0;
-      t=global_time(ix);
-      if ((t<(N0-1))||(bc!=0))
+   #pragma omp target teams distribute parallel for collapse(2) reduction(+:pa)
+   for (n=0;n<6;n++)
+   {
+      for (ix=0;ix<VOLUME;ix++)
       {
-         for (n=0;n<3;n++)
-            local_pa+=plaq_dble(udb,n,ix);
-      }
-      
-      if (((t>0)&&(t<(N0-1)))||(bc==3))
-      {
-         for (n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
-      }
-      else if ((t==0)||(bc==0))
-      {
-         if (bc==1)
-            local_pa+=wp*9.0;
+         double local_pa=0.0;
+         t=global_time(ix);
+
+         if (n<3)
+         {
+            if ((t<(N0-1))||(bc!=0))
+               local_pa+=plaq_dble(udb,n,ix);
+         }
          else
          {
-            for (n=3;n<6;n++)
-               local_pa+=wp*plaq_dble(udb,n,ix);
+            if (((t>0)&&(t<(N0-1)))||(bc==3))
+               local_pa+=plaq_dble(udb,n,ix);
+            else if ((t==0)||(bc==0))
+            {
+               if (bc==1)
+                  local_pa+=wp*3.0;
+               else
+                  local_pa+=wp*plaq_dble(udb,n,ix);
+            }
+            else
+            {
+               local_pa+=plaq_dble(udb,n,ix);
+               local_pa+=wp*3.0;
+            }
          }
+         pa+=local_pa;
       }
-      else
-      {
-         for (n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
-
-         local_pa+=wp*9.0;
-      }
-      pa += local_pa;
-      
    }
    #pragma omp target update from(pa)
    acc_qflt(pa,rqsm.q);
