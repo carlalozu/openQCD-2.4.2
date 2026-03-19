@@ -115,16 +115,8 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udbv=udfldv();
 
-//    su3_mat_field *wd1 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
-//    su3_mat_field *wd2 = (su3_mat_field*)malloc(sizeof(su3_mat_field));
-// 
-//    su3_mat_field_init(wd1, VOLUME);
-//    su3_mat_field_init(wd2, VOLUME);
-// 
-//    enter_su3_mat_field(wd1);
-//    enter_su3_mat_field(wd2);   
-
-   #pragma omp target teams distribute parallel for collapse(2) reduction(+:pa) num_teams(N_TEAMS)
+   // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+   #pragma omp target teams distribute parallel for collapse(2) reduction(+:pa)
    for (n=0;n<6;n++)
    {
       for (ix=0;ix<VOLUME;ix++)

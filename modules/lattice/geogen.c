@@ -192,8 +192,9 @@ static void alloc_iupdn(void)
 {
    iup=malloc(VOLUME*sizeof(*iup));
    idn=malloc(VOLUME*sizeof(*idn));
+   iupT=malloc(4*sizeof(*iupT));
 
-   error((iup==NULL)||(idn==NULL),1,"alloc_iupdn [geogen.c]",
+   error((iup==NULL)||(idn==NULL)||(iupT==NULL),1,"alloc_iupdn [geogen.c]",
          "Unable to allocate index arrays");
 }
 
@@ -273,6 +274,15 @@ void set_iupdn(void)
          }
       }
       #pragma omp target enter data map(to: iup[:VOLUME])
+
+      for (ix=0;ix<VOLUME;ix++)
+      {
+         iupT[0][ix]=iup[ix][0];
+         iupT[1][ix]=iup[ix][1];
+         iupT[2][ix]=iup[ix][2];
+         iupT[3][ix]=iup[ix][3];
+      }
+      #pragma omp target enter data map(to: iupT[:4])
    }
 }
 
