@@ -23,18 +23,18 @@
 *     Fills ipt for the thread block owned by thread k, whose origin in the
 *     local lattice is (n0_ofs, n1_ofs, n2_ofs, n3_ofs).
 *
-*     The memory layout groups points into spatial cache blocks of size 4x4x4.
-*     Within each cache block the full time extent L0_TRD is kept together, so
-*     consecutive memory indices belong to the set
+*     The memory layout is time-major: for each time slice t, all spatial points
+*     are grouped into cache blocks of size BLOCK_SIZE^3. Consecutive memory
+*     indices within a time slice belong to the set
 *
-*     { (t, x1, x2, x3) : t in [n0_ofs, n0_ofs+L0_TRD),
-*                        x1 in [n1_ofs+4*cb1, n1_ofs+4*cb1+4),
-*                        x2 in [n2_ofs+4*cb2, n2_ofs+4*cb2+4),
-*                        x3 in [n3_ofs+4*cb3, n3_ofs+4*cb3+4) }
+*     { (t, x1, x2, x3) : t fixed,
+*                        x1 in [n1_ofs+BLOCK_SIZE*cb1, n1_ofs+BLOCK_SIZE*(cb1+1)),
+*                        x2 in [n2_ofs+BLOCK_SIZE*cb2, n2_ofs+BLOCK_SIZE*(cb2+1)),
+*                        x3 in [n3_ofs+BLOCK_SIZE*cb3, n3_ofs+BLOCK_SIZE*(cb3+1)) }
 *
 *     for each cache-block triple (cb1, cb2, cb3).
 *
-* Requires L1_TRD, L2_TRD and L3_TRD to be multiples of 4.
+* Requires L1_TRD, L2_TRD and L3_TRD to be multiples of BLOCK_SIZE.
 *
 *   int global_time(int ix)
 *     Returns the (global) time coordinate of the lattice point with local
@@ -80,30 +80,30 @@ static void update_ipt_cbs4(int k, int n0_ofs, int n1_ofs, int n2_ofs, int n3_of
    int lex,mem;
    int nbs1,nbs2,nbs3;
 
-   nbs1=L1_TRD/4;
-   nbs2=L2_TRD/4;
-   nbs3=L3_TRD/4;
+   nbs1=L1_TRD/BLOCK_SIZE;
+   nbs2=L2_TRD/BLOCK_SIZE;
+   nbs3=L3_TRD/BLOCK_SIZE;
 
    mem=k*VOLUME_TRD;
 
-   for (cb1=0;cb1<nbs1;cb1++)
+   for (x0=0;x0<L0_TRD;x0++)
    {
-      for (cb2=0;cb2<nbs2;cb2++)
+      for (cb1=0;cb1<nbs1;cb1++)
       {
-         for (cb3=0;cb3<nbs3;cb3++)
+         for (cb2=0;cb2<nbs2;cb2++)
          {
-            for (x0=0;x0<L0_TRD;x0++)
+            for (cb3=0;cb3<nbs3;cb3++)
             {
-               for (x1=0;x1<4;x1++)
+               for (x1=0;x1<BLOCK_SIZE;x1++)
                {
-                  for (x2=0;x2<4;x2++)
+                  for (x2=0;x2<BLOCK_SIZE;x2++)
                   {
-                     for (x3=0;x3<4;x3++)
+                     for (x3=0;x3<BLOCK_SIZE;x3++)
                      {
                         y0=n0_ofs+x0;
-                        y1=n1_ofs+cb1*4+x1;
-                        y2=n2_ofs+cb2*4+x2;
-                        y3=n3_ofs+cb3*4+x3;
+                        y1=n1_ofs+cb1*BLOCK_SIZE+x1;
+                        y2=n2_ofs+cb2*BLOCK_SIZE+x2;
+                        y3=n3_ofs+cb3*BLOCK_SIZE+x3;
 
                         lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
                         ipt[lex]=mem;
