@@ -125,16 +125,8 @@ static void alloc_idx(void)
 #pragma omp declare target
 static int offset(int ix,int mu)
 {
-   int CBS,cb,pos,t,sp;
-
-   CBS=BLOCK_VLM*L0_TRD;
-   cb=ix/CBS;
-   pos=ix%CBS;
-   t=pos/BLOCK_VLM;
-   sp=pos%BLOCK_VLM;
-
-   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(BLOCK_VLM)] */
-   return cb*(L0_TRD*4*BLOCK_VLM)+t*(4*BLOCK_VLM)+mu*BLOCK_VLM+sp;
+   /* Layout: [4D-block] -> [mu(4)] -> [within-block(BLOCK_VLM)] */
+   return (ix/BLOCK_VLM)*(4*BLOCK_VLM)+mu*BLOCK_VLM+(ix%BLOCK_VLM);
 }
 #pragma omp end declare target
 
