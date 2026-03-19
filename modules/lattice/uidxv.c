@@ -300,7 +300,7 @@ int plaq_uidx1(int n,int ix)
    }
    else
    {
-      iy=iup[ix][mu];
+      iy=iupT[mu][ix];
 
       if (iy<VOLUME)
          return offset(iy,nu);
@@ -335,7 +335,7 @@ int plaq_uidx3(int n,int ix)
    mu=plns[n][0];
    nu=plns[n][1];
 
-   iy=iup[ix][nu];
+   iy=iupT[nu][ix];
 
    if (iy<VOLUME)
       return offset(iy,mu);
@@ -343,8 +343,7 @@ int plaq_uidx3(int n,int ix)
    {
       if (iy<(VOLUME+(BNDRY/2)))
          ic=iy-VOLUME-nfc[nu];
-      
-      else-(BNDRY/2);
+      else
          ic=iy-VOLUME-(BNDRY/2);
 
       return 4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
