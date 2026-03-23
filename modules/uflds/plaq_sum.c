@@ -84,19 +84,22 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 }
 #pragma omp end declare target
 
-#pragma omp declare target
+/*
+ * Drop-in replacement for plaq_dblev.
+ * Computes the same Re Tr(wd1 * wd2) but without allocating wd1 or wd2.
+ */
+ #pragma omp declare target
 static double plaq_dblev(su3_mat_field *udbv, int n, int ix)
 {
-   double sm;
-   su3_dble wd1 ALIGNED16;
-   su3_dble wd2 ALIGNED16;
+   int ip0 = plaq_uidx0(n, ix);
+   int ip1 = plaq_uidx1(n, ix);
+   int ip2 = plaq_uidx2(n, ix);
+   int ip3 = plaq_uidx3(n, ix);
 
-   fsu3matxsu3mat(udbv, udbv, &wd1, n, ix);
-   fsu3matdagxsu3matdag(udbv, udbv, &wd2, n, ix);
-   cm3x3_retr(&wd1,&wd2,&sm);
-   return sm;
+   return plaq_retrace_fused(udbv, ip0, ip1, ip2, ip3);
 }
 #pragma omp end declare target
+
 
 static qflt local_plaq_sum_dble(int iw)
 {
