@@ -125,16 +125,8 @@ static void alloc_idx(void)
 #pragma omp declare target
 static int offset(int ix,int mu)
 {
-   int CBS,cb,pos,t,sp;
-
-   CBS=BLOCK_VLM*L0_TRD;
-   cb=ix/CBS;
-   pos=ix%CBS;
-   t=pos/BLOCK_VLM;
-   sp=pos%BLOCK_VLM;
-
-   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(BLOCK_VLM)] */
-   return cb*(L0_TRD*4*BLOCK_VLM)+t*(4*BLOCK_VLM)+mu*BLOCK_VLM+sp;
+   /* Layout: [4D-block] -> [mu(4)] -> [within-block(BLOCK_VLM)] */
+   return (ix/BLOCK_VLM)*(4*BLOCK_VLM)+mu*BLOCK_VLM+(ix%BLOCK_VLM);
 }
 #pragma omp end declare target
 
@@ -268,6 +260,82 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
          ic=iy-VOLUME-(BNDRY/2);
 
       ip[3]=4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
+   }
+}
+#pragma omp end declare target
+
+
+#pragma omp declare target
+int plaq_uidx0(int n,int ix)
+{
+   int mu;
+   mu=plns[n][0];
+   return offset(ix,mu);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx1(int n,int ix)
+{
+   int mu,nu;
+   int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
+
+   if ((mu==0)&&(global_time(ix)==(N0-1))&&((bc==1)||(bc==2)))
+   {
+      return 4*VOLUME+7*(BNDRY/4)+nu-1;
+   }
+   else
+   {
+      iy=iupT[mu][ix];
+
+      if (iy<VOLUME)
+         return offset(iy,nu);
+      else
+      {
+         if (iy<(VOLUME+(BNDRY/2)))
+            ic=iy-VOLUME-nfc[mu];
+         else
+            ic=iy-VOLUME-(BNDRY/2);
+
+         return 4*VOLUME+(BNDRY/4)+3*ic+nu-(nu>mu);
+      }
+   }
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx2(int n,int ix)
+{
+   int nu;
+   nu=plns[n][1];
+   return offset(ix,nu);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+int plaq_uidx3(int n,int ix)
+{
+   int mu,nu;
+   int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
+
+   iy=iupT[nu][ix];
+
+   if (iy<VOLUME)
+      return offset(iy,mu);
+   else
+   {
+      if (iy<(VOLUME+(BNDRY/2)))
+         ic=iy-VOLUME-nfc[nu];
+      else
+         ic=iy-VOLUME-(BNDRY/2);
+
+      return 4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
    }
 }
 #pragma omp end declare target

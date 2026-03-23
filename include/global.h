@@ -37,8 +37,12 @@
 
 #define NAME_SIZE 128
 // #define N_TEAMS ((VOLUME+128-1)/128)
-#define BLOCK_SIZE 8
-#define BLOCK_VLM ((BLOCK_SIZE*BLOCK_SIZE*BLOCK_SIZE))
+#define BLOCK_SIZE_0 1
+#define BLOCK_SIZE_1 8
+#define BLOCK_SIZE_2 8
+#define BLOCK_SIZE_3 8
+#define SVOL_BLK (BLOCK_SIZE_1*BLOCK_SIZE_2*BLOCK_SIZE_3)
+#define BLOCK_VLM (BLOCK_SIZE_0*SVOL_BLK)
 
 
 /****************************** do not change *********************************/

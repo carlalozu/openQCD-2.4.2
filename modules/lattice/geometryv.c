@@ -74,19 +74,20 @@ static void alloc_ipt(void)
 
 static void update_ipt_cbs4(int k, int n0_ofs, int n1_ofs, int n2_ofs, int n3_ofs)
 {
-   int cb1,cb2,cb3;
+   int cb0,cb1,cb2,cb3;
    int x0,x1,x2,x3;
    int y0,y1,y2,y3;
    int lex,mem;
-   int nbs1,nbs2,nbs3;
+   int nbs0,nbs1,nbs2,nbs3;
 
-   nbs1=L1_TRD/BLOCK_SIZE;
-   nbs2=L2_TRD/BLOCK_SIZE;
-   nbs3=L3_TRD/BLOCK_SIZE;
+   nbs0=L0_TRD/BLOCK_SIZE_0;
+   nbs1=L1_TRD/BLOCK_SIZE_1;
+   nbs2=L2_TRD/BLOCK_SIZE_2;
+   nbs3=L3_TRD/BLOCK_SIZE_3;
 
    mem=k*VOLUME_TRD;
 
-   for (x0=0;x0<L0_TRD;x0++)
+   for (cb0=0;cb0<nbs0;cb0++)
    {
       for (cb1=0;cb1<nbs1;cb1++)
       {
@@ -94,20 +95,23 @@ static void update_ipt_cbs4(int k, int n0_ofs, int n1_ofs, int n2_ofs, int n3_of
          {
             for (cb3=0;cb3<nbs3;cb3++)
             {
-               for (x1=0;x1<BLOCK_SIZE;x1++)
+               for (x0=0;x0<BLOCK_SIZE_0;x0++)
                {
-                  for (x2=0;x2<BLOCK_SIZE;x2++)
+                  for (x1=0;x1<BLOCK_SIZE_1;x1++)
                   {
-                     for (x3=0;x3<BLOCK_SIZE;x3++)
+                     for (x2=0;x2<BLOCK_SIZE_2;x2++)
                      {
-                        y0=n0_ofs+x0;
-                        y1=n1_ofs+cb1*BLOCK_SIZE+x1;
-                        y2=n2_ofs+cb2*BLOCK_SIZE+x2;
-                        y3=n3_ofs+cb3*BLOCK_SIZE+x3;
+                        for (x3=0;x3<BLOCK_SIZE_3;x3++)
+                        {
+                           y0=n0_ofs+cb0*BLOCK_SIZE_0+x0;
+                           y1=n1_ofs+cb1*BLOCK_SIZE_1+x1;
+                           y2=n2_ofs+cb2*BLOCK_SIZE_2+x2;
+                           y3=n3_ofs+cb3*BLOCK_SIZE_3+x3;
 
-                        lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
-                        ipt[lex]=mem;
-                        mem+=1;
+                           lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
+                           ipt[lex]=mem;
+                           mem+=1;
+                        }
                      }
                   }
                }
@@ -125,12 +129,14 @@ static void set_ipt(void)
 
    alloc_ipt();
 
-   error((L1_TRD%BLOCK_SIZE)!=0,1,"set_ipt [geometryv.c]",
-         "L1_TRD must be a multiple of BLOCK_SIZE for cache-block layout");
-   error((L2_TRD%BLOCK_SIZE)!=0,1,"set_ipt [geometryv.c]",
-         "L2_TRD must be a multiple of BLOCK_SIZE for cache-block layout");
-   error((L3_TRD%BLOCK_SIZE)!=0,1,"set_ipt [geometryv.c]",
-         "L3_TRD must be a multiple of BLOCK_SIZE for cache-block layout");
+   error((L0_TRD%BLOCK_SIZE_0)!=0,1,"set_ipt [geometryv.c]",
+         "L0_TRD must be a multiple of BLOCK_SIZE_0 for cache-block layout");
+   error((L1_TRD%BLOCK_SIZE_1)!=0,1,"set_ipt [geometryv.c]",
+         "L1_TRD must be a multiple of BLOCK_SIZE_1 for cache-block layout");
+   error((L2_TRD%BLOCK_SIZE_2)!=0,1,"set_ipt [geometryv.c]",
+         "L2_TRD must be a multiple of BLOCK_SIZE_2 for cache-block layout");
+   error((L3_TRD%BLOCK_SIZE_3)!=0,1,"set_ipt [geometryv.c]",
+         "L3_TRD must be a multiple of BLOCK_SIZE_3 for cache-block layout");
 
    nt1=L1/L1_TRD;
    nt2=L2/L2_TRD;
@@ -186,7 +192,8 @@ static void set_tms(void)
       for (mem=k*VOLUME_TRD;mem<(k+1)*VOLUME_TRD;mem++)
       {
          pos=mem-k*VOLUME_TRD;
-         t_local=(pos%(BLOCK_VLM*L0_TRD))/BLOCK_VLM;
+         t_local=(pos/BLOCK_VLM/((L1_TRD*L2_TRD*L3_TRD)/SVOL_BLK))*BLOCK_SIZE_0
+                +(pos%BLOCK_VLM)/SVOL_BLK;
 
          tms[mem]=cpr[0]*L0+n0*L0_TRD+t_local;
       }
