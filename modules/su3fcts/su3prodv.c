@@ -60,11 +60,8 @@ double fsu3matxsu3mat_retrace(
 
 #pragma omp declare target
 void fsu3matxsu3mat(
-    const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int n, int i)
+    const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int ip0, int ip1)
 {
-   int ip0 = plaq_uidx0(n, i);
-   int ip1 = plaq_uidx1(n, i);
-
    //  printf("n: %i, ix: %i, ip: (%i, %i) \n", n, i, ip0, ip1);
 
    res->c11.re = u->c1.c1re[ip0] * v->c1.c1re[ip1] - u->c1.c1im[ip0] * v->c1.c1im[ip1] +
@@ -131,11 +128,8 @@ void fsu3matxsu3mat(
  */
 #pragma omp declare target
 void fsu3matdagxsu3matdag(
-    const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int n, int i)
+    const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int ip2, int ip3)
 {
-   int ip2 = plaq_uidx2(n, i);
-   int ip3 = plaq_uidx3(n, i);
-
    // printf("n: %i, ix: %i, ip: (%i, %i) \n", n, i, ip2, ip3);
 
    res->c11.re = u->c1.c1re[ip2] * v->c1.c1re[ip3] + u->c1.c1im[ip2] * -v->c1.c1im[ip3] +

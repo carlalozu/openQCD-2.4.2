@@ -37,7 +37,7 @@
 
 #define NAME_SIZE 128
 // #define N_TEAMS ((VOLUME+128-1)/128)
-#define BLOCK_SIZE_0 1
+#define BLOCK_SIZE_0 8
 #define BLOCK_SIZE_1 8
 #define BLOCK_SIZE_2 8
 #define BLOCK_SIZE_3 8
@@ -95,8 +95,8 @@ int npr[8];
 int sbofs[16];
 int sbvol[16];
 
-int *ipt=NULL;
 #pragma omp declare target
+int *ipt=NULL;
 int (*iup)[4]=NULL;
 int (*iupT)[VOLUME]=NULL;
 #pragma omp end declare target
@@ -108,8 +108,8 @@ extern int npr[8];
 extern int sbofs[16];
 extern int sbvol[16];
 
-extern int *ipt;
 #pragma omp declare target
+extern int *ipt;
 extern int (*iup)[4];
 extern int (*iupT)[VOLUME];
 #pragma omp end declare target

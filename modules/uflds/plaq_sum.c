@@ -89,14 +89,12 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
  * Computes the same Re Tr(wd1 * wd2) but without allocating wd1 or wd2.
  */
  #pragma omp declare target
-static double plaq_dblev(su3_mat_field *udbv, int n, int ix)
+static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
 {
-   int ip0 = plaq_uidx0(n, ix);
-   int ip1 = plaq_uidx1(n, ix);
-   int ip2 = plaq_uidx2(n, ix);
-   int ip3 = plaq_uidx3(n, ix);
+   int ip[4];
+   plaq_uidx(mu,nu,ix,ip);
 
-   return plaq_retrace_fused(udbv, ip0, ip1, ip2, ip3);
+   return plaq_retrace_fused(udbv, ip[0], ip[1], ip[2], ip[3]);
 }
 #pragma omp end declare target
 
@@ -129,22 +127,22 @@ static qflt local_plaq_sum_dble(int iw)
             if (mu<1)
             {
                if ((t<(N0-1))||(bc!=0))
-                  local_pa+=plaq_dble(udbv,mu,nu,ix);
+                  local_pa+=plaq_dblev(udbv,mu,nu,ix);
             }
             else
             {
                if (((t>0)&&(t<(N0-1)))||(bc==3))
-                  local_pa+=plaq_dble(udbv,mu,nu,ix);
+                  local_pa+=plaq_dblev(udbv,mu,nu,ix);
                else if ((t==0)||(bc==0))
                {
                   if (bc==1)
                      local_pa+=wp*3.0;
                   else
-                     local_pa+=wp*plaq_dble(udbv,mu,nu,ix);
+                     local_pa+=wp*plaq_dblev(udbv,mu,nu,ix);
                }
                else
                {
-                  local_pa+=plaq_dble(udbv,mu,nu,ix);
+                  local_pa+=plaq_dblev(udbv,mu,nu,ix);
                   local_pa+=wp*3.0;
                }
             }
