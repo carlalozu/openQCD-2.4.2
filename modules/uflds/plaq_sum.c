@@ -65,14 +65,14 @@ static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int n,int ix)
+static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 {
    int ip[4];
    double sm;
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(n,ix,ip);
+   plaq_uidx(mu,nu,ix,ip);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
@@ -101,41 +101,38 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
 
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(N_TEAMS)
-   for (ix=0;ix<VOLUME_TRD;ix++)
-{
-      double local_pa=0.0;
-      t=global_time(ix);
-      if ((t<(N0-1))||(bc!=0))
-      {
-         for (n=0;n<3;n++)
-            local_pa+=plaq_dble(udb,n,ix);
-      }
-      
-      if (((t>0)&&(t<(N0-1)))||(bc==3))
-      {
-         for (n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
-      }
-      else if ((t==0)||(bc==0))
-      {
-         if (bc==1)
-            local_pa+=wp*9.0;
-         else
-         {
-            for (n=3;n<6;n++)
-               local_pa+=wp*plaq_dble(udb,n,ix);
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (ix=0;ix<VOLUME;ix++){
+      for (int mu = 0; mu < 4; mu++) {
+         for (int nu = mu+1; nu < 4; nu++) {
+            double local_pa=0.0;
+            t=global_time(ix);
+
+            if (mu<1)
+            {
+               if ((t<(N0-1))||(bc!=0))
+                  local_pa+=plaq_dble(udb,mu,nu,ix);
+            }
+            else
+            {
+               if (((t>0)&&(t<(N0-1)))||(bc==3))
+                  local_pa+=plaq_dble(udb,mu,nu,ix);
+               else if ((t==0)||(bc==0))
+               {
+                  if (bc==1)
+                     local_pa+=wp*3.0;
+                  else
+                     local_pa+=wp*plaq_dble(udb,mu,nu,ix);
+               }
+               else
+               {
+                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=wp*3.0;
+               }
+            }
+            pa+=local_pa;
          }
       }
-      else
-      {
-         for (n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
-
-         local_pa+=wp*9.0;
-      }
-      pa += local_pa;
-      
    }
    #pragma omp target update from(pa)
    acc_qflt(pa,rqsm.q);
@@ -224,13 +221,15 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb,n,ix));
+               smE+=(3.0-plaq_dble(udb,0,n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
-            for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(udb,n,ix));
+            for (int mu = 1; mu < 4; mu++) {
+               for (int nu = mu+1; nu < 4; nu++)
+                  smB+=(3.0-plaq_dble(udb,mu,nu,ix));
+            }
          }
 
          acc_qflt(smE,rqsmE[t].q);
