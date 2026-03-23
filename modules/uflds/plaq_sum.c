@@ -132,7 +132,6 @@ static qflt local_plaq_sum_dble(int iw)
             }
             pa+=local_pa;
          }
-         pa+=local_pa;
       }
    }
    #pragma omp target update from(pa)
