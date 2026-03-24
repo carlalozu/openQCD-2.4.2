@@ -89,11 +89,14 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 static double plaq_dblev(su3_mat_field *udbv, int n, int ix)
 {
    double sm;
+   int ip[4];
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   fsu3matxsu3mat(udbv, udbv, &wd1, n, ix);
-   fsu3matdagxsu3matdag(udbv, udbv, &wd2, n, ix);
+   plaq_uidx(n,ix,ip);
+
+   fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
+   fsu3matdagxsu3matdag(udbv, &wd2, ip[2], ip[3]);
    cm3x3_retr(&wd1,&wd2,&sm);
    return sm;
 }
