@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
    prof_section benchmark = {.name = "benchmark"};
    prof_section total = {.name = "total"};
    prof_section prepare_data = {.name = "prepare_data"};
-   prof_section compute = {.name = "compute"};
 
    int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
@@ -171,6 +170,7 @@ int main(int argc, char *argv[])
    random_ud();
    prof_end(&set_params);
    
+   prof_reset(&compute);
    prof_begin(&benchmark);
    wdti = 0.0;
    while (wdti < 5.0)
@@ -186,12 +186,11 @@ int main(int argc, char *argv[])
          prof_end(&prepare_data);
          
          MPI_Barrier(MPI_COMM_WORLD);
-         prof_begin(&compute);
+         // compute profiler defined externally
          wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
          MPI_Barrier(MPI_COMM_WORLD);
          wt2 = MPI_Wtime();
-         prof_end(&compute);
 
          wdt += wt2 - wt1;
          wdti += wt2 - wt0;
