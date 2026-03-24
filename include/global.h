@@ -25,15 +25,15 @@
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 512
-#define L1 8
+#define L0 32
+#define L1 32
 #define L2 8
-#define L3 8
+#define L3 16
 
-#define L0_TRD 512
-#define L1_TRD 8
-#define L2_TRD 8
-#define L3_TRD 8
+#define L0_TRD 32
+#define L1_TRD 32
+#define L2_TRD 16
+#define L3_TRD 16
 
 #define NAME_SIZE 128
 // #define N_TEAMS ((VOLUME+128-1)/128)
@@ -98,7 +98,6 @@ int sbvol[16];
 #pragma omp declare target
 int *ipt=NULL;
 int (*iup)[4]=NULL;
-int (*iupT)[VOLUME]=NULL;
 #pragma omp end declare target
 int (*idn)[4]=NULL;
 int *map=NULL;
@@ -111,7 +110,6 @@ extern int sbvol[16];
 #pragma omp declare target
 extern int *ipt;
 extern int (*iup)[4];
-extern int (*iupT)[VOLUME];
 #pragma omp end declare target
 extern int (*idn)[4];
 extern int *map;

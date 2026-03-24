@@ -75,7 +75,7 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(mu,nu,ix,ip);
+   plaq_uidxv(mu,nu,ix,ip);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
@@ -93,7 +93,7 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
 {
    int ip[4];
-   plaq_uidx(mu,nu,ix,ip);
+   plaq_uidxv(mu,nu,ix,ip);
 
    return plaq_retrace_fused(udbv, ip[0], ip[1], ip[2], ip[3]);
 }

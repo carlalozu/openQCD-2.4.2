@@ -60,66 +60,66 @@ double fsu3matxsu3mat_retrace(
 
 #pragma omp declare target
 void fsu3matxsu3mat(
-    const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int ip0, int ip1)
+    const su3_mat_field *u, su3_dble *res, int ip0, int ip1)
 {
    //  printf("n: %i, ix: %i, ip: (%i, %i) \n", n, i, ip0, ip1);
 
-   res->c11.re = u->c1.c1re[ip0] * v->c1.c1re[ip1] - u->c1.c1im[ip0] * v->c1.c1im[ip1] +
-                 u->c1.c2re[ip0] * v->c1.c2re[ip1] - u->c1.c2im[ip0] * v->c1.c2im[ip1] +
-                 u->c1.c3re[ip0] * v->c1.c3re[ip1] - u->c1.c3im[ip0] * v->c1.c3im[ip1];
-   res->c11.im = u->c1.c1re[ip0] * v->c1.c1im[ip1] + u->c1.c1im[ip0] * v->c1.c1re[ip1] +
-                 u->c1.c2re[ip0] * v->c1.c2im[ip1] + u->c1.c2im[ip0] * v->c1.c2re[ip1] +
-                 u->c1.c3re[ip0] * v->c1.c3im[ip1] + u->c1.c3im[ip0] * v->c1.c3re[ip1];
-   res->c12.re = u->c2.c1re[ip0] * v->c1.c1re[ip1] - u->c2.c1im[ip0] * v->c1.c1im[ip1] +
-                 u->c2.c2re[ip0] * v->c1.c2re[ip1] - u->c2.c2im[ip0] * v->c1.c2im[ip1] +
-                 u->c2.c3re[ip0] * v->c1.c3re[ip1] - u->c2.c3im[ip0] * v->c1.c3im[ip1];
-   res->c12.im = u->c2.c1re[ip0] * v->c1.c1im[ip1] + u->c2.c1im[ip0] * v->c1.c1re[ip1] +
-                 u->c2.c2re[ip0] * v->c1.c2im[ip1] + u->c2.c2im[ip0] * v->c1.c2re[ip1] +
-                 u->c2.c3re[ip0] * v->c1.c3im[ip1] + u->c2.c3im[ip0] * v->c1.c3re[ip1];
-   res->c13.re = u->c3.c1re[ip0] * v->c1.c1re[ip1] - u->c3.c1im[ip0] * v->c1.c1im[ip1] +
-                 u->c3.c2re[ip0] * v->c1.c2re[ip1] - u->c3.c2im[ip0] * v->c1.c2im[ip1] +
-                 u->c3.c3re[ip0] * v->c1.c3re[ip1] - u->c3.c3im[ip0] * v->c1.c3im[ip1];
-   res->c13.im = u->c3.c1re[ip0] * v->c1.c1im[ip1] + u->c3.c1im[ip0] * v->c1.c1re[ip1] +
-                 u->c3.c2re[ip0] * v->c1.c2im[ip1] + u->c3.c2im[ip0] * v->c1.c2re[ip1] +
-                 u->c3.c3re[ip0] * v->c1.c3im[ip1] + u->c3.c3im[ip0] * v->c1.c3re[ip1];
+   res->c11.re = u->c1.c1re[ip0] * u->c1.c1re[ip1] - u->c1.c1im[ip0] * u->c1.c1im[ip1] +
+                 u->c1.c2re[ip0] * u->c1.c2re[ip1] - u->c1.c2im[ip0] * u->c1.c2im[ip1] +
+                 u->c1.c3re[ip0] * u->c1.c3re[ip1] - u->c1.c3im[ip0] * u->c1.c3im[ip1];
+   res->c11.im = u->c1.c1re[ip0] * u->c1.c1im[ip1] + u->c1.c1im[ip0] * u->c1.c1re[ip1] +
+                 u->c1.c2re[ip0] * u->c1.c2im[ip1] + u->c1.c2im[ip0] * u->c1.c2re[ip1] +
+                 u->c1.c3re[ip0] * u->c1.c3im[ip1] + u->c1.c3im[ip0] * u->c1.c3re[ip1];
+   res->c12.re = u->c2.c1re[ip0] * u->c1.c1re[ip1] - u->c2.c1im[ip0] * u->c1.c1im[ip1] +
+                 u->c2.c2re[ip0] * u->c1.c2re[ip1] - u->c2.c2im[ip0] * u->c1.c2im[ip1] +
+                 u->c2.c3re[ip0] * u->c1.c3re[ip1] - u->c2.c3im[ip0] * u->c1.c3im[ip1];
+   res->c12.im = u->c2.c1re[ip0] * u->c1.c1im[ip1] + u->c2.c1im[ip0] * u->c1.c1re[ip1] +
+                 u->c2.c2re[ip0] * u->c1.c2im[ip1] + u->c2.c2im[ip0] * u->c1.c2re[ip1] +
+                 u->c2.c3re[ip0] * u->c1.c3im[ip1] + u->c2.c3im[ip0] * u->c1.c3re[ip1];
+   res->c13.re = u->c3.c1re[ip0] * u->c1.c1re[ip1] - u->c3.c1im[ip0] * u->c1.c1im[ip1] +
+                 u->c3.c2re[ip0] * u->c1.c2re[ip1] - u->c3.c2im[ip0] * u->c1.c2im[ip1] +
+                 u->c3.c3re[ip0] * u->c1.c3re[ip1] - u->c3.c3im[ip0] * u->c1.c3im[ip1];
+   res->c13.im = u->c3.c1re[ip0] * u->c1.c1im[ip1] + u->c3.c1im[ip0] * u->c1.c1re[ip1] +
+                 u->c3.c2re[ip0] * u->c1.c2im[ip1] + u->c3.c2im[ip0] * u->c1.c2re[ip1] +
+                 u->c3.c3re[ip0] * u->c1.c3im[ip1] + u->c3.c3im[ip0] * u->c1.c3re[ip1];
 
-   res->c21.re = u->c1.c1re[ip0] * v->c2.c1re[ip1] - u->c1.c1im[ip0] * v->c2.c1im[ip1] +
-                 u->c1.c2re[ip0] * v->c2.c2re[ip1] - u->c1.c2im[ip0] * v->c2.c2im[ip1] +
-                 u->c1.c3re[ip0] * v->c2.c3re[ip1] - u->c1.c3im[ip0] * v->c2.c3im[ip1];
-   res->c21.im = u->c1.c1re[ip0] * v->c2.c1im[ip1] + u->c1.c1im[ip0] * v->c2.c1re[ip1] +
-                 u->c1.c2re[ip0] * v->c2.c2im[ip1] + u->c1.c2im[ip0] * v->c2.c2re[ip1] +
-                 u->c1.c3re[ip0] * v->c2.c3im[ip1] + u->c1.c3im[ip0] * v->c2.c3re[ip1];
-   res->c22.re = u->c2.c1re[ip0] * v->c2.c1re[ip1] - u->c2.c1im[ip0] * v->c2.c1im[ip1] +
-                 u->c2.c2re[ip0] * v->c2.c2re[ip1] - u->c2.c2im[ip0] * v->c2.c2im[ip1] +
-                 u->c2.c3re[ip0] * v->c2.c3re[ip1] - u->c2.c3im[ip0] * v->c2.c3im[ip1];
-   res->c22.im = u->c2.c1re[ip0] * v->c2.c1im[ip1] + u->c2.c1im[ip0] * v->c2.c1re[ip1] +
-                 u->c2.c2re[ip0] * v->c2.c2im[ip1] + u->c2.c2im[ip0] * v->c2.c2re[ip1] +
-                 u->c2.c3re[ip0] * v->c2.c3im[ip1] + u->c2.c3im[ip0] * v->c2.c3re[ip1];
-   res->c23.re = u->c3.c1re[ip0] * v->c2.c1re[ip1] - u->c3.c1im[ip0] * v->c2.c1im[ip1] +
-                 u->c3.c2re[ip0] * v->c2.c2re[ip1] - u->c3.c2im[ip0] * v->c2.c2im[ip1] +
-                 u->c3.c3re[ip0] * v->c2.c3re[ip1] - u->c3.c3im[ip0] * v->c2.c3im[ip1];
-   res->c23.im = u->c3.c1re[ip0] * v->c2.c1im[ip1] + u->c3.c1im[ip0] * v->c2.c1re[ip1] +
-                 u->c3.c2re[ip0] * v->c2.c2im[ip1] + u->c3.c2im[ip0] * v->c2.c2re[ip1] +
-                 u->c3.c3re[ip0] * v->c2.c3im[ip1] + u->c3.c3im[ip0] * v->c2.c3re[ip1];
+   res->c21.re = u->c1.c1re[ip0] * u->c2.c1re[ip1] - u->c1.c1im[ip0] * u->c2.c1im[ip1] +
+                 u->c1.c2re[ip0] * u->c2.c2re[ip1] - u->c1.c2im[ip0] * u->c2.c2im[ip1] +
+                 u->c1.c3re[ip0] * u->c2.c3re[ip1] - u->c1.c3im[ip0] * u->c2.c3im[ip1];
+   res->c21.im = u->c1.c1re[ip0] * u->c2.c1im[ip1] + u->c1.c1im[ip0] * u->c2.c1re[ip1] +
+                 u->c1.c2re[ip0] * u->c2.c2im[ip1] + u->c1.c2im[ip0] * u->c2.c2re[ip1] +
+                 u->c1.c3re[ip0] * u->c2.c3im[ip1] + u->c1.c3im[ip0] * u->c2.c3re[ip1];
+   res->c22.re = u->c2.c1re[ip0] * u->c2.c1re[ip1] - u->c2.c1im[ip0] * u->c2.c1im[ip1] +
+                 u->c2.c2re[ip0] * u->c2.c2re[ip1] - u->c2.c2im[ip0] * u->c2.c2im[ip1] +
+                 u->c2.c3re[ip0] * u->c2.c3re[ip1] - u->c2.c3im[ip0] * u->c2.c3im[ip1];
+   res->c22.im = u->c2.c1re[ip0] * u->c2.c1im[ip1] + u->c2.c1im[ip0] * u->c2.c1re[ip1] +
+                 u->c2.c2re[ip0] * u->c2.c2im[ip1] + u->c2.c2im[ip0] * u->c2.c2re[ip1] +
+                 u->c2.c3re[ip0] * u->c2.c3im[ip1] + u->c2.c3im[ip0] * u->c2.c3re[ip1];
+   res->c23.re = u->c3.c1re[ip0] * u->c2.c1re[ip1] - u->c3.c1im[ip0] * u->c2.c1im[ip1] +
+                 u->c3.c2re[ip0] * u->c2.c2re[ip1] - u->c3.c2im[ip0] * u->c2.c2im[ip1] +
+                 u->c3.c3re[ip0] * u->c2.c3re[ip1] - u->c3.c3im[ip0] * u->c2.c3im[ip1];
+   res->c23.im = u->c3.c1re[ip0] * u->c2.c1im[ip1] + u->c3.c1im[ip0] * u->c2.c1re[ip1] +
+                 u->c3.c2re[ip0] * u->c2.c2im[ip1] + u->c3.c2im[ip0] * u->c2.c2re[ip1] +
+                 u->c3.c3re[ip0] * u->c2.c3im[ip1] + u->c3.c3im[ip0] * u->c2.c3re[ip1];
 
-   res->c31.re = u->c1.c1re[ip0] * v->c3.c1re[ip1] - u->c1.c1im[ip0] * v->c3.c1im[ip1] +
-                 u->c1.c2re[ip0] * v->c3.c2re[ip1] - u->c1.c2im[ip0] * v->c3.c2im[ip1] +
-                 u->c1.c3re[ip0] * v->c3.c3re[ip1] - u->c1.c3im[ip0] * v->c3.c3im[ip1];
-   res->c31.im = u->c1.c1re[ip0] * v->c3.c1im[ip1] + u->c1.c1im[ip0] * v->c3.c1re[ip1] +
-                 u->c1.c2re[ip0] * v->c3.c2im[ip1] + u->c1.c2im[ip0] * v->c3.c2re[ip1] +
-                 u->c1.c3re[ip0] * v->c3.c3im[ip1] + u->c1.c3im[ip0] * v->c3.c3re[ip1];
-   res->c32.re = u->c2.c1re[ip0] * v->c3.c1re[ip1] - u->c2.c1im[ip0] * v->c3.c1im[ip1] +
-                 u->c2.c2re[ip0] * v->c3.c2re[ip1] - u->c2.c2im[ip0] * v->c3.c2im[ip1] +
-                 u->c2.c3re[ip0] * v->c3.c3re[ip1] - u->c2.c3im[ip0] * v->c3.c3im[ip1];
-   res->c32.im = u->c2.c1re[ip0] * v->c3.c1im[ip1] + u->c2.c1im[ip0] * v->c3.c1re[ip1] +
-                 u->c2.c2re[ip0] * v->c3.c2im[ip1] + u->c2.c2im[ip0] * v->c3.c2re[ip1] +
-                 u->c2.c3re[ip0] * v->c3.c3im[ip1] + u->c2.c3im[ip0] * v->c3.c3re[ip1];
-   res->c33.re = u->c3.c1re[ip0] * v->c3.c1re[ip1] - u->c3.c1im[ip0] * v->c3.c1im[ip1] +
-                 u->c3.c2re[ip0] * v->c3.c2re[ip1] - u->c3.c2im[ip0] * v->c3.c2im[ip1] +
-                 u->c3.c3re[ip0] * v->c3.c3re[ip1] - u->c3.c3im[ip0] * v->c3.c3im[ip1];
-   res->c33.im = u->c3.c1re[ip0] * v->c3.c1im[ip1] + u->c3.c1im[ip0] * v->c3.c1re[ip1] +
-                 u->c3.c2re[ip0] * v->c3.c2im[ip1] + u->c3.c2im[ip0] * v->c3.c2re[ip1] +
-                 u->c3.c3re[ip0] * v->c3.c3im[ip1] + u->c3.c3im[ip0] * v->c3.c3re[ip1];
+   res->c31.re = u->c1.c1re[ip0] * u->c3.c1re[ip1] - u->c1.c1im[ip0] * u->c3.c1im[ip1] +
+                 u->c1.c2re[ip0] * u->c3.c2re[ip1] - u->c1.c2im[ip0] * u->c3.c2im[ip1] +
+                 u->c1.c3re[ip0] * u->c3.c3re[ip1] - u->c1.c3im[ip0] * u->c3.c3im[ip1];
+   res->c31.im = u->c1.c1re[ip0] * u->c3.c1im[ip1] + u->c1.c1im[ip0] * u->c3.c1re[ip1] +
+                 u->c1.c2re[ip0] * u->c3.c2im[ip1] + u->c1.c2im[ip0] * u->c3.c2re[ip1] +
+                 u->c1.c3re[ip0] * u->c3.c3im[ip1] + u->c1.c3im[ip0] * u->c3.c3re[ip1];
+   res->c32.re = u->c2.c1re[ip0] * u->c3.c1re[ip1] - u->c2.c1im[ip0] * u->c3.c1im[ip1] +
+                 u->c2.c2re[ip0] * u->c3.c2re[ip1] - u->c2.c2im[ip0] * u->c3.c2im[ip1] +
+                 u->c2.c3re[ip0] * u->c3.c3re[ip1] - u->c2.c3im[ip0] * u->c3.c3im[ip1];
+   res->c32.im = u->c2.c1re[ip0] * u->c3.c1im[ip1] + u->c2.c1im[ip0] * u->c3.c1re[ip1] +
+                 u->c2.c2re[ip0] * u->c3.c2im[ip1] + u->c2.c2im[ip0] * u->c3.c2re[ip1] +
+                 u->c2.c3re[ip0] * u->c3.c3im[ip1] + u->c2.c3im[ip0] * u->c3.c3re[ip1];
+   res->c33.re = u->c3.c1re[ip0] * u->c3.c1re[ip1] - u->c3.c1im[ip0] * u->c3.c1im[ip1] +
+                 u->c3.c2re[ip0] * u->c3.c2re[ip1] - u->c3.c2im[ip0] * u->c3.c2im[ip1] +
+                 u->c3.c3re[ip0] * u->c3.c3re[ip1] - u->c3.c3im[ip0] * u->c3.c3im[ip1];
+   res->c33.im = u->c3.c1re[ip0] * u->c3.c1im[ip1] + u->c3.c1im[ip0] * u->c3.c1re[ip1] +
+                 u->c3.c2re[ip0] * u->c3.c2im[ip1] + u->c3.c2im[ip0] * u->c3.c2re[ip1] +
+                 u->c3.c3re[ip0] * u->c3.c3im[ip1] + u->c3.c3im[ip0] * u->c3.c3re[ip1];
 }
 #pragma omp end declare target
 
@@ -128,66 +128,66 @@ void fsu3matxsu3mat(
  */
 #pragma omp declare target
 void fsu3matdagxsu3matdag(
-    const su3_mat_field *u, const su3_mat_field *v, su3_dble *res, int ip2, int ip3)
+    const su3_mat_field *u, su3_dble *res, int ip2, int ip3)
 {
    // printf("n: %i, ix: %i, ip: (%i, %i) \n", n, i, ip2, ip3);
 
-   res->c11.re = u->c1.c1re[ip2] * v->c1.c1re[ip3] + u->c1.c1im[ip2] * -v->c1.c1im[ip3] +
-                 u->c2.c1re[ip2] * v->c1.c2re[ip3] + u->c2.c1im[ip2] * -v->c1.c2im[ip3] +
-                 u->c3.c1re[ip2] * v->c1.c3re[ip3] + u->c3.c1im[ip2] * -v->c1.c3im[ip3];
-   res->c11.im = u->c1.c1re[ip2] * -v->c1.c1im[ip3] - u->c1.c1im[ip2] * v->c1.c1re[ip3] +
-                 u->c2.c1re[ip2] * -v->c1.c2im[ip3] - u->c2.c1im[ip2] * v->c1.c2re[ip3] +
-                 u->c3.c1re[ip2] * -v->c1.c3im[ip3] - u->c3.c1im[ip2] * v->c1.c3re[ip3];
-   res->c21.re = u->c1.c2re[ip2] * v->c1.c1re[ip3] + u->c1.c2im[ip2] * -v->c1.c1im[ip3] +
-                 u->c2.c2re[ip2] * v->c1.c2re[ip3] + u->c2.c2im[ip2] * -v->c1.c2im[ip3] +
-                 u->c3.c2re[ip2] * v->c1.c3re[ip3] + u->c3.c2im[ip2] * -v->c1.c3im[ip3];
-   res->c21.im = u->c1.c2re[ip2] * -v->c1.c1im[ip3] - u->c1.c2im[ip2] * v->c1.c1re[ip3] +
-                 u->c2.c2re[ip2] * -v->c1.c2im[ip3] - u->c2.c2im[ip2] * v->c1.c2re[ip3] +
-                 u->c3.c2re[ip2] * -v->c1.c3im[ip3] - u->c3.c2im[ip2] * v->c1.c3re[ip3];
-   res->c31.re = u->c1.c3re[ip2] * v->c1.c1re[ip3] + u->c1.c3im[ip2] * -v->c1.c1im[ip3] +
-                 u->c2.c3re[ip2] * v->c1.c2re[ip3] + u->c2.c3im[ip2] * -v->c1.c2im[ip3] +
-                 u->c3.c3re[ip2] * v->c1.c3re[ip3] + u->c3.c3im[ip2] * -v->c1.c3im[ip3];
-   res->c31.im = u->c1.c3re[ip2] * -v->c1.c1im[ip3] - u->c1.c3im[ip2] * v->c1.c1re[ip3] +
-                 u->c2.c3re[ip2] * -v->c1.c2im[ip3] - u->c2.c3im[ip2] * v->c1.c2re[ip3] +
-                 u->c3.c3re[ip2] * -v->c1.c3im[ip3] - u->c3.c3im[ip2] * v->c1.c3re[ip3];
+   res->c11.re = u->c1.c1re[ip2] * u->c1.c1re[ip3] + u->c1.c1im[ip2] * -u->c1.c1im[ip3] +
+                 u->c2.c1re[ip2] * u->c1.c2re[ip3] + u->c2.c1im[ip2] * -u->c1.c2im[ip3] +
+                 u->c3.c1re[ip2] * u->c1.c3re[ip3] + u->c3.c1im[ip2] * -u->c1.c3im[ip3];
+   res->c11.im = u->c1.c1re[ip2] * -u->c1.c1im[ip3] - u->c1.c1im[ip2] * u->c1.c1re[ip3] +
+                 u->c2.c1re[ip2] * -u->c1.c2im[ip3] - u->c2.c1im[ip2] * u->c1.c2re[ip3] +
+                 u->c3.c1re[ip2] * -u->c1.c3im[ip3] - u->c3.c1im[ip2] * u->c1.c3re[ip3];
+   res->c21.re = u->c1.c2re[ip2] * u->c1.c1re[ip3] + u->c1.c2im[ip2] * -u->c1.c1im[ip3] +
+                 u->c2.c2re[ip2] * u->c1.c2re[ip3] + u->c2.c2im[ip2] * -u->c1.c2im[ip3] +
+                 u->c3.c2re[ip2] * u->c1.c3re[ip3] + u->c3.c2im[ip2] * -u->c1.c3im[ip3];
+   res->c21.im = u->c1.c2re[ip2] * -u->c1.c1im[ip3] - u->c1.c2im[ip2] * u->c1.c1re[ip3] +
+                 u->c2.c2re[ip2] * -u->c1.c2im[ip3] - u->c2.c2im[ip2] * u->c1.c2re[ip3] +
+                 u->c3.c2re[ip2] * -u->c1.c3im[ip3] - u->c3.c2im[ip2] * u->c1.c3re[ip3];
+   res->c31.re = u->c1.c3re[ip2] * u->c1.c1re[ip3] + u->c1.c3im[ip2] * -u->c1.c1im[ip3] +
+                 u->c2.c3re[ip2] * u->c1.c2re[ip3] + u->c2.c3im[ip2] * -u->c1.c2im[ip3] +
+                 u->c3.c3re[ip2] * u->c1.c3re[ip3] + u->c3.c3im[ip2] * -u->c1.c3im[ip3];
+   res->c31.im = u->c1.c3re[ip2] * -u->c1.c1im[ip3] - u->c1.c3im[ip2] * u->c1.c1re[ip3] +
+                 u->c2.c3re[ip2] * -u->c1.c2im[ip3] - u->c2.c3im[ip2] * u->c1.c2re[ip3] +
+                 u->c3.c3re[ip2] * -u->c1.c3im[ip3] - u->c3.c3im[ip2] * u->c1.c3re[ip3];
 
-   res->c12.re = u->c1.c1re[ip2] * v->c2.c1re[ip3] + u->c1.c1im[ip2] * -v->c2.c1im[ip3] +
-                 u->c2.c1re[ip2] * v->c2.c2re[ip3] + u->c2.c1im[ip2] * -v->c2.c2im[ip3] +
-                 u->c3.c1re[ip2] * v->c2.c3re[ip3] + u->c3.c1im[ip2] * -v->c2.c3im[ip3];
-   res->c12.im = u->c1.c1re[ip2] * -v->c2.c1im[ip3] - u->c1.c1im[ip2] * v->c2.c1re[ip3] +
-                 u->c2.c1re[ip2] * -v->c2.c2im[ip3] - u->c2.c1im[ip2] * v->c2.c2re[ip3] +
-                 u->c3.c1re[ip2] * -v->c2.c3im[ip3] - u->c3.c1im[ip2] * v->c2.c3re[ip3];
-   res->c22.re = u->c1.c2re[ip2] * v->c2.c1re[ip3] + u->c1.c2im[ip2] * -v->c2.c1im[ip3] +
-                 u->c2.c2re[ip2] * v->c2.c2re[ip3] + u->c2.c2im[ip2] * -v->c2.c2im[ip3] +
-                 u->c3.c2re[ip2] * v->c2.c3re[ip3] + u->c3.c2im[ip2] * -v->c2.c3im[ip3];
-   res->c22.im = u->c1.c2re[ip2] * -v->c2.c1im[ip3] - u->c1.c2im[ip2] * v->c2.c1re[ip3] +
-                 u->c2.c2re[ip2] * -v->c2.c2im[ip3] - u->c2.c2im[ip2] * v->c2.c2re[ip3] +
-                 u->c3.c2re[ip2] * -v->c2.c3im[ip3] - u->c3.c2im[ip2] * v->c2.c3re[ip3];
-   res->c32.re = u->c1.c3re[ip2] * v->c2.c1re[ip3] + u->c1.c3im[ip2] * -v->c2.c1im[ip3] +
-                 u->c2.c3re[ip2] * v->c2.c2re[ip3] + u->c2.c3im[ip2] * -v->c2.c2im[ip3] +
-                 u->c3.c3re[ip2] * v->c2.c3re[ip3] + u->c3.c3im[ip2] * -v->c2.c3im[ip3];
-   res->c32.im = u->c1.c3re[ip2] * -v->c2.c1im[ip3] - u->c1.c3im[ip2] * v->c2.c1re[ip3] +
-                 u->c2.c3re[ip2] * -v->c2.c2im[ip3] - u->c2.c3im[ip2] * v->c2.c2re[ip3] +
-                 u->c3.c3re[ip2] * -v->c2.c3im[ip3] - u->c3.c3im[ip2] * v->c2.c3re[ip3];
+   res->c12.re = u->c1.c1re[ip2] * u->c2.c1re[ip3] + u->c1.c1im[ip2] * -u->c2.c1im[ip3] +
+                 u->c2.c1re[ip2] * u->c2.c2re[ip3] + u->c2.c1im[ip2] * -u->c2.c2im[ip3] +
+                 u->c3.c1re[ip2] * u->c2.c3re[ip3] + u->c3.c1im[ip2] * -u->c2.c3im[ip3];
+   res->c12.im = u->c1.c1re[ip2] * -u->c2.c1im[ip3] - u->c1.c1im[ip2] * u->c2.c1re[ip3] +
+                 u->c2.c1re[ip2] * -u->c2.c2im[ip3] - u->c2.c1im[ip2] * u->c2.c2re[ip3] +
+                 u->c3.c1re[ip2] * -u->c2.c3im[ip3] - u->c3.c1im[ip2] * u->c2.c3re[ip3];
+   res->c22.re = u->c1.c2re[ip2] * u->c2.c1re[ip3] + u->c1.c2im[ip2] * -u->c2.c1im[ip3] +
+                 u->c2.c2re[ip2] * u->c2.c2re[ip3] + u->c2.c2im[ip2] * -u->c2.c2im[ip3] +
+                 u->c3.c2re[ip2] * u->c2.c3re[ip3] + u->c3.c2im[ip2] * -u->c2.c3im[ip3];
+   res->c22.im = u->c1.c2re[ip2] * -u->c2.c1im[ip3] - u->c1.c2im[ip2] * u->c2.c1re[ip3] +
+                 u->c2.c2re[ip2] * -u->c2.c2im[ip3] - u->c2.c2im[ip2] * u->c2.c2re[ip3] +
+                 u->c3.c2re[ip2] * -u->c2.c3im[ip3] - u->c3.c2im[ip2] * u->c2.c3re[ip3];
+   res->c32.re = u->c1.c3re[ip2] * u->c2.c1re[ip3] + u->c1.c3im[ip2] * -u->c2.c1im[ip3] +
+                 u->c2.c3re[ip2] * u->c2.c2re[ip3] + u->c2.c3im[ip2] * -u->c2.c2im[ip3] +
+                 u->c3.c3re[ip2] * u->c2.c3re[ip3] + u->c3.c3im[ip2] * -u->c2.c3im[ip3];
+   res->c32.im = u->c1.c3re[ip2] * -u->c2.c1im[ip3] - u->c1.c3im[ip2] * u->c2.c1re[ip3] +
+                 u->c2.c3re[ip2] * -u->c2.c2im[ip3] - u->c2.c3im[ip2] * u->c2.c2re[ip3] +
+                 u->c3.c3re[ip2] * -u->c2.c3im[ip3] - u->c3.c3im[ip2] * u->c2.c3re[ip3];
 
-   res->c13.re = u->c1.c1re[ip2] * v->c3.c1re[ip3] + u->c1.c1im[ip2] * -v->c3.c1im[ip3] +
-                 u->c2.c1re[ip2] * v->c3.c2re[ip3] + u->c2.c1im[ip2] * -v->c3.c2im[ip3] +
-                 u->c3.c1re[ip2] * v->c3.c3re[ip3] + u->c3.c1im[ip2] * -v->c3.c3im[ip3];
-   res->c13.im = u->c1.c1re[ip2] * -v->c3.c1im[ip3] - u->c1.c1im[ip2] * v->c3.c1re[ip3] +
-                 u->c2.c1re[ip2] * -v->c3.c2im[ip3] - u->c2.c1im[ip2] * v->c3.c2re[ip3] +
-                 u->c3.c1re[ip2] * -v->c3.c3im[ip3] - u->c3.c1im[ip2] * v->c3.c3re[ip3];
-   res->c23.re = u->c1.c2re[ip2] * v->c3.c1re[ip3] + u->c1.c2im[ip2] * -v->c3.c1im[ip3] +
-                 u->c2.c2re[ip2] * v->c3.c2re[ip3] + u->c2.c2im[ip2] * -v->c3.c2im[ip3] +
-                 u->c3.c2re[ip2] * v->c3.c3re[ip3] + u->c3.c2im[ip2] * -v->c3.c3im[ip3];
-   res->c23.im = u->c1.c2re[ip2] * -v->c3.c1im[ip3] - u->c1.c2im[ip2] * v->c3.c1re[ip3] +
-                 u->c2.c2re[ip2] * -v->c3.c2im[ip3] - u->c2.c2im[ip2] * v->c3.c2re[ip3] +
-                 u->c3.c2re[ip2] * -v->c3.c3im[ip3] - u->c3.c2im[ip2] * v->c3.c3re[ip3];
-   res->c33.re = u->c1.c3re[ip2] * v->c3.c1re[ip3] + u->c1.c3im[ip2] * -v->c3.c1im[ip3] +
-                 u->c2.c3re[ip2] * v->c3.c2re[ip3] + u->c2.c3im[ip2] * -v->c3.c2im[ip3] +
-                 u->c3.c3re[ip2] * v->c3.c3re[ip3] + u->c3.c3im[ip2] * -v->c3.c3im[ip3];
-   res->c33.im = u->c1.c3re[ip2] * -v->c3.c1im[ip3] - u->c1.c3im[ip2] * v->c3.c1re[ip3] +
-                 u->c2.c3re[ip2] * -v->c3.c2im[ip3] - u->c2.c3im[ip2] * v->c3.c2re[ip3] +
-                 u->c3.c3re[ip2] * -v->c3.c3im[ip3] - u->c3.c3im[ip2] * v->c3.c3re[ip3];
+   res->c13.re = u->c1.c1re[ip2] * u->c3.c1re[ip3] + u->c1.c1im[ip2] * -u->c3.c1im[ip3] +
+                 u->c2.c1re[ip2] * u->c3.c2re[ip3] + u->c2.c1im[ip2] * -u->c3.c2im[ip3] +
+                 u->c3.c1re[ip2] * u->c3.c3re[ip3] + u->c3.c1im[ip2] * -u->c3.c3im[ip3];
+   res->c13.im = u->c1.c1re[ip2] * -u->c3.c1im[ip3] - u->c1.c1im[ip2] * u->c3.c1re[ip3] +
+                 u->c2.c1re[ip2] * -u->c3.c2im[ip3] - u->c2.c1im[ip2] * u->c3.c2re[ip3] +
+                 u->c3.c1re[ip2] * -u->c3.c3im[ip3] - u->c3.c1im[ip2] * u->c3.c3re[ip3];
+   res->c23.re = u->c1.c2re[ip2] * u->c3.c1re[ip3] + u->c1.c2im[ip2] * -u->c3.c1im[ip3] +
+                 u->c2.c2re[ip2] * u->c3.c2re[ip3] + u->c2.c2im[ip2] * -u->c3.c2im[ip3] +
+                 u->c3.c2re[ip2] * u->c3.c3re[ip3] + u->c3.c2im[ip2] * -u->c3.c3im[ip3];
+   res->c23.im = u->c1.c2re[ip2] * -u->c3.c1im[ip3] - u->c1.c2im[ip2] * u->c3.c1re[ip3] +
+                 u->c2.c2re[ip2] * -u->c3.c2im[ip3] - u->c2.c2im[ip2] * u->c3.c2re[ip3] +
+                 u->c3.c2re[ip2] * -u->c3.c3im[ip3] - u->c3.c2im[ip2] * u->c3.c3re[ip3];
+   res->c33.re = u->c1.c3re[ip2] * u->c3.c1re[ip3] + u->c1.c3im[ip2] * -u->c3.c1im[ip3] +
+                 u->c2.c3re[ip2] * u->c3.c2re[ip3] + u->c2.c3im[ip2] * -u->c3.c2im[ip3] +
+                 u->c3.c3re[ip2] * u->c3.c3re[ip3] + u->c3.c3im[ip2] * -u->c3.c3im[ip3];
+   res->c33.im = u->c1.c3re[ip2] * -u->c3.c1im[ip3] - u->c1.c3im[ip2] * u->c3.c1re[ip3] +
+                 u->c2.c3re[ip2] * -u->c3.c2im[ip3] - u->c2.c3im[ip2] * u->c3.c2re[ip3] +
+                 u->c3.c3re[ip2] * -u->c3.c3im[ip3] - u->c3.c3im[ip2] * u->c3.c3re[ip3];
 }
 #pragma omp end declare target
 
