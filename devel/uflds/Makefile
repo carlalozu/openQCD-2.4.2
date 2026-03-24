@@ -19,7 +19,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check1 check2 check3 check4 check5 time
+MAIN = check1 check2 check3 check4 check5 time time_test
 
 DEVFCTS = dutils gtrans
 

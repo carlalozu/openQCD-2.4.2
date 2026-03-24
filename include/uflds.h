@@ -21,6 +21,9 @@
 #include "su3v.h"
 #endif
 
+#include "profiler.h"
+
+
 /* BSTAP_C */
 extern su3_dble *bstap(void);
 extern void set_bstap(void);
@@ -46,6 +49,8 @@ extern void set_ud_phase(void);
 extern void unset_ud_phase(void);
 extern void renormalize_ud(void);
 extern void assign_ud2u(void);
+extern prof_section compute;
+
 
 /* UINIT_C */
 extern void set_u2unity(int vol,int icom,su3 *u);
