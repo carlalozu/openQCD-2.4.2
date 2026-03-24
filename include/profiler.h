@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include "mpi.h"
 
 static inline double prof_now(void) {
   return MPI_Wtime();
@@ -20,6 +21,11 @@ static inline void prof_end(prof_section *s) {
   double t1 = prof_now();
   s->total += (t1 - s->t0);
   s->count += 1;
+}
+
+static inline void prof_reset(prof_section *s) {
+  s->total = 0.0;
+  s->count = 0;
 }
 
 static inline void prof_report(const prof_section *s) {
