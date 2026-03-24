@@ -57,7 +57,7 @@
 #include "lattice.h"
 #include "uflds.h"
 #include "global.h"
-#include "lattice.h"
+#include "profiler.h"
 
 #define N0 (NPROC0*L0)
 
@@ -65,6 +65,7 @@ static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
 static su3_mat_field *udbv;
+prof_section compute = {.name = "compute"};
 
 #pragma omp declare target
 static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
@@ -116,6 +117,7 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udbv=udfldv();
 
+   prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (ix=0;ix<VOLUME;ix++){
@@ -151,8 +153,8 @@ static qflt local_plaq_sum_dble(int iw)
       }
    }
    #pragma omp target update from(pa)
+   prof_end(&compute);
    acc_qflt(pa,rqsm.q);
-
    return rqsm;
 }
 

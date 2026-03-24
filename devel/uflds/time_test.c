@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
    geometry();
 
    p1 = plaq_sum_dble(1);
-   p2 = plaq_wsum_dble(1);
+   // p2 = plaq_wsum_dble(1);
 
    if (bc == 0)
    {
@@ -159,46 +159,21 @@ int main(int argc, char *argv[])
              fabs(1.0 - p2 / (3.0 * nplaq2 + d1 + d2)));
    }
 
-   nt = (int)(1.0e6 / (double)(VOLUME));
-   if (nt < 2)
-      nt = 2;
    
    size_t flush_size = 114 * 4 * 1024 * 1024 / sizeof(double);
    double *flush_buf = malloc(flush_size * sizeof(double));
    
    flush_cache(flush_size, flush_buf);
-   random_udv();
+   random_ud();
    prof_end(&set_params);
    
-   prof_reset(&compute);
+   nt = 0;
+   // prof_reset(&compute);
    prof_begin(&benchmark);
-   wdti = 0.0;
-   while (wdti < 5.0)
+   for (count = 0; count < nt; count++)
    {
-      p1 = 0.0;
-      wdt = 0.0;
-      for (count = 0; count < nt; count++)
-      {
-         MPI_Barrier(MPI_COMM_WORLD);
-         prof_begin(&prepare_data);
-         wt0 = MPI_Wtime();
-         flush_cache(flush_size, flush_buf);
-         prof_end(&prepare_data);
-         
-         MPI_Barrier(MPI_COMM_WORLD);
-         // compute profiler defined externally
-         wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
-         MPI_Barrier(MPI_COMM_WORLD);
-         wt2 = MPI_Wtime();
-
-         wdt += wt2 - wt1;
-         wdti += wt2 - wt0;
-      }
-
-      nt *= 2;
    }
-
    wdt = 2.0 * wdt / ((double)(nt));
    p1 = 2.0 * p1 / ((double)(nt));
    prof_end(&benchmark);
@@ -210,7 +185,7 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      // printf("Block size: %i\n", BLOCK_SIZE);
+      printf("Number of teams: %i\n", N_TEAMS);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 
