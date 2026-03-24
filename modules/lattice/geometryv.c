@@ -154,6 +154,7 @@ static void set_ipt(void)
 
       update_ipt_cbs4(k,n0*L0_TRD,n1*L1_TRD,n2*L2_TRD,n3*L3_TRD);
    }
+   #pragma omp target enter data map(to : ipt[:VOLUME])
 }
 
 
