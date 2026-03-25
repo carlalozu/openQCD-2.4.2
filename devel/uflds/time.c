@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Block size: %i\n", BLOCK_SIZE);
+      printf("Block size: (%i, %i, %i, %i)\n", BLOCK_SIZE_0, BLOCK_SIZE_1, BLOCK_SIZE_2, BLOCK_SIZE_3);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 
