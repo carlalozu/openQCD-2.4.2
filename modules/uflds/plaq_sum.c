@@ -84,6 +84,34 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 }
 #pragma omp end declare target
 
+#pragma omp declare target
+static double plaq_dble_fused(su3_dble *udb, int mu, int nu,int ix)
+{
+   int ip[4];
+   double sm;
+   su3_dble wd1 ALIGNED16;
+   su3_dble wd2 ALIGNED16;
+
+   plaq_uidx(mu,nu,ix,ip);
+
+   su3xsu3(udb+ip[0],udb+ip[1],&wd1);
+   su3xsu3(udb+ip[2],udb+ip[3],&wd2);
+
+   sm =wd1.c11.re*wd2.c11.re+wd1.c11.im*wd2.c11.im;
+   sm+=wd1.c12.re*wd2.c12.re+wd1.c12.im*wd2.c12.im;
+   sm+=wd1.c13.re*wd2.c13.re+wd1.c13.im*wd2.c13.im;
+
+   sm+=wd1.c21.re*wd2.c21.re+wd1.c21.im*wd2.c21.im;
+   sm+=wd1.c22.re*wd2.c22.re+wd1.c22.im*wd2.c22.im;
+   sm+=wd1.c23.re*wd2.c23.re+wd1.c23.im*wd2.c23.im;
+
+   sm+=wd1.c31.re*wd2.c31.re+wd1.c31.im*wd2.c31.im;
+   sm+=wd1.c32.re*wd2.c32.re+wd1.c32.im*wd2.c32.im;
+   sm+=wd1.c33.re*wd2.c33.re+wd1.c33.im*wd2.c33.im;
+
+   return sm;
+}
+#pragma omp end declare target
 
 static qflt local_plaq_sum_dble(int iw)
 {
@@ -113,22 +141,22 @@ static qflt local_plaq_sum_dble(int iw)
             if (mu<1)
             {
                if ((t<(N0-1))||(bc!=0))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dble_fused(udb,mu,nu,ix);
             }
             else
             {
                if (((t>0)&&(t<(N0-1)))||(bc==3))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dble_fused(udb,mu,nu,ix);
                else if ((t==0)||(bc==0))
                {
                   if (bc==1)
                      local_pa+=wp*3.0;
                   else
-                     local_pa+=wp*plaq_dble(udb,mu,nu,ix);
+                     local_pa+=wp*plaq_dble_fused(udb,mu,nu,ix);
                }
                else
                {
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dble_fused(udb,mu,nu,ix);
                   local_pa+=wp*3.0;
                }
             }
