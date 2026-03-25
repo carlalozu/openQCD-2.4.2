@@ -36,13 +36,15 @@
 #define N2 (NPROC2 * L2)
 #define N3 (NPROC3 * L3)
 
+#pragma omp declare target
 void flush_cache(size_t flush_size, double* flush_buf)
 {
-    #pragma omp parallel for schedule(static)
+    #pragma omp target teams distribute parallel for
     for (size_t j = 0; j < flush_size; j++) {
         flush_buf[j] += 1.0; 
     }
 }
+#pragma omp end declare target
 
 int main(int argc, char *argv[])
 {
@@ -163,8 +165,9 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
    
-   size_t flush_size = 114 * 4 * 1024 * 1024 / sizeof(double);
+   size_t flush_size = 62914560 * 4 / sizeof(double);
    double *flush_buf = malloc(flush_size * sizeof(double));
+   #pragma omp target enter data map(to : flush_buf[:flush_size])
    
    flush_cache(flush_size, flush_buf);
    random_udv();
@@ -210,7 +213,7 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Block size: %i\n", BLOCK_SIZE);
+      printf("Block size: (%i, %i, %i, %i)\n", BLOCK_SIZE_0, BLOCK_SIZE_1, BLOCK_SIZE_2, BLOCK_SIZE_3);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 
