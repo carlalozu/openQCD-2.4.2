@@ -141,22 +141,22 @@ static qflt local_plaq_sum_dble(int iw)
             if (mu<1)
             {
                if ((t<(N0-1))||(bc!=0))
-                  local_pa+=plaq_dble_fused(udb,mu,nu,ix);
+                  local_pa+=plaq_dble(udb,mu,nu,ix);
             }
             else
             {
                if (((t>0)&&(t<(N0-1)))||(bc==3))
-                  local_pa+=plaq_dble_fused(udb,mu,nu,ix);
+                  local_pa+=plaq_dble(udb,mu,nu,ix);
                else if ((t==0)||(bc==0))
                {
                   if (bc==1)
                      local_pa+=wp*3.0;
                   else
-                     local_pa+=wp*plaq_dble_fused(udb,mu,nu,ix);
+                     local_pa+=wp*plaq_dble(udb,mu,nu,ix);
                }
                else
                {
-                  local_pa+=plaq_dble_fused(udb,mu,nu,ix);
+                  local_pa+=plaq_dble(udb,mu,nu,ix);
                   local_pa+=wp*3.0;
                }
             }
