@@ -67,14 +67,33 @@ static su3_dble *udb;
 prof_section compute = {.name = "compute"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
+static double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(mu,nu,ix,ip);
+   plaq_uidx(n,ix,ip);
+
+   su3xsu3(udb+ip[0],udb+ip[1],&wd1);
+   su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
+   cm3x3_retr(&wd1,&wd2,&sm);
+   return sm;
+
+}
+#pragma omp end declare target
+
+
+#pragma omp declare target
+static double plaq_dblev(su3_dble *udb, int mu, int nu,int ix)
+{
+   int ip[4];
+   double sm;
+   su3_dble wd1 ALIGNED16;
+   su3_dble wd2 ALIGNED16;
+
+   plaq_uidxv(mu,nu,ix,ip);
    // printf("mu, nu = (%i, %i), ix: %i, ip: (%i, %i, %i, %i)\n", mu, nu, ix, ip[0], ip[1], ip[2], ip[3]);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
@@ -93,7 +112,7 @@ static double plaq_dble_fused(su3_dble *udb, int mu, int nu,int ix)
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(mu,nu,ix,ip);
+   plaq_uidxv(mu,nu,ix,ip);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3xsu3(udb+ip[2],udb+ip[3],&wd2);
@@ -142,22 +161,22 @@ static qflt local_plaq_sum_dble(int iw)
             if (mu<1)
             {
                if ((t<(N0-1))||(bc!=0))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dblev(udb,mu,nu,ix);
             }
             else
             {
                if (((t>0)&&(t<(N0-1)))||(bc==3))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dblev(udb,mu,nu,ix);
                else if ((t==0)||(bc==0))
                {
                   if (bc==1)
                      local_pa+=wp*3.0;
                   else
-                     local_pa+=wp*plaq_dble(udb,mu,nu,ix);
+                     local_pa+=wp*plaq_dblev(udb,mu,nu,ix);
                }
                else
                {
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dblev(udb,mu,nu,ix);
                   local_pa+=wp*3.0;
                }
             }
@@ -252,14 +271,14 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb,0,n,ix));
+               smE+=(3.0-plaq_dble(udb,n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (int mu = 1; mu < 4; mu++) {
                for (int nu = mu+1; nu < 4; nu++)
-                  smB+=(3.0-plaq_dble(udb,mu,nu,ix));
+                  smB+=(3.0-plaq_dble(udb,n,ix));
             }
          }
 
