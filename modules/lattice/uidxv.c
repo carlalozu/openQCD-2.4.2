@@ -317,7 +317,7 @@ void plaq_uidx(int n,int ix,int *ip)
    }
    else
    {
-      iy=ipu[ix][mu];
+      iy=iup[ix][mu];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
@@ -333,7 +333,7 @@ void plaq_uidx(int n,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=ipu[ix][nu];
+   iy=iup[ix][nu];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);

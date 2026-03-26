@@ -97,6 +97,7 @@ int sbvol[16];
 
 #pragma omp declare target
 int *ipt=NULL;
+int *itp=NULL;
 int (*iup)[4]=NULL;
 #pragma omp end declare target
 int (*idn)[4]=NULL;
@@ -109,6 +110,7 @@ extern int sbvol[16];
 
 #pragma omp declare target
 extern int *ipt;
+extern int *itp;
 extern int (*iup)[4];
 #pragma omp end declare target
 extern int (*idn)[4];
