@@ -96,8 +96,21 @@ static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
    plaq_uidxv(mu,nu,ix,ip);
 
    fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
-   fsu3matdagxsu3matdag(udbv, &wd2, ip[2], ip[3]);
-   cm3x3_retr(&wd1,&wd2,&sm);
+   fsu3matxsu3mat(udbv, &wd2, ip[2], ip[3]);
+
+   // TODO: calculate trace correctly (udbv[0] * udbv[1]) * (udbv[2] * udbv[3])^{dagger}
+   sm =wd1.c11.re*wd2.c11.re-wd1.c11.im*wd2.c11.im;
+   sm+=wd1.c12.re*wd2.c21.re-wd1.c12.im*wd2.c21.im;
+   sm+=wd1.c13.re*wd2.c31.re-wd1.c13.im*wd2.c31.im;
+
+   sm+=wd1.c21.re*wd2.c12.re-wd1.c21.im*wd2.c12.im;
+   sm+=wd1.c22.re*wd2.c22.re-wd1.c22.im*wd2.c22.im;
+   sm+=wd1.c23.re*wd2.c32.re-wd1.c23.im*wd2.c32.im;
+
+   sm+=wd1.c31.re*wd2.c13.re-wd1.c31.im*wd2.c13.im;
+   sm+=wd1.c32.re*wd2.c23.re-wd1.c32.im*wd2.c23.im;
+   sm+=wd1.c33.re*wd2.c33.re-wd1.c33.im*wd2.c33.im;
+
    return sm;
 }
 #pragma omp end declare target
