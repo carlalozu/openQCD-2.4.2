@@ -222,7 +222,8 @@ int get_iupdn(int nu,int ix){
 
    int iz,x0,x1,x2,x3,iy;
 
-   iz=ix;
+   // from thread (block) index to cartesian
+   iz = itp[ix];
    x3=iz%L3; iz/=L3;
    x2=iz%L2; iz/=L2;
    x1=iz%L1; iz/=L1;
@@ -249,6 +250,7 @@ int get_iupdn(int nu,int ix){
       default:
          iy = VOLUME;
    }
+   // from cartesian to thread/mem index
    return ipt[iy];
 }
 #pragma omp end declare target

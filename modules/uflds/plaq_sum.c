@@ -68,14 +68,14 @@ static su3_mat_field *udbv;
 prof_section compute = {.name = "compute"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
+static double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidxv(mu,nu,ix,ip);
+   plaq_uidx(n,ix,ip);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
@@ -239,15 +239,13 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb,0,n,ix));
+               smE+=(3.0-plaq_dble(udb,n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
-            for (int mu = 1; mu < 4; mu++) {
-               for (int nu = mu+1; nu < 4; nu++)
-                  smB+=(3.0-plaq_dble(udb,mu,nu,ix));
-            }
+            for (n=3;n<6;n++)
+               smB+=(3.0-plaq_dble(udb,n,ix));
          }
 
          acc_qflt(smE,rqsmE[t].q);

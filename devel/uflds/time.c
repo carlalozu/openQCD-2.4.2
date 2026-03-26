@@ -36,6 +36,7 @@
 #define N2 (NPROC2 * L2)
 #define N3 (NPROC3 * L3)
 
+#pragma omp declare target
 void flush_cache(size_t flush_size, double* flush_buf)
 {
     #pragma omp target teams distribute parallel for
@@ -43,6 +44,7 @@ void flush_cache(size_t flush_size, double* flush_buf)
         flush_buf[j] += 1.0; 
     }
 }
+#pragma omp end declare target
 
 int main(int argc, char *argv[])
 {
