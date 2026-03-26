@@ -66,6 +66,7 @@ int *tms=NULL;
 static void alloc_ipt(void)
 {
    ipt=malloc(VOLUME*sizeof(*ipt));
+   itp=malloc(VOLUME*sizeof(*itp));
 
    error(ipt==NULL,1,"alloc_ipt [geometryv.c]",
          "Unable to allocate index array");
@@ -110,6 +111,7 @@ static void update_ipt_cbs4(int k, int n0_ofs, int n1_ofs, int n2_ofs, int n3_of
 
                            lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
                            ipt[lex]=mem;
+                           itp[mem]=lex;
                            mem+=1;
                         }
                      }
@@ -154,7 +156,7 @@ static void set_ipt(void)
 
       update_ipt_cbs4(k,n0*L0_TRD,n1*L1_TRD,n2*L2_TRD,n3*L3_TRD);
    }
-   #pragma omp target enter data map(to : ipt[:VOLUME])
+   #pragma omp target enter data map(to : ipt[:VOLUME], itp[:VOLUME])
 }
 
 
