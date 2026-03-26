@@ -89,27 +89,24 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
 {
    double sm;
-   int ip[4];
+   // int ip[4];
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidxv(mu,nu,ix,ip);
+   // plaq_uidxv(mu,nu,ix,ip);
 
-   fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
-   fsu3matxsu3mat(udbv, &wd2, ip[2], ip[3]);
+   int iy1=get_iupdn(mu,ix);
+   int ip1=offset(iy1,nu);
+   int ip0=offset(ix,mu);
+   int ip2=offset(ix,nu);
+
+   int iy3=get_iupdn(nu,ix);
+   int ip3=offset(iy3,mu);
 
    /* Re[tr(wd1 * wd2^dag)] = sum_{ij} (wd1_ij.re*wd2_ij.re + wd1_ij.im*wd2_ij.im) */
-   sm =wd1.c11.re*wd2.c11.re+wd1.c11.im*wd2.c11.im;
-   sm+=wd1.c12.re*wd2.c12.re+wd1.c12.im*wd2.c12.im;
-   sm+=wd1.c13.re*wd2.c13.re+wd1.c13.im*wd2.c13.im;
-
-   sm+=wd1.c21.re*wd2.c21.re+wd1.c21.im*wd2.c21.im;
-   sm+=wd1.c22.re*wd2.c22.re+wd1.c22.im*wd2.c22.im;
-   sm+=wd1.c23.re*wd2.c23.re+wd1.c23.im*wd2.c23.im;
-
-   sm+=wd1.c31.re*wd2.c31.re+wd1.c31.im*wd2.c31.im;
-   sm+=wd1.c32.re*wd2.c32.re+wd1.c32.im*wd2.c32.im;
-   sm+=wd1.c33.re*wd2.c33.re+wd1.c33.im*wd2.c33.im;
+   fsu3matxsu3mat(udbv, &wd1, ip0, ip1);
+   fsu3matxsu3mat(udbv, &wd2, ip2, ip3);
+   cm3x3_retr_dag(&wd1,&wd2,&sm);
 
    return sm;
 }
