@@ -233,15 +233,19 @@ int get_iupdn(int nu,int ix){
       case 0:
          if ((x0==(L0-1))&&(NPROC0>1)) return VOLUME;
          iy = ((x0+1)%L0)*(L1*L2*L3)+x1*(L2*L3)+x2*L3+x3;
+         break;
       case 1:
          if ((x1==(L1-1))&&(NPROC1>1)) return VOLUME;
          iy = x0*(L1*L2*L3)+((x1+1)%L1)*(L2*L3)+x2*L3+x3;
+         break;
       case 2:
          if ((x2==(L2-1))&&(NPROC2>1)) return VOLUME;
          iy = x0*(L1*L2*L3)+x1*(L2*L3)+((x2+1)%L2)*L3+x3;
+         break;
       case 3:
          if ((x3==(L3-1))&&(NPROC3>1)) return VOLUME;
          iy = x0*(L1*L2*L3)+x1*(L2*L3)+x2*L3+(x3+1)%L3;
+         break;
       default:
          iy = VOLUME;
    }
