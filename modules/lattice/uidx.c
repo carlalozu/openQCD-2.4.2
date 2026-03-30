@@ -123,7 +123,7 @@ static void alloc_idx(void)
 
 
 #pragma omp declare target
-static int offset(int ix,int mu)
+int offset(int ix,int mu)
 {
    int iy,ib;
 
