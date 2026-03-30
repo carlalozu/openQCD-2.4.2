@@ -179,7 +179,6 @@ void random_ud(void)
          for (int mu=0;mu<4;mu++)
          { 
             int iz=offset(iy,mu);
-            printf("thread/lex (ix):%i, mem (iy):%i, time:%i, mu:%i, iz:%i \n", ix, iy, t, mu, iz);
 
             // U(mu-1, nu) on odd site is U(mu,nu) on even site
             if ((t==0) && (bc==0) && (mu==0))

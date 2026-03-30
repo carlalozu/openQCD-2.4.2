@@ -133,7 +133,7 @@ void random_udv(void)
    {
       k=omp_get_thread_num();
 
-∫      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
       {
          int iy = ipt[ix];
          t=global_time(iy);
