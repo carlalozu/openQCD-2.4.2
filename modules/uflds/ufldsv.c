@@ -142,12 +142,12 @@ void random_udv(void)
             if (mu==0)
             {
                if ((t!=(N0-1))||(bc!=0))
-                  random_su3_mat_field(udbv, ix);
+                  random_su3_mat_field(udbv, mu*VOLUME+ix);
             }
             else
             {
                if ((t!=0)||(bc!=1))
-                  random_su3_mat_field(udbv, ix);
+                  random_su3_mat_field(udbv, mu*VOLUME+ix);
             }
          }
       }
@@ -156,5 +156,8 @@ void random_udv(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   #pragma omp target update to(udbv)
+   #pragma omp target update \
+    to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
+    to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
+    to(udbv->c3.base[0 : 6 * udbv->c3.volume])
 }
