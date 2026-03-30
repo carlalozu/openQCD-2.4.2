@@ -133,21 +133,22 @@ void random_udv(void)
    {
       k=omp_get_thread_num();
 
-      for (mu=0;mu<4;mu++)
+∫      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
       {
-         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+         int iy = ipt[ix];
+         t=global_time(iy);
+         for (mu=0;mu<4;mu++)
          {
-            t=global_time(ix);
-
+            int iz = offset(iy, mu);
             if (mu==0)
             {
                if ((t!=(N0-1))||(bc!=0))
-                  random_su3_mat_field(udbv, mu*VOLUME+ix);
+                  random_su3_mat_field(udbv, iz);
             }
             else
             {
                if ((t!=0)||(bc!=1))
-                  random_su3_mat_field(udbv, mu*VOLUME+ix);
+                  random_su3_mat_field(udbv, iz);
             }
          }
       }

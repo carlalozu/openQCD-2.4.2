@@ -171,47 +171,27 @@ void random_ud(void)
 #pragma omp parallel private(k,ix,t,ifc,ud)
    {
       k=omp_get_thread_num();
-      ud=udb+k*4*VOLUME_TRD;
 
-      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
       {
-         t=global_time(ix+(VOLUME/2));
+         int iy = ipt[ix];
+         t=global_time(iy);
+         for (int mu=0;mu<4;mu++)
+         { 
+            int iz=offset(iy,mu);
+            printf("thread/lex (ix):%i, mem (iy):%i, time:%i, mu:%i, iz:%i \n", ix, iy, t, mu, iz);
 
-         if (t==0)
-         {
-            random_su3_dble(ud);
-            ud+=1;
+            // U(mu-1, nu) on odd site is U(mu,nu) on even site
+            if ((t==0) && (bc==0) && (mu==0))
+               continue;
 
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
+            if ((t==0) && (bc==1) && (mu>0))
+               continue;
+            
+            if ((t==(N0-1)) && (bc==0) && (mu==0))
+               continue;
 
-            for (ifc=2;ifc<8;ifc++)
-            {
-               if (bc!=1)
-                  random_su3_dble(ud);
-               ud+=1;
-            }
-         }
-         else if (t==(N0-1))
-         {
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
-
-            for (ifc=1;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
-            }
-         }
-         else
-         {
-            for (ifc=0;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
-            }
+            random_su3_dble(ud+iz);
          }
       }
    }
