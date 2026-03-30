@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
    start_ranlux(0, 12345);
    geometry();
-
+   random_udv();
    p1 = plaq_sum_dble(1);
    // p2 = plaq_wsum_dble(1);
 

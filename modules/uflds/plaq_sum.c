@@ -95,12 +95,12 @@ static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
 
    // plaq_uidxv(mu,nu,ix,ip);
 
-   int iy1=get_iupdn(mu,ix);
+   int iy1=iup[ix][mu];;
    int ip1=offset(iy1,nu);
    int ip0=offset(ix,mu);
    int ip2=offset(ix,nu);
 
-   int iy3=get_iupdn(nu,ix);
+   int iy3=iup[ix][nu];;
    int ip3=offset(iy3,mu);
 
    /* Re[tr(wd1 * wd2^dag)] = sum_{ij} (wd1_ij.re*wd2_ij.re + wd1_ij.im*wd2_ij.im) */

@@ -269,7 +269,7 @@ void plaq_uidxv(int mu,int nu,int ix,int *ip)
    }
    else
    {
-      iy=get_iupdn(mu,ix);
+      iy=iup[ix][mu];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
@@ -285,7 +285,7 @@ void plaq_uidxv(int mu,int nu,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=get_iupdn(nu,ix);
+   iy=iup[ix][nu];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);
