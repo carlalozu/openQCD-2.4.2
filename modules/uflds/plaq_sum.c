@@ -68,33 +68,44 @@ static su3_mat_field *udbv;
 prof_section compute = {.name = "compute"};
 
 
-
 #pragma omp declare target
-static double plaq_dble(su3_mat_field *udbv,int mu,int nu,int ix)
+static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 {
+   int ip[4];
    double sm;
-   // int ip[4];
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   // plaq_uidxv(mu,nu,ix,ip);
+   plaq_uidx(mu,nu,ix,ip);
 
-   int iy1=iup[ix][mu];;
-   int ip1=offset(iy1,nu);
-   int ip0=offset(ix,mu);
-   int ip2=offset(ix,nu);
+   su3xsu3(udb+ip[0],udb+ip[1],&wd1);
+   su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
+   cm3x3_retr(&wd1,&wd2,&sm);
 
-   int iy3=iup[ix][nu];;
-   int ip3=offset(iy3,mu);
+   return sm;
+}
+#pragma omp end declare target
+
+
+#pragma omp declare target
+static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
+{
+   double sm;
+   int ip[4];
+   su3_dble wd1 ALIGNED16;
+   su3_dble wd2 ALIGNED16;
+
+   plaq_uidx(mu,nu,ix,ip);
 
    /* Re[tr(wd1 * wd2^dag)] = sum_{ij} (wd1_ij.re*wd2_ij.re + wd1_ij.im*wd2_ij.im) */
-   fsu3matxsu3mat(udbv, &wd1, ip0, ip1);
-   fsu3matxsu3mat(udbv, &wd2, ip2, ip3);
+   fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
+   fsu3matxsu3mat(udbv, &wd2, ip[2], ip[3]);
    cm3x3_retr_dag(&wd1,&wd2,&sm);
 
    return sm;
 }
 #pragma omp end declare target
+
 
 static qflt local_plaq_sum_dble(int iw)
 {
@@ -125,22 +136,22 @@ static qflt local_plaq_sum_dble(int iw)
             if (mu<1)
             {
                if ((t<(N0-1))||(bc!=0))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dblev(udbv,mu,nu,ix);
             }
             else
             {
                if (((t>0)&&(t<(N0-1)))||(bc==3))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dblev(udbv,mu,nu,ix);
                else if ((t==0)||(bc==0))
                {
                   if (bc==1)
                      local_pa+=wp*3.0;
                   else
-                     local_pa+=wp*plaq_dble(udb,mu,nu,ix);
+                     local_pa+=wp*plaq_dblev(udbv,mu,nu,ix);
                }
                else
                {
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
+                  local_pa+=plaq_dblev(udbv,mu,nu,ix);
                   local_pa+=wp*3.0;
                }
             }
