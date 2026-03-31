@@ -173,7 +173,7 @@ void random_ud(void)
       k=omp_get_thread_num();
       for (int iy=0;iy<VOLUME;iy++){
          for (int mu = 0; mu < 4; mu++) {
-            ix = ipt[iy];
+            ix=ipt[iy];
             t=global_time(ix);
             ifc=offset(ix,mu);
             random_su3_dble(udb+ifc);
@@ -184,7 +184,7 @@ void random_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   #pragma omp target update to(udb[:VOLUME])
+   #pragma omp target update to(udb[:4*VOLUME])
 }
 
 
