@@ -129,18 +129,21 @@ int offset(int ix,int mu)
 
    if (ix<(VOLUME/2))
    {
+      // if even side, find the neighbouring odd site in the mu direction
       iy=iup[ix][mu];
 
       if (iy<VOLUME)
+         // recover U(x, -mu) of the correspoding odd site 
          return 8*(iy-(VOLUME/2))+2*mu+1;
       else
       {
+         // get link from the boundary ghost cells
          ib=iy-ofs[mu]-(BNDRY/2);
-
          return 4*VOLUME+snu[mu]+ib;
       }
    }
    else
+      // recover U(x, mu) if x is odd site
       return 8*(ix-(VOLUME/2))+2*mu;
 }
 #pragma omp end declare target
