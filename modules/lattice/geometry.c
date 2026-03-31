@@ -328,4 +328,3 @@ int global_time_cart(int iy)
    else
       return NPROC0*L0;
 }
-#pragma omp end declare target

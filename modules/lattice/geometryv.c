@@ -172,33 +172,20 @@ static void alloc_tms(void)
 
 static void set_tms(void)
 {
-   int k,n,n0,n1,n2,n3;
-   int nt1,nt2,nt3;
-   int mem,pos,t_local;
+   int k,ix,iy,x0;
 
    alloc_tms();
 
-   nt1=L1/L1_TRD;
-   nt2=L2/L2_TRD;
-   nt3=L3/L3_TRD;
-
-#pragma omp parallel private(k,n,n0,n1,n2,n3,mem,pos,t_local)
+#pragma omp parallel private(k,ix,iy,x0)
    {
       k=omp_get_thread_num();
 
-      n=k;
-      n3=n%nt3;   n/=nt3;
-      n2=n%nt2;   n/=nt2;
-      n1=n%nt1;   n/=nt1;
-      n0=n;
-
-      for (mem=k*VOLUME_TRD;mem<(k+1)*VOLUME_TRD;mem++)
+      for (iy=(k*VOLUME_TRD);iy<((k+1)*VOLUME_TRD);iy++)
       {
-         pos=mem-k*VOLUME_TRD;
-         t_local=(pos/BLOCK_VLM/((L1_TRD*L2_TRD*L3_TRD)/SVOL_BLK))*BLOCK_SIZE_0
-                +(pos%BLOCK_VLM)/SVOL_BLK;
+         x0=iy/(L1*L2*L3);
+         ix=ipt[iy];
 
-         tms[mem]=cpr[0]*L0+n0*L0_TRD+t_local;
+         tms[ix]=x0+cpr[0]*L0;
       }
    }
    #pragma omp target update to(tms[:VOLUME])
