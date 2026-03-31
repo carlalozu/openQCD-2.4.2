@@ -100,6 +100,7 @@ int *ipt=NULL;
 int *itp=NULL;
 int (*iup)[4]=NULL;
 #pragma omp end declare target
+int (*giup)[4]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
 #else
@@ -113,6 +114,7 @@ extern int *ipt;
 extern int *itp;
 extern int (*iup)[4];
 #pragma omp end declare target
+extern int (*giup)[4]=NULL;
 extern int (*idn)[4];
 extern int *map;
 #endif
