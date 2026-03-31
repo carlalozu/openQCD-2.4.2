@@ -129,18 +129,21 @@ int offset(int ix,int mu)
 
    if (ix<(VOLUME/2))
    {
+      // if even side, find the neighbouring odd site in the mu direction
       iy=iup[ix][mu];
 
       if (iy<VOLUME)
+         // recover U(x, -mu) of the correspoding odd site 
          return 8*(iy-(VOLUME/2))+2*mu+1;
       else
       {
+         // get link from the boundary ghost cells
          ib=iy-ofs[mu]-(BNDRY/2);
-
          return 4*VOLUME+snu[mu]+ib;
       }
    }
    else
+      // recover U(x, mu) if x is odd site
       return 8*(ix-(VOLUME/2))+2*mu;
 }
 #pragma omp end declare target
@@ -234,13 +237,9 @@ uidx_t *uidx(void)
 
 
 #pragma omp declare target
-void plaq_uidx(int n,int ix,int *ip)
+void plaq_uidx(int mu,int nu,int ix,int *ip)
 {
-   int mu,nu;
    int iy,ic;
-
-   mu=plns[n][0];
-   nu=plns[n][1];
 
    ip[0]=offset(ix,mu);
 
@@ -250,7 +249,7 @@ void plaq_uidx(int n,int ix,int *ip)
    }
    else
    {
-      iy=iup[ix][mu];
+      iy=iupT[mu][ix];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
@@ -266,7 +265,7 @@ void plaq_uidx(int n,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=iup[ix][nu];
+   iy=iupT[nu][ix];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);
