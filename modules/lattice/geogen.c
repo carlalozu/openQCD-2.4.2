@@ -191,10 +191,9 @@ void set_sbofs(void)
 static void alloc_iupdn(void)
 {
    iup=malloc(VOLUME*sizeof(*iup));
-   giup=malloc(VOLUME*sizeof(*giup));
    idn=malloc(VOLUME*sizeof(*idn));
 
-   error((iup==NULL)||(idn==NULL)||(giup==NULL),1,"alloc_iupdn [geogen.c]",
+   error((iup==NULL)||(idn==NULL),1,"alloc_iupdn [geogen.c]",
          "Unable to allocate index arrays");
 }
 
@@ -253,47 +252,39 @@ void set_iupdn(void)
             ix=index(x0,x1,x2,x3);
 
             iup[ix][0]=index(x0+1,x1,x2,x3);
-            giup[iy][0]=cart_index(x0+1,x1,x2,x3);
             idn[ix][0]=index(x0-1,x1,x2,x3);
 
             iup[ix][1]=index(x0,x1+1,x2,x3);
-            giup[iy][1]=cart_index(x0,x1+1,x2,x3);
             idn[ix][1]=index(x0,x1-1,x2,x3);
 
             iup[ix][2]=index(x0,x1,x2+1,x3);
-            giup[iy][2]=cart_index(x0,x1,x2+1,x3);
             idn[ix][2]=index(x0,x1,x2-1,x3);
 
             iup[ix][3]=index(x0,x1,x2,x3+1);
-            giup[iy][3]=cart_index(x0,x1,x2,x3+1);
             idn[ix][3]=index(x0,x1,x2,x3-1);
 
             if ((x0==(L0-1))&&(NPROC0>1))
                iup[ix][0]=VOLUME;
-               giup[iy][0]=VOLUME;
             if ((x0==0)&&(NPROC0>1))
                idn[ix][0]=VOLUME;
 
             if ((x1==(L1-1))&&(NPROC1>1))
                iup[ix][1]=VOLUME;
-               giup[iy][1]=VOLUME;
             if ((x1==0)&&(NPROC1>1))
                idn[ix][1]=VOLUME;
 
             if ((x2==(L2-1))&&(NPROC2>1))
                iup[ix][2]=VOLUME;
-               giup[iy][2]=VOLUME;
             if ((x2==0)&&(NPROC2>1))
                idn[ix][2]=VOLUME;
 
             if ((x3==(L3-1))&&(NPROC3>1))
                iup[ix][3]=VOLUME;
-               giup[iy][3]=VOLUME;
             if ((x3==0)&&(NPROC3>1))
                idn[ix][3]=VOLUME;
          }
       }
-      #pragma omp target enter data map(to: iup[:VOLUME], giup[:VOLUME])
+      #pragma omp target enter data map(to: iup[:VOLUME])
    }
 }
 
