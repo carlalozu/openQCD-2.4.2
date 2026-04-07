@@ -64,6 +64,7 @@
 #include "mdflds.h"
 #include "forces.h"
 #include "global.h"
+#include "profiler.h"
 
 #define N0 (NPROC0*L0)
 
@@ -71,7 +72,7 @@ static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
 static int nfc[8],ofs[8],hofs[8],init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
-
+prof_section force0_part_p = {.name = "force0_part", .level=2};
 
 static void set_ofs(void)
 {
@@ -583,6 +584,7 @@ void force0(double c)
       hdb=bstap();
    }
 
+   prof_begin(&force0_part_p);
 #pragma omp parallel private(k,isb,ofs_pt,vol)
    {
       k=omp_get_thread_num();
@@ -597,6 +599,7 @@ void force0(double c)
          force0_part(ofs_pt+(VOLUME/2),vol,c);
       }
    }
+   prof_end(&force0_part_p);
 
    add_bnd_frc();
 }
