@@ -70,8 +70,8 @@
 
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
+int nfc_f0[8],ofs_f0[8],hofs_f0[8],init_f0=0;
 #pragma omp end declare target
-static int nfc[8],ofs[8],hofs[8],init=0;
 
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
@@ -79,40 +79,40 @@ prof_section force0_part_p = {.name = "force0_part", .level=2};
 
 static void set_ofs(void)
 {
-   nfc[0]=FACE0/2;
-   nfc[1]=FACE0/2;
-   nfc[2]=FACE1/2;
-   nfc[3]=FACE1/2;
-   nfc[4]=FACE2/2;
-   nfc[5]=FACE2/2;
-   nfc[6]=FACE3/2;
-   nfc[7]=FACE3/2;
+   nfc_f0[0]=FACE0/2;
+   nfc_f0[1]=FACE0/2;
+   nfc_f0[2]=FACE1/2;
+   nfc_f0[3]=FACE1/2;
+   nfc_f0[4]=FACE2/2;
+   nfc_f0[5]=FACE2/2;
+   nfc_f0[6]=FACE3/2;
+   nfc_f0[7]=FACE3/2;
 
-   ofs[0]=VOLUME;
-   ofs[1]=ofs[0]+(FACE0/2);
-   ofs[2]=ofs[1]+(FACE0/2);
-   ofs[3]=ofs[2]+(FACE1/2);
-   ofs[4]=ofs[3]+(FACE1/2);
-   ofs[5]=ofs[4]+(FACE2/2);
-   ofs[6]=ofs[5]+(FACE2/2);
-   ofs[7]=ofs[6]+(FACE3/2);
+   ofs_f0[0]=VOLUME;
+   ofs_f0[1]=ofs_f0[0]+(FACE0/2);
+   ofs_f0[2]=ofs_f0[1]+(FACE0/2);
+   ofs_f0[3]=ofs_f0[2]+(FACE1/2);
+   ofs_f0[4]=ofs_f0[3]+(FACE1/2);
+   ofs_f0[5]=ofs_f0[4]+(FACE2/2);
+   ofs_f0[6]=ofs_f0[5]+(FACE2/2);
+   ofs_f0[7]=ofs_f0[6]+(FACE3/2);
 
-   hofs[0]=0;
-   hofs[1]=hofs[0]+3*FACE0;
-   hofs[2]=hofs[1]+3*FACE0;
-   hofs[3]=hofs[2]+3*FACE1;
-   hofs[4]=hofs[3]+3*FACE1;
-   hofs[5]=hofs[4]+3*FACE2;
-   hofs[6]=hofs[5]+3*FACE2;
-   hofs[7]=hofs[6]+3*FACE3;
+   hofs_f0[0]=0;
+   hofs_f0[1]=hofs_f0[0]+3*FACE0;
+   hofs_f0[2]=hofs_f0[1]+3*FACE0;
+   hofs_f0[3]=hofs_f0[2]+3*FACE1;
+   hofs_f0[4]=hofs_f0[3]+3*FACE1;
+   hofs_f0[5]=hofs_f0[4]+3*FACE2;
+   hofs_f0[6]=hofs_f0[5]+3*FACE2;
+   hofs_f0[7]=hofs_f0[6]+3*FACE3;
 
-   init=1;
-   #pragma omp target enter data map(to : nfc[:8], ofs[:8], hofs[:8], init)
+   init_f0=1;
+   #pragma omp target enter data map(to : nfc_f0[:8], ofs_f0[:8], hofs_f0[:8], init_f0)
 }
 
 
 #pragma omp declare target
-static void set_staples(int n,int ix,int ia,su3_dble *vd)
+static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble *vd)
 {
    int mu,nu,ifc;
    int iy,ib,ip[4];
@@ -137,11 +137,11 @@ static void set_staples(int n,int ix,int ia,su3_dble *vd)
          ifc=2*nu;
 
          if (iy<(VOLUME+(BNDRY/2)))
-            ib=iy-ofs[ifc];
+            ib=iy-ofs_f0[ifc];
          else
-            ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+            ib=iy-ofs_f0[ifc]-(BNDRY/2)+nfc_f0[ifc];
 
-         vd[0]=hdb[hofs[ifc]+3*ib+mu-(mu>nu)];
+         vd[0]=hdb[hofs_f0[ifc]+3*ib+mu-(mu>nu)];
       }
    }
 
@@ -159,11 +159,11 @@ static void set_staples(int n,int ix,int ia,su3_dble *vd)
       ifc=2*mu+1;
 
       if (iy<(VOLUME+(BNDRY/2)))
-         ib=iy-ofs[ifc];
+         ib=iy-ofs_f0[ifc];
       else
-         ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+         ib=iy-ofs_f0[ifc]-(BNDRY/2)+nfc_f0[ifc];
 
-      vd[1]=hdb[hofs[ifc]+3*ib+nu-(nu>mu)];
+      vd[1]=hdb[hofs_f0[ifc]+3*ib+nu-(nu>mu)];
    }
 
    if (!ia)
@@ -182,11 +182,11 @@ static void set_staples(int n,int ix,int ia,su3_dble *vd)
          ifc=2*mu;
 
          if (iy<(VOLUME+(BNDRY/2)))
-            ib=iy-ofs[ifc];
+            ib=iy-ofs_f0[ifc];
          else
-            ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+            ib=iy-ofs_f0[ifc]-(BNDRY/2)+nfc_f0[ifc];
 
-         vd[2]=hdb[hofs[ifc]+3*ib+nu-(nu>mu)];
+         vd[2]=hdb[hofs_f0[ifc]+3*ib+nu-(nu>mu)];
       }
    }
 
@@ -204,11 +204,11 @@ static void set_staples(int n,int ix,int ia,su3_dble *vd)
       ifc=2*nu+1;
 
       if (iy<(VOLUME+(BNDRY/2)))
-         ib=iy-ofs[ifc];
+         ib=iy-ofs_f0[ifc];
       else
-         ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+         ib=iy-ofs_f0[ifc]-(BNDRY/2)+nfc_f0[ifc];
 
-      vd[3]=hdb[hofs[ifc]+3*ib+mu-(mu>nu)];
+      vd[3]=hdb[hofs_f0[ifc]+3*ib+mu-(mu>nu)];
    }
 }
 #pragma omp end declare target
@@ -317,26 +317,24 @@ void plaq_frc(void)
 }
 
 
-static void force0_part(int ofs_pt,int vol,double c)
+static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,
+   bc_parms_t bcp,int ix,double c)
 {
-   int bc,n,ix,t,ip[4];
+   int bc,n,t,ip[4];
    double r0,r1,c0,c1,*cG;
    su3_alg_dble X ALIGNED16;
    su3_dble wd[3] ALIGNED16;
    su3_dble vd[4] ALIGNED16;
-   lat_parms_t lat;
-   bc_parms_t bcp;
 
-   lat=lat_parms();
    c*=(lat.beta/6.0);
    c0=lat.c0;
    c1=lat.c1;
 
-   bcp=bc_parms();
    bc=bcp.type;
    cG=bcp.cG;
 
-   for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
+   // #pragma omp parallel for
+   // for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
    {
       t=global_time(ix);
 
@@ -377,7 +375,7 @@ static void force0_part(int ofs_pt,int vol,double c)
 
             if (c0!=1.0)
             {
-               set_staples(n,ix,0,vd);
+               set_staples(udb,hdb,n,ix,0,vd);
 
                if ((t==0)&&(bc==1))
                {
@@ -514,7 +512,7 @@ static void force0_part(int ofs_pt,int vol,double c)
 
             if (c0!=1.0)
             {
-               set_staples(n,ix,0,vd);
+               set_staples(udb,hdb,n,ix,0,vd);
 
                prod2su3alg(wd+1,vd,&X);
                _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
@@ -565,6 +563,7 @@ void force0(double c)
 {
    int k,isb,ofs_pt,vol;
    lat_parms_t lat;
+   bc_parms_t bcp;
    mdflds_t *mdfs;
 
    if (query_flags(UDBUF_UP2DATE)!=1)
@@ -582,32 +581,35 @@ void force0(double c)
       hdb=NULL;
    else
    {
-      if (init==0)
+      if (init_f0==0)
          set_ofs();
 
       if (query_flags(BSTAP_UP2DATE)!=1)
          set_bstap();
       hdb=bstap();
    }
+   bcp=bc_parms();
+
+   #pragma omp target update to(fdb)
+   #pragma omp target update to(fdb[0:4*VOLUME])
 
    prof_begin(&force0_part_p);
-#pragma omp parallel private(k,isb,ofs_pt,vol)
-   {
-      k=omp_get_thread_num();
-
-      for (isb=0;isb<16;isb++)
-      {
-         ofs_pt=k*(VOLUME_TRD/2)+sbofs[isb]/2;
-         vol=sbvol[isb]/2;
-
-#pragma omp barrier
-         force0_part(ofs_pt,vol,c);
-         force0_part(ofs_pt+(VOLUME/2),vol,c);
-      }
+   // for (isb=0;isb<16;isb++)
+   // {
+   //    ofs_pt=sbofs[isb]/2;
+   //    vol=sbvol[isb]/2;
+   //    
+   //    printf("ofs_pt:%i , vol:%i \n",ofs_pt,vol);
+   #pragma omp target teams distribute parallel for
+   for (int ix=0;ix<(VOLUME/2);ix++){
+      force0_part(udb,hdb,fdb,lat,bcp,ix,c);
+      force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
    }
+   // }
+   // update fdb
+   #pragma omp target update from(fdb)
+   #pragma omp target update from(fdb[0:4*VOLUME])
    prof_end(&force0_part_p);
-
-   add_bnd_frc();
 }
 
 
@@ -635,7 +637,7 @@ static void wloops(int n,int ix,int t,double c0,double *trU)
 
    if (c0!=1.0)
    {
-      set_staples(n,ix,1,vd);
+      set_staples(udb,hdb,n,ix,1,vd);
 
       if ((n<3)&&(((t==0)&&(bc==1))||
                   ((t==(N0-1))&&((bc==1)||(bc==2)))))
@@ -751,7 +753,7 @@ qflt action0(int icom)
       hdb=NULL;
    else
    {
-      if (init==0)
+      if (init_f0==0)
          set_ofs();
 
       if (query_flags(BSTAP_UP2DATE)!=1)
