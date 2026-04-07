@@ -157,6 +157,7 @@ static void alloc_hdb(void)
 
    sbufs[0]=hdb+3*BNDRY;
    sbufs[1]=sbufs[0]+6*n;
+   #pragma omp target enter data map(to: hdb[:3*BNDRY+12*n])
 }
 
 
