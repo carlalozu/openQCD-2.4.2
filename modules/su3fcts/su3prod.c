@@ -2349,7 +2349,7 @@ void u3algxsu3dag(u3_alg_dble *X,su3_dble *u,su3_dble *v)
    (*v).c33.im= chi.c3.im;
 }
 
-
+#pragma omp declare target
 double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X)
 {
    double tr;
@@ -2400,7 +2400,7 @@ double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X)
 
    return tr;
 }
-
+#pragma omp end declare target
 
 void prod2u3alg(su3_dble *u,su3_dble *v,u3_alg_dble *X)
 {

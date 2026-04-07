@@ -68,8 +68,11 @@
 
 #define N0 (NPROC0*L0)
 
+#pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
+#pragma omp end declare target
 static int nfc[8],ofs[8],hofs[8],init=0;
+
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
@@ -104,9 +107,11 @@ static void set_ofs(void)
    hofs[7]=hofs[6]+3*FACE3;
 
    init=1;
+   #pragma omp target enter data map(to : nfc[:8], ofs[:8], hofs[:8], init)
 }
 
 
+#pragma omp declare target
 static void set_staples(int n,int ix,int ia,su3_dble *vd)
 {
    int mu,nu,ifc;
@@ -206,6 +211,7 @@ static void set_staples(int n,int ix,int ia,su3_dble *vd)
       vd[3]=hdb[hofs[ifc]+3*ib+mu-(mu>nu)];
    }
 }
+#pragma omp end declare target
 
 
 static void plaq_frc_part(int ofs_pt,int vol)
