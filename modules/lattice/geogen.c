@@ -185,6 +185,7 @@ void set_sbofs(void)
       for (ic=0;ic<ib;ic++)
          sbofs[ib]+=sbvol[ic];
    }
+   #pragma omp target enter data map(to: sbofs[:16], sbvol[:16])
 }
 
 

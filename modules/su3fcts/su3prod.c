@@ -2066,6 +2066,7 @@ void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w)
 #pragma omp end declare target
 
 
+#pragma omp declare target
 void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w)
 {
    su3_vector_dble psi,chi;
@@ -2094,8 +2095,10 @@ void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
 }
+#pragma omp end declare target
 
 
+#pragma omp declare target
 void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
 {
    su3_vector_dble psi,chi;
@@ -2133,6 +2136,7 @@ void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
 }
+#pragma omp end declare target
 
 
 #pragma omp declare target
