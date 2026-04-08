@@ -357,7 +357,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
             {
                prod2su3alg(wd,wd+1,&X);
                _su3_alg_mul_add_assign(*(fdb+ip[1]),r0,X);
-	    }
+	         }
 
             prod2su3alg(wd+1,wd,&X);
             _su3_alg_mul_sub_assign(*(fdb+ip[3]),r0,X);
@@ -592,24 +592,13 @@ void force0(double c)
    #pragma omp target update to(fdb[0:4*VOLUME])
    prof_begin(&force0_part_p);
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
-   {
-      k=0;
-
-      for (isb=0;isb<16;isb++)
-      {
-         ofs_pt=k*(VOLUME_TRD/2)+sbofs[isb]/2;
-         vol=sbvol[isb]/2;
-
 // #pragma omp barrier
-      #pragma omp target teams distribute parallel for
-      for (int ix=ofs_pt;ix<(ofs_pt+vol);ix++)
-      {
-         force0_part(udb,hdb,fdb,lat,bcp,ix,c);
-         force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
-      }
-      }
+   #pragma omp target teams distribute parallel for
+   for (int ix=0;ix<(VOLUME/2);ix++)
+   {
+      force0_part(udb,hdb,fdb,lat,bcp,ix,c);
+      force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
    }
-
    #pragma omp target update from(fdb)
    #pragma omp target update from(fdb[0:4*VOLUME])
    prof_end(&force0_part_p);
