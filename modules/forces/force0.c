@@ -67,12 +67,10 @@
 #include "profiler.h"
 
 #define N0 (NPROC0*L0)
-
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
 static int nfc[8],ofs[8],hofs[8],init=0;
 #pragma omp end declare target
-
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
@@ -332,6 +330,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
    bc=bcp.type;
    cG=bcp.cG;
 
+
    // for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
    {
       t=global_time(ix);
@@ -588,19 +587,24 @@ void force0(double c)
    }
    bcp=bc_parms();
 
-   #pragma omp target update to(fdb)
-   #pragma omp target update to(fdb[0:4*VOLUME])
    prof_begin(&force0_part_p);
-// #pragma omp parallel private(k,isb,ofs_pt,vol)
-// #pragma omp barrier
-   #pragma omp target teams distribute parallel for
-   for (int ix=0;ix<(VOLUME/2);ix++)
+#pragma omp parallel private(k,isb,ofs_pt,vol)
    {
-      force0_part(udb,hdb,fdb,lat,bcp,ix,c);
-      force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
+      k=omp_get_thread_num();
+
+      for (isb=0;isb<16;isb++)
+      {
+         ofs_pt=k*(VOLUME_TRD/2)+sbofs[isb]/2;
+         vol=sbvol[isb]/2;
+
+#pragma omp barrier
+      for (int ix=ofs_pt;ix<(ofs_pt+vol);ix++)
+      {
+         force0_part(udb,hdb,fdb,lat,bcp,ix,c);
+         force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
+      }
+      }
    }
-   #pragma omp target update from(fdb)
-   #pragma omp target update from(fdb[0:4*VOLUME])
    prof_end(&force0_part_p);
    add_bnd_frc();
 
