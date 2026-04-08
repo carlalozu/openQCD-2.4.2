@@ -13,22 +13,16 @@
 ################################################################################
 
 [Run name]
-name         8x8v2
+name         4x4v3_threads
 
 [Log and data directories]
 log_dir      ../data/ym1/log
 dat_dir      ../data/ym1/dat
 
-[Initial configuration]
-type         b
-block_dir    ../data/ym1/blk
-nio_nodes    1
-nio_streams  1
-
 [Configurations]
 types        b
 block_dir    ../data/ym1/blk
-bs           8 8 8 8
+bs           4 4 4 4
 nio_nodes    1
 nio_streams  1
 
