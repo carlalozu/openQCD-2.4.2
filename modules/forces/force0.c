@@ -356,19 +356,19 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
             if ((t<(N0-1))||(bc==3))
             {
                prod2su3alg(wd,wd+1,&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[1]),r0,X);
+               su3_alg_mul_add_assign((fdb+ip[1]),r0,X);
 	         }
 
             prod2su3alg(wd+1,wd,&X);
-            _su3_alg_mul_sub_assign(*(fdb+ip[3]),r0,X);
+            su3_alg_mul_sub_assign((fdb+ip[3]),r0,X);
 
             su3xsu3dag(wd,udb+ip[2],wd+1);
             prod2su3alg(udb+ip[0],wd+1,&X);
-            _su3_alg_mul_add_assign(*(fdb+ip[0]),r0,X);
+            su3_alg_mul_add_assign((fdb+ip[0]),r0,X);
 
             if ((t>0)||(bc!=1))
             {
-               _su3_alg_mul_sub_assign(*(fdb+ip[2]),r0,X);
+               su3_alg_mul_sub_assign((fdb+ip[2]),r0,X);
             }
 
             if (c0!=1.0)
@@ -381,15 +381,15 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
                   su3xsu3(udb+ip[0],wd+2,wd+2);
 
                   prod2su3alg(wd+1,wd+2,&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
 
                   prod2su3alg(wd+2,wd+1,&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[0]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[0]),r1,X);
 
                   su3dagxsu3(udb+ip[2],wd+2,wd+2);
 
                   prod2su3alg(wd+2,wd,&X);
-                  _su3_alg_mul_sub_assign(*(fdb+ip[3]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[3]),r1,X);
                }
 
                if ((t==(N0-1))&&(bc!=3))
@@ -398,78 +398,78 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
                   su3xsu3(udb+ip[0],wd+2,wd+2);
 
                   prod2su3alg(wd+2,wd+1,&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[0]),r1,X);
-                  _su3_alg_mul_sub_assign(*(fdb+ip[2]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[0]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[2]),r1,X);
 
                   su3dagxsu3(udb+ip[2],wd+2,wd+2);
 
                   prod2su3alg(wd+2,wd,&X);
-                  _su3_alg_mul_sub_assign(*(fdb+ip[3]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[3]),r1,X);
                }
 
                if ((t<(N0-1))||(bc==3))
                {
                   prod2su3alg(wd+1,vd,&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
                }
 
                if ((t>0)||(bc!=1))
                {
                   prod2su3alg(vd,wd+1,&X);
-                  _su3_alg_mul_sub_assign(*(fdb+ip[2]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[2]),r1,X);
                }
 
                su3dagxsu3(udb+ip[2],vd,wd+1);
                prod2su3alg(wd+1,wd,&X);
-               _su3_alg_mul_sub_assign(*(fdb+ip[3]),r1,X);
+               su3_alg_mul_sub_assign((fdb+ip[3]),r1,X);
 
                if ((t<(N0-2))||((t==(N0-2))&&(bc!=0))||(bc==3))
                {
                   su3xsu3dag(udb+ip[3],vd+1,wd+1);
                   su3xsu3dag(wd+1,udb+ip[0],wd+2);
                   prod2su3alg(udb+ip[2],wd+2,&X);
-                  _su3_alg_mul_sub_assign(*(fdb+ip[0]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[0]),r1,X);
 
                   if ((t>0)||(bc!=1))
                   {
-                     _su3_alg_mul_add_assign(*(fdb+ip[2]),r1,X);
+                     su3_alg_mul_add_assign((fdb+ip[2]),r1,X);
                   }
 
                   prod2su3alg(wd+2,udb+ip[2],&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[3]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[3]),r1,X);
                }
 
                if ((t>0)||(bc==3))
                {
                   su3xsu3dag(wd,vd+2,wd+1);
                   prod2su3alg(udb+ip[0],wd+1,&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[0]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[0]),r1,X);
 
                   if ((t<(N0-1))||(bc==3))
                   {
                      prod2su3alg(wd+1,udb+ip[0],&X);
-                     _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+                     su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
                   }
 
                   su3dagxsu3(vd+2,udb+ip[0],wd+1);
                   prod2su3alg(wd+1,wd,&X);
-                  _su3_alg_mul_sub_assign(*(fdb+ip[3]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[3]),r1,X);
                }
 
                su3xsu3dag(udb+ip[1],vd+3,wd);
                su3xsu3dag(wd,udb+ip[2],wd+1);
                prod2su3alg(udb+ip[0],wd+1,&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[0]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[0]),r1,X);
 
                if ((t>0)||(bc!=1))
                {
-                  _su3_alg_mul_sub_assign(*(fdb+ip[2]),r1,X);
+                  su3_alg_mul_sub_assign((fdb+ip[2]),r1,X);
                }
 
                if ((t<(N0-1))||(bc==3))
                {
                   prod2su3alg(wd+1,udb+ip[0],&X);
-                  _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+                  su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
                }
             }
          }
@@ -498,58 +498,58 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
             su3xsu3dag(udb+ip[1],udb+ip[3],wd);
             su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
             prod2su3alg(wd,wd+1,&X);
-            _su3_alg_mul_add_assign(*(fdb+ip[1]),r0,X);
+            su3_alg_mul_add_assign((fdb+ip[1]),r0,X);
 
             prod2su3alg(wd+1,wd,&X);
-            _su3_alg_mul_sub_assign(*(fdb+ip[3]),r0,X);
+            su3_alg_mul_sub_assign((fdb+ip[3]),r0,X);
 
             su3xsu3dag(wd,udb+ip[2],wd+1);
             prod2su3alg(udb+ip[0],wd+1,&X);
-            _su3_alg_mul_add_assign(*(fdb+ip[0]),r0,X);
-            _su3_alg_mul_sub_assign(*(fdb+ip[2]),r0,X);
+            su3_alg_mul_add_assign((fdb+ip[0]),r0,X);
+            su3_alg_mul_sub_assign((fdb+ip[2]),r0,X);
 
             if (c0!=1.0)
             {
                set_staples(udb,hdb,n,ix,0,vd);
 
                prod2su3alg(wd+1,vd,&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
 
                prod2su3alg(vd,wd+1,&X);
-               _su3_alg_mul_sub_assign(*(fdb+ip[2]),r1,X);
+               su3_alg_mul_sub_assign((fdb+ip[2]),r1,X);
 
                su3dagxsu3(udb+ip[2],vd,wd+1);
                prod2su3alg(wd+1,wd,&X);
-               _su3_alg_mul_sub_assign(*(fdb+ip[3]),r1,X);
+               su3_alg_mul_sub_assign((fdb+ip[3]),r1,X);
 
                su3xsu3dag(udb+ip[3],vd+1,wd+1);
                su3xsu3dag(wd+1,udb+ip[0],wd+2);
                prod2su3alg(udb+ip[2],wd+2,&X);
-               _su3_alg_mul_sub_assign(*(fdb+ip[0]),r1,X);
-               _su3_alg_mul_add_assign(*(fdb+ip[2]),r1,X);
+               su3_alg_mul_sub_assign((fdb+ip[0]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[2]),r1,X);
 
                prod2su3alg(wd+2,udb+ip[2],&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[3]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[3]),r1,X);
 
                su3xsu3dag(wd,vd+2,wd+1);
                prod2su3alg(udb+ip[0],wd+1,&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[0]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[0]),r1,X);
 
                prod2su3alg(wd+1,udb+ip[0],&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
 
                su3dagxsu3(vd+2,udb+ip[0],wd+1);
                prod2su3alg(wd+1,wd,&X);
-               _su3_alg_mul_sub_assign(*(fdb+ip[3]),r1,X);
+               su3_alg_mul_sub_assign((fdb+ip[3]),r1,X);
 
                su3xsu3dag(udb+ip[1],vd+3,wd);
                su3xsu3dag(wd,udb+ip[2],wd+1);
                prod2su3alg(udb+ip[0],wd+1,&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[0]),r1,X);
-               _su3_alg_mul_sub_assign(*(fdb+ip[2]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[0]),r1,X);
+               su3_alg_mul_sub_assign((fdb+ip[2]),r1,X);
 
                prod2su3alg(wd+1,udb+ip[0],&X);
-               _su3_alg_mul_add_assign(*(fdb+ip[1]),r1,X);
+               su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
             }
          }
       }
@@ -589,28 +589,20 @@ void force0(double c)
    bcp=bc_parms();
 
    prof_begin(&force0_part_p);
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
 
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
+
+   #pragma omp target teams distribute parallel for
+   for (int ix=0;ix<VOLUME/2;ix++)
    {
-      k=0;
-
-      for (isb=0;isb<16;isb++)
-      {
-         ofs_pt=k*(VOLUME_TRD/2)+sbofs[isb]/2;
-         vol=sbvol[isb]/2;
-
-         #pragma omp target teams distribute parallel for
-         for (int ix=ofs_pt;ix<(ofs_pt+vol);ix++)
-         {
-            force0_part(udb,hdb,fdb,lat,bcp,ix,c);
-            force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
-         }
-      }
+      force0_part(udb,hdb,fdb,lat,bcp,ix,c);
+      force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
    }
    #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&force0_part_p);
    add_bnd_frc();
+   prof_end(&force0_part_p);
 }
 
 

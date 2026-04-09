@@ -154,8 +154,6 @@ su3_dble *udfld(void)
    if (udb==NULL)
       alloc_ud();
 
-   // for now, always update udb
-   #pragma omp target update to(udb[:udb_size])
    return udb;
 }
 
