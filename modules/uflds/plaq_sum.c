@@ -103,8 +103,8 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
    prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa) num_teams(N_TEAMS)
-   for (ix=0;ix<VOLUME_TRD;ix++)
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (ix=0;ix<VOLUME;ix++)
 {
       double local_pa=0.0;
       t=global_time(ix);
