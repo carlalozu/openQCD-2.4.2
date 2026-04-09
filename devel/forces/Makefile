@@ -108,8 +108,8 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c89 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes -Werror \
+CFLAGS = -std=c99 -pedantic -fstrict-aliasing -fopenmp -Wall \
+         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
          -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
 
 LFLAGS = -fopenmp
