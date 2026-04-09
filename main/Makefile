@@ -18,7 +18,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = cvt1 ms1 ms2 ms3 ms4 qcd1 qcd2 xms1 xms2 ym1 ym2
+MAIN = cvt1 ms1 ms2 ms3 ms4 qcd1 qcd2 xms1 xms2 ym1 ym2 ym1_time
 
 ARCHIVE = archive iodat marchive sarchive
 
