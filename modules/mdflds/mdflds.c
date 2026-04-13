@@ -262,6 +262,7 @@ static void alloc_mdflds(void)
       (*mdfs).eo=NULL;
       (*mdfs).pf=NULL;
    }
+   #pragma omp target enter data map(to: mdfs->mom[:4*VOLUME])
    #pragma omp target enter data map(to: mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
 }
 

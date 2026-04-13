@@ -571,9 +571,21 @@ void force0(double c)
    udb=udfld();
    mdfs=mdflds();
    fdb=(*mdfs).frc;
-   set_frc2zero();
-
    lat=lat_parms();
+
+   // set_frc2zero();
+   #pragma omp target teams distribute parallel for
+   for (int i=0; i<(4*VOLUME+7*(BNDRY/4)); i++)
+   {
+      fdb[i].c1=0.0;
+      fdb[i].c2=0.0;
+      fdb[i].c3=0.0;
+      fdb[i].c4=0.0;
+      fdb[i].c5=0.0;
+      fdb[i].c6=0.0;
+      fdb[i].c7=0.0;
+      fdb[i].c8=0.0;
+   }
 
    if (lat.c0==1.0)
       hdb=NULL;
@@ -589,8 +601,7 @@ void force0(double c)
    bcp=bc_parms();
 
    prof_begin(&force0_part_p);
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
 
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
 
@@ -600,7 +611,7 @@ void force0(double c)
       force0_part(udb,hdb,fdb,lat,bcp,ix,c);
       force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
    }
-   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
    add_bnd_frc();
    prof_end(&force0_part_p);
 }

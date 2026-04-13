@@ -87,6 +87,8 @@ extern void run_smd_noacc1(void);
 /* UPDATE_C */
 extern void update_mom(void);
 extern void update_ud(double eps);
+extern void update_flds_to(void);
+extern void update_flds_from(void);
 extern void start_dfl_upd(void);
 extern void dfl_upd(void);
 extern prof_section update_mom_p;

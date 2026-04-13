@@ -44,11 +44,13 @@ typedef struct
 
 /* CHEXP_C */
 extern void chexp_init(void);
-extern void ch2mat(complex_dble *p,su3_alg_dble *X,su3_dble *u);
-extern void chexp_drv0(su3_alg_dble *X,ch_drv0_t *s);
 extern void chexp_drv1(su3_alg_dble *X,ch_drv1_t *s);
 extern void chexp_drv2(su3_alg_dble *X,ch_drv2_t *s);
+#pragma omp declare target
+extern void chexp_drv0(su3_alg_dble *X,ch_drv0_t *s);
+extern void ch2mat(complex_dble *p,su3_alg_dble *X,su3_dble *u);
 extern void expXsu3(double eps,su3_alg_dble *X,su3_dble *u);
+#pragma omp end declare target
 
 /* CM3X3_C */
 extern void cm3x3_zero(int vol,su3_dble *u);
