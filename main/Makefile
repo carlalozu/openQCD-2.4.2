@@ -116,6 +116,8 @@ CFLAGS = -std=c99 -pedantic -fstrict-aliasing -fopenmp -Wall \
          -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
          -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
 
+# CFLAGS = -O1 -fopenmp -DFMA3 -DPM // for mpicc arm gnu
+
 LFLAGS = -fopenmp
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
@@ -132,7 +134,6 @@ LFLAGS = -fopenmp
 ############################## do not change ###################################
 
 SHELL=/bin/bash
-CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)
