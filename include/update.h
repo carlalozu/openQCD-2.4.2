@@ -88,6 +88,7 @@ extern void run_smd_noacc1(void);
 extern void update_mom(void);
 extern void update_ud(double eps);
 extern void update_flds_to(void);
+extern void init_data_to_device(void);
 extern void update_flds_from(void);
 extern void start_dfl_upd(void);
 extern void dfl_upd(void);

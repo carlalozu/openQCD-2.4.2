@@ -186,6 +186,7 @@ void run_mdint(void)
    hmc=hmc_parms();
    smd=smd_parms();
 
+   init_data_to_device();
    update_flds_to();
    if (hmc.nlv!=0)
       mdint(hmc.mu);

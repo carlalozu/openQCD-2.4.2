@@ -20,7 +20,10 @@ typedef struct {
   int level;
 } prof_section;
 
-static inline void prof_begin(prof_section *s) { s->t0 = prof_now(); }
+static inline void prof_begin(prof_section *s) {
+   s->t0 = prof_now(); 
+}
+
 static inline void prof_end(prof_section *s) {
   double t1 = prof_now();
   s->total += (t1 - s->t0);
