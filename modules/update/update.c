@@ -159,54 +159,52 @@ void update_ud(double eps)
    // #pragma omp target update to((*mdfs).mom[:4*VOLUME])
    // #pragma omp target update to(ud[:4*VOLUME+7*(BNDRY/4)])
 // #pragma omp parallel private(k,ofs,vol,ix,t,ifc,ud,mom)
-   {
 //       int k=omp_get_thread_num();
 // 
 //       int vol=VOLUME_TRD/2;
 //       int ofs=(VOLUME/2)+k*vol;
 
-      
-      #pragma omp target teams distribute parallel for
-      for (int ix=0;ix<VOLUME/2;ix++)
-      {
-         int off=8*ix;
-         int t=global_time(ix+(VOLUME/2));
+   
+   #pragma omp target teams distribute parallel for
+   for (int ix=0;ix<VOLUME/2;ix++)
+   {
+      int off=8*ix;
+      int t=global_time(ix+(VOLUME/2));
 
-         if (t==0)
+      if (t==0)
+      {
+         expXsu3(eps,mom+off,ud+off);
+         off+=1;
+
+         if (bc!=0)
+            expXsu3(eps,mom+off,ud+off);
+         off+=1;
+
+         for (int ifc=2;ifc<8;ifc++)
+         {
+            if (bc!=1)
+               expXsu3(eps,mom+off,ud+off);
+            off+=1;
+         }
+      }
+      else if (t==(N0-1))
+      {
+         if (bc!=0)
+            expXsu3(eps,mom+off,ud+off);
+         off+=1;
+
+         for (int ifc=1;ifc<8;ifc++)
          {
             expXsu3(eps,mom+off,ud+off);
             off+=1;
-
-            if (bc!=0)
-               expXsu3(eps,mom+off,ud+off);
-            off+=1;
-
-            for (int ifc=2;ifc<8;ifc++)
-            {
-               if (bc!=1)
-                  expXsu3(eps,mom+off,ud+off);
-               off+=1;
-            }
          }
-         else if (t==(N0-1))
+      }
+      else
+      {
+         for (int ifc=0;ifc<8;ifc++)
          {
-            if (bc!=0)
-               expXsu3(eps,mom+off,ud+off);
+            expXsu3(eps,mom+off,ud+off);
             off+=1;
-
-            for (int ifc=1;ifc<8;ifc++)
-            {
-               expXsu3(eps,mom+off,ud+off);
-               off+=1;
-            }
-         }
-         else
-         {
-            for (int ifc=0;ifc<8;ifc++)
-            {
-               expXsu3(eps,mom+off,ud+off);
-               off+=1;
-            }
          }
       }
    }
@@ -216,8 +214,8 @@ void update_ud(double eps)
    prof_end(&update_ud_p);
 }
 
-void update_flds_to(void){
-   // int k,ofs,vol,ix,t,ifc;
+void update_flds_to(void)
+{
    su3_dble *ud;
    mdflds_t *mdfs;
 
@@ -228,8 +226,8 @@ void update_flds_to(void){
    #pragma omp target update to((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
 }
 
-void init_data_to_device(void){
-   // int k,ofs,vol,ix,t,ifc;
+void init_data_to_device(void)
+{
    su3_dble *ud;
    mdflds_t *mdfs;
 
@@ -240,8 +238,8 @@ void init_data_to_device(void){
    #pragma omp target enter data map(to: (*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
 }
 
-void update_flds_from(void){
-   // int k,ofs,vol,ix,t,ifc;
+void update_flds_from(void)
+{
    su3_dble *ud;
    mdflds_t *mdfs;
 
