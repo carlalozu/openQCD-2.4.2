@@ -87,11 +87,10 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 
 static qflt local_plaq_sum_dble(int iw)
 {
-   int bc,ix,t,n;
    double wp,pa=0.0;
    qflt rqsm;
 
-   bc=bc_type();
+   int bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -104,19 +103,19 @@ static qflt local_plaq_sum_dble(int iw)
    prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
-   for (ix=0;ix<VOLUME;ix++)
-{
+   for (int ix=0;ix<VOLUME;ix++)
+   {
       double local_pa=0.0;
-      t=global_time(ix);
+      int t=global_time(ix);
       if ((t<(N0-1))||(bc!=0))
       {
-         for (n=0;n<3;n++)
+         for (int n=0;n<3;n++)
             local_pa+=plaq_dble(udb,n,ix);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
-         for (n=3;n<6;n++)
+         for (int n=3;n<6;n++)
             local_pa+=plaq_dble(udb,n,ix);
       }
       else if ((t==0)||(bc==0))
@@ -125,13 +124,13 @@ static qflt local_plaq_sum_dble(int iw)
             local_pa+=wp*9.0;
          else
          {
-            for (n=3;n<6;n++)
+            for (int n=3;n<6;n++)
                local_pa+=wp*plaq_dble(udb,n,ix);
          }
       }
       else
       {
-         for (n=3;n<6;n++)
+         for (int n=3;n<6;n++)
             local_pa+=plaq_dble(udb,n,ix);
 
          local_pa+=wp*9.0;
