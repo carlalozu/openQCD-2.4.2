@@ -116,7 +116,7 @@ CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
          -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
          -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda
+LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
 
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
