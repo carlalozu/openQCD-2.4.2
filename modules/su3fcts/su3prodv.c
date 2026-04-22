@@ -200,24 +200,38 @@ void fsu3matxsu3mat(
    su3_vec_field psi;
    su3_vector_dble chi;
 
-   psi=(*u).c1;
+   psi.c1re=(*u).c1.c1re;
+   psi.c1im=(*u).c1.c1im;
+   psi.c2re=(*u).c2.c1re;
+   psi.c2im=(*u).c2.c1im;
+   psi.c3re=(*u).c3.c1re;
+   psi.c3im=(*u).c3.c1im;
    fsu3matxsu3vec(u,&psi,&chi,ip0,ip1);
    (*res).c11=chi.c1;
    (*res).c21=chi.c2;
    (*res).c31=chi.c3;
 
-   psi=(*u).c2;
+   psi.c1re=(*u).c1.c2re;
+   psi.c1im=(*u).c1.c2im;
+   psi.c2re=(*u).c2.c2re;
+   psi.c2im=(*u).c2.c2im;
+   psi.c3re=(*u).c3.c2re;
+   psi.c3im=(*u).c3.c2im;
    fsu3matxsu3vec(u,&psi,&chi,ip0,ip1);
    (*res).c12=chi.c1;
    (*res).c22=chi.c2;
    (*res).c32=chi.c3;
 
-   psi=(*u).c3;
+   psi.c1re=(*u).c1.c3re;
+   psi.c1im=(*u).c1.c3im;
+   psi.c2re=(*u).c2.c3re;
+   psi.c2im=(*u).c2.c3im;
+   psi.c3re=(*u).c3.c3re;
+   psi.c3im=(*u).c3.c3im;
    fsu3matxsu3vec(u,&psi,&chi,ip0,ip1);
    (*res).c13=chi.c1;
    (*res).c23=chi.c2;
    (*res).c33=chi.c3;
-
 }
 #pragma omp end declare target
 

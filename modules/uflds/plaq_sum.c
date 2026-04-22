@@ -99,8 +99,8 @@ static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
 
    /* Re[tr(wd1 * wd2^dag)] = sum_{ij} (wd1_ij.re*wd2_ij.re + wd1_ij.im*wd2_ij.im) */
    fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
-   fsu3matxsu3mat(udbv, &wd2, ip[2], ip[3]);
-   cm3x3_retr_dag(&wd1,&wd2,&sm);
+   fsu3matdagxsu3matdag(udbv, &wd2, ip[3], ip[2]);
+   cm3x3_retr(&wd1,&wd2,&sm);
 
    return sm;
 }
