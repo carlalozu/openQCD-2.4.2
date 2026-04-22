@@ -215,138 +215,152 @@ void fsu3matdagxsu3matdag(
  * We compute one diagonal contribution at a time, keeping only
  * one row of A and one column of B live simultaneously.
  */
- #pragma omp declare target
+#pragma omp declare target
+#pragma omp declare target
 double plaq_retrace_fused(const su3_mat_field *u,
-                                  int ip0, int ip1,
-                                  int ip2, int ip3)
+                          int ip0, int ip1,
+                          int ip2, int ip3)
 {
    double tr = 0.0;
 
-   double xc11re = u->c1.c1re[ip0] * u->c1.c1re[ip1] - u->c1.c1im[ip0] * u->c1.c1im[ip1] +
-                 u->c1.c2re[ip0] * u->c1.c2re[ip1] - u->c1.c2im[ip0] * u->c1.c2im[ip1] +
-                 u->c1.c3re[ip0] * u->c1.c3re[ip1] - u->c1.c3im[ip0] * u->c1.c3im[ip1];
-   double xc11im = u->c1.c1re[ip0] * u->c1.c1im[ip1] + u->c1.c1im[ip0] * u->c1.c1re[ip1] +
-                 u->c1.c2re[ip0] * u->c1.c2im[ip1] + u->c1.c2im[ip0] * u->c1.c2re[ip1] +
-                 u->c1.c3re[ip0] * u->c1.c3im[ip1] + u->c1.c3im[ip0] * u->c1.c3re[ip1];
-   double xc12re = u->c2.c1re[ip0] * u->c1.c1re[ip1] - u->c2.c1im[ip0] * u->c1.c1im[ip1] +
-                 u->c2.c2re[ip0] * u->c1.c2re[ip1] - u->c2.c2im[ip0] * u->c1.c2im[ip1] +
-                 u->c2.c3re[ip0] * u->c1.c3re[ip1] - u->c2.c3im[ip0] * u->c1.c3im[ip1];
-   double xc12im = u->c2.c1re[ip0] * u->c1.c1im[ip1] + u->c2.c1im[ip0] * u->c1.c1re[ip1] +
-                 u->c2.c2re[ip0] * u->c1.c2im[ip1] + u->c2.c2im[ip0] * u->c1.c2re[ip1] +
-                 u->c2.c3re[ip0] * u->c1.c3im[ip1] + u->c2.c3im[ip0] * u->c1.c3re[ip1];
-   double xc13re = u->c3.c1re[ip0] * u->c1.c1re[ip1] - u->c3.c1im[ip0] * u->c1.c1im[ip1] +
-                 u->c3.c2re[ip0] * u->c1.c2re[ip1] - u->c3.c2im[ip0] * u->c1.c2im[ip1] +
-                 u->c3.c3re[ip0] * u->c1.c3re[ip1] - u->c3.c3im[ip0] * u->c1.c3im[ip1];
-   double xc13im = u->c3.c1re[ip0] * u->c1.c1im[ip1] + u->c3.c1im[ip0] * u->c1.c1re[ip1] +
-                 u->c3.c2re[ip0] * u->c1.c2im[ip1] + u->c3.c2im[ip0] * u->c1.c2re[ip1] +
-                 u->c3.c3re[ip0] * u->c1.c3im[ip1] + u->c3.c3im[ip0] * u->c1.c3re[ip1];
+   double xc11re = u->c1.c1re[ip0]*u->c1.c1re[ip1] - u->c1.c1im[ip0]*u->c1.c1im[ip1]
+                 + u->c1.c2re[ip0]*u->c2.c1re[ip1] - u->c1.c2im[ip0]*u->c2.c1im[ip1]
+                 + u->c1.c3re[ip0]*u->c3.c1re[ip1] - u->c1.c3im[ip0]*u->c3.c1im[ip1];
+   double xc11im = u->c1.c1re[ip0]*u->c1.c1im[ip1] + u->c1.c1im[ip0]*u->c1.c1re[ip1]
+                 + u->c1.c2re[ip0]*u->c2.c1im[ip1] + u->c1.c2im[ip0]*u->c2.c1re[ip1]
+                 + u->c1.c3re[ip0]*u->c3.c1im[ip1] + u->c1.c3im[ip0]*u->c3.c1re[ip1];
 
-   double xc21re = u->c1.c1re[ip0] * u->c2.c1re[ip1] - u->c1.c1im[ip0] * u->c2.c1im[ip1] +
-                 u->c1.c2re[ip0] * u->c2.c2re[ip1] - u->c1.c2im[ip0] * u->c2.c2im[ip1] +
-                 u->c1.c3re[ip0] * u->c2.c3re[ip1] - u->c1.c3im[ip0] * u->c2.c3im[ip1];
-   double xc21im = u->c1.c1re[ip0] * u->c2.c1im[ip1] + u->c1.c1im[ip0] * u->c2.c1re[ip1] +
-                 u->c1.c2re[ip0] * u->c2.c2im[ip1] + u->c1.c2im[ip0] * u->c2.c2re[ip1] +
-                 u->c1.c3re[ip0] * u->c2.c3im[ip1] + u->c1.c3im[ip0] * u->c2.c3re[ip1];
-   double xc22re = u->c2.c1re[ip0] * u->c2.c1re[ip1] - u->c2.c1im[ip0] * u->c2.c1im[ip1] +
-                 u->c2.c2re[ip0] * u->c2.c2re[ip1] - u->c2.c2im[ip0] * u->c2.c2im[ip1] +
-                 u->c2.c3re[ip0] * u->c2.c3re[ip1] - u->c2.c3im[ip0] * u->c2.c3im[ip1];
-   double xc22im = u->c2.c1re[ip0] * u->c2.c1im[ip1] + u->c2.c1im[ip0] * u->c2.c1re[ip1] +
-                 u->c2.c2re[ip0] * u->c2.c2im[ip1] + u->c2.c2im[ip0] * u->c2.c2re[ip1] +
-                 u->c2.c3re[ip0] * u->c2.c3im[ip1] + u->c2.c3im[ip0] * u->c2.c3re[ip1];
-   double xc23re = u->c3.c1re[ip0] * u->c2.c1re[ip1] - u->c3.c1im[ip0] * u->c2.c1im[ip1] +
-                 u->c3.c2re[ip0] * u->c2.c2re[ip1] - u->c3.c2im[ip0] * u->c2.c2im[ip1] +
-                 u->c3.c3re[ip0] * u->c2.c3re[ip1] - u->c3.c3im[ip0] * u->c2.c3im[ip1];
-   double xc23im = u->c3.c1re[ip0] * u->c2.c1im[ip1] + u->c3.c1im[ip0] * u->c2.c1re[ip1] +
-                 u->c3.c2re[ip0] * u->c2.c2im[ip1] + u->c3.c2im[ip0] * u->c2.c2re[ip1] +
-                 u->c3.c3re[ip0] * u->c2.c3im[ip1] + u->c3.c3im[ip0] * u->c2.c3re[ip1];
+   double xc12re = u->c1.c1re[ip0]*u->c1.c2re[ip1] - u->c1.c1im[ip0]*u->c1.c2im[ip1]
+                 + u->c1.c2re[ip0]*u->c2.c2re[ip1] - u->c1.c2im[ip0]*u->c2.c2im[ip1]
+                 + u->c1.c3re[ip0]*u->c3.c2re[ip1] - u->c1.c3im[ip0]*u->c3.c2im[ip1];
+   double xc12im = u->c1.c1re[ip0]*u->c1.c2im[ip1] + u->c1.c1im[ip0]*u->c1.c2re[ip1]
+                 + u->c1.c2re[ip0]*u->c2.c2im[ip1] + u->c1.c2im[ip0]*u->c2.c2re[ip1]
+                 + u->c1.c3re[ip0]*u->c3.c2im[ip1] + u->c1.c3im[ip0]*u->c3.c2re[ip1];
 
-   double xc31re = u->c1.c1re[ip0] * u->c3.c1re[ip1] - u->c1.c1im[ip0] * u->c3.c1im[ip1] +
-                 u->c1.c2re[ip0] * u->c3.c2re[ip1] - u->c1.c2im[ip0] * u->c3.c2im[ip1] +
-                 u->c1.c3re[ip0] * u->c3.c3re[ip1] - u->c1.c3im[ip0] * u->c3.c3im[ip1];
-   double xc31im = u->c1.c1re[ip0] * u->c3.c1im[ip1] + u->c1.c1im[ip0] * u->c3.c1re[ip1] +
-                 u->c1.c2re[ip0] * u->c3.c2im[ip1] + u->c1.c2im[ip0] * u->c3.c2re[ip1] +
-                 u->c1.c3re[ip0] * u->c3.c3im[ip1] + u->c1.c3im[ip0] * u->c3.c3re[ip1];
-   double xc32re = u->c2.c1re[ip0] * u->c3.c1re[ip1] - u->c2.c1im[ip0] * u->c3.c1im[ip1] +
-                 u->c2.c2re[ip0] * u->c3.c2re[ip1] - u->c2.c2im[ip0] * u->c3.c2im[ip1] +
-                 u->c2.c3re[ip0] * u->c3.c3re[ip1] - u->c2.c3im[ip0] * u->c3.c3im[ip1];
-   double xc32im = u->c2.c1re[ip0] * u->c3.c1im[ip1] + u->c2.c1im[ip0] * u->c3.c1re[ip1] +
-                 u->c2.c2re[ip0] * u->c3.c2im[ip1] + u->c2.c2im[ip0] * u->c3.c2re[ip1] +
-                 u->c2.c3re[ip0] * u->c3.c3im[ip1] + u->c2.c3im[ip0] * u->c3.c3re[ip1];
-   double xc33re = u->c3.c1re[ip0] * u->c3.c1re[ip1] - u->c3.c1im[ip0] * u->c3.c1im[ip1] +
-                 u->c3.c2re[ip0] * u->c3.c2re[ip1] - u->c3.c2im[ip0] * u->c3.c2im[ip1] +
-                 u->c3.c3re[ip0] * u->c3.c3re[ip1] - u->c3.c3im[ip0] * u->c3.c3im[ip1];
-   double xc33im = u->c3.c1re[ip0] * u->c3.c1im[ip1] + u->c3.c1im[ip0] * u->c3.c1re[ip1] +
-                 u->c3.c2re[ip0] * u->c3.c2im[ip1] + u->c3.c2im[ip0] * u->c3.c2re[ip1] +
-                 u->c3.c3re[ip0] * u->c3.c3im[ip1] + u->c3.c3im[ip0] * u->c3.c3re[ip1];
-                 
-   double yc11re = u->c1.c1re[ip2] * u->c1.c1re[ip3] + u->c1.c1im[ip2] * -u->c1.c1im[ip3] +
-                 u->c2.c1re[ip2] * u->c1.c2re[ip3] + u->c2.c1im[ip2] * -u->c1.c2im[ip3] +
-                 u->c3.c1re[ip2] * u->c1.c3re[ip3] + u->c3.c1im[ip2] * -u->c1.c3im[ip3];
-   double yc11im = u->c1.c1re[ip2] * -u->c1.c1im[ip3] - u->c1.c1im[ip2] * u->c1.c1re[ip3] +
-                 u->c2.c1re[ip2] * -u->c1.c2im[ip3] - u->c2.c1im[ip2] * u->c1.c2re[ip3] +
-                 u->c3.c1re[ip2] * -u->c1.c3im[ip3] - u->c3.c1im[ip2] * u->c1.c3re[ip3];
-   double yc21re = u->c1.c2re[ip2] * u->c1.c1re[ip3] + u->c1.c2im[ip2] * -u->c1.c1im[ip3] +
-                 u->c2.c2re[ip2] * u->c1.c2re[ip3] + u->c2.c2im[ip2] * -u->c1.c2im[ip3] +
-                 u->c3.c2re[ip2] * u->c1.c3re[ip3] + u->c3.c2im[ip2] * -u->c1.c3im[ip3];
-   double yc21im = u->c1.c2re[ip2] * -u->c1.c1im[ip3] - u->c1.c2im[ip2] * u->c1.c1re[ip3] +
-                 u->c2.c2re[ip2] * -u->c1.c2im[ip3] - u->c2.c2im[ip2] * u->c1.c2re[ip3] +
-                 u->c3.c2re[ip2] * -u->c1.c3im[ip3] - u->c3.c2im[ip2] * u->c1.c3re[ip3];
-   double yc31re = u->c1.c3re[ip2] * u->c1.c1re[ip3] + u->c1.c3im[ip2] * -u->c1.c1im[ip3] +
-                 u->c2.c3re[ip2] * u->c1.c2re[ip3] + u->c2.c3im[ip2] * -u->c1.c2im[ip3] +
-                 u->c3.c3re[ip2] * u->c1.c3re[ip3] + u->c3.c3im[ip2] * -u->c1.c3im[ip3];
-   double yc31im = u->c1.c3re[ip2] * -u->c1.c1im[ip3] - u->c1.c3im[ip2] * u->c1.c1re[ip3] +
-                 u->c2.c3re[ip2] * -u->c1.c2im[ip3] - u->c2.c3im[ip2] * u->c1.c2re[ip3] +
-                 u->c3.c3re[ip2] * -u->c1.c3im[ip3] - u->c3.c3im[ip2] * u->c1.c3re[ip3];
+   double xc13re = u->c1.c1re[ip0]*u->c1.c3re[ip1] - u->c1.c1im[ip0]*u->c1.c3im[ip1]
+                 + u->c1.c2re[ip0]*u->c2.c3re[ip1] - u->c1.c2im[ip0]*u->c2.c3im[ip1]
+                 + u->c1.c3re[ip0]*u->c3.c3re[ip1] - u->c1.c3im[ip0]*u->c3.c3im[ip1];
+   double xc13im = u->c1.c1re[ip0]*u->c1.c3im[ip1] + u->c1.c1im[ip0]*u->c1.c3re[ip1]
+                 + u->c1.c2re[ip0]*u->c2.c3im[ip1] + u->c1.c2im[ip0]*u->c2.c3re[ip1]
+                 + u->c1.c3re[ip0]*u->c3.c3im[ip1] + u->c1.c3im[ip0]*u->c3.c3re[ip1];
 
-    tr += xc11re * yc11re - xc11im * yc11im;
-    tr += xc12re * yc21re - xc12im * yc21im;
-    tr += xc13re * yc31re - xc13im * yc31im;
+   double xc21re = u->c2.c1re[ip0]*u->c1.c1re[ip1] - u->c2.c1im[ip0]*u->c1.c1im[ip1]
+                 + u->c2.c2re[ip0]*u->c2.c1re[ip1] - u->c2.c2im[ip0]*u->c2.c1im[ip1]
+                 + u->c2.c3re[ip0]*u->c3.c1re[ip1] - u->c2.c3im[ip0]*u->c3.c1im[ip1];
+   double xc21im = u->c2.c1re[ip0]*u->c1.c1im[ip1] + u->c2.c1im[ip0]*u->c1.c1re[ip1]
+                 + u->c2.c2re[ip0]*u->c2.c1im[ip1] + u->c2.c2im[ip0]*u->c2.c1re[ip1]
+                 + u->c2.c3re[ip0]*u->c3.c1im[ip1] + u->c2.c3im[ip0]*u->c3.c1re[ip1];
 
-   double yc12re = u->c1.c1re[ip2] * u->c2.c1re[ip3] + u->c1.c1im[ip2] * -u->c2.c1im[ip3] +
-                 u->c2.c1re[ip2] * u->c2.c2re[ip3] + u->c2.c1im[ip2] * -u->c2.c2im[ip3] +
-                 u->c3.c1re[ip2] * u->c2.c3re[ip3] + u->c3.c1im[ip2] * -u->c2.c3im[ip3];
-   double yc12im = u->c1.c1re[ip2] * -u->c2.c1im[ip3] - u->c1.c1im[ip2] * u->c2.c1re[ip3] +
-                 u->c2.c1re[ip2] * -u->c2.c2im[ip3] - u->c2.c1im[ip2] * u->c2.c2re[ip3] +
-                 u->c3.c1re[ip2] * -u->c2.c3im[ip3] - u->c3.c1im[ip2] * u->c2.c3re[ip3];
-   double yc22re = u->c1.c2re[ip2] * u->c2.c1re[ip3] + u->c1.c2im[ip2] * -u->c2.c1im[ip3] +
-                 u->c2.c2re[ip2] * u->c2.c2re[ip3] + u->c2.c2im[ip2] * -u->c2.c2im[ip3] +
-                 u->c3.c2re[ip2] * u->c2.c3re[ip3] + u->c3.c2im[ip2] * -u->c2.c3im[ip3];
-   double yc22im = u->c1.c2re[ip2] * -u->c2.c1im[ip3] - u->c1.c2im[ip2] * u->c2.c1re[ip3] +
-                 u->c2.c2re[ip2] * -u->c2.c2im[ip3] - u->c2.c2im[ip2] * u->c2.c2re[ip3] +
-                 u->c3.c2re[ip2] * -u->c2.c3im[ip3] - u->c3.c2im[ip2] * u->c2.c3re[ip3];
-   double yc32re = u->c1.c3re[ip2] * u->c2.c1re[ip3] + u->c1.c3im[ip2] * -u->c2.c1im[ip3] +
-                 u->c2.c3re[ip2] * u->c2.c2re[ip3] + u->c2.c3im[ip2] * -u->c2.c2im[ip3] +
-                 u->c3.c3re[ip2] * u->c2.c3re[ip3] + u->c3.c3im[ip2] * -u->c2.c3im[ip3];
-   double yc32im = u->c1.c3re[ip2] * -u->c2.c1im[ip3] - u->c1.c3im[ip2] * u->c2.c1re[ip3] +
-                 u->c2.c3re[ip2] * -u->c2.c2im[ip3] - u->c2.c3im[ip2] * u->c2.c2re[ip3] +
-                 u->c3.c3re[ip2] * -u->c2.c3im[ip3] - u->c3.c3im[ip2] * u->c2.c3re[ip3];
+   double xc22re = u->c2.c1re[ip0]*u->c1.c2re[ip1] - u->c2.c1im[ip0]*u->c1.c2im[ip1]
+                 + u->c2.c2re[ip0]*u->c2.c2re[ip1] - u->c2.c2im[ip0]*u->c2.c2im[ip1]
+                 + u->c2.c3re[ip0]*u->c3.c2re[ip1] - u->c2.c3im[ip0]*u->c3.c2im[ip1];
+   double xc22im = u->c2.c1re[ip0]*u->c1.c2im[ip1] + u->c2.c1im[ip0]*u->c1.c2re[ip1]
+                 + u->c2.c2re[ip0]*u->c2.c2im[ip1] + u->c2.c2im[ip0]*u->c2.c2re[ip1]
+                 + u->c2.c3re[ip0]*u->c3.c2im[ip1] + u->c2.c3im[ip0]*u->c3.c2re[ip1];
 
-    tr += xc21re * yc12re - xc21im * yc12im;
-    tr += xc22re * yc22re - xc22im * yc22im;
-    tr += xc23re * yc32re - xc23im * yc32im;
+   double xc23re = u->c2.c1re[ip0]*u->c1.c3re[ip1] - u->c2.c1im[ip0]*u->c1.c3im[ip1]
+                 + u->c2.c2re[ip0]*u->c2.c3re[ip1] - u->c2.c2im[ip0]*u->c2.c3im[ip1]
+                 + u->c2.c3re[ip0]*u->c3.c3re[ip1] - u->c2.c3im[ip0]*u->c3.c3im[ip1];
+   double xc23im = u->c2.c1re[ip0]*u->c1.c3im[ip1] + u->c2.c1im[ip0]*u->c1.c3re[ip1]
+                 + u->c2.c2re[ip0]*u->c2.c3im[ip1] + u->c2.c2im[ip0]*u->c2.c3re[ip1]
+                 + u->c2.c3re[ip0]*u->c3.c3im[ip1] + u->c2.c3im[ip0]*u->c3.c3re[ip1];
 
-   double yc13re = u->c1.c1re[ip2] * u->c3.c1re[ip3] + u->c1.c1im[ip2] * -u->c3.c1im[ip3] +
-                 u->c2.c1re[ip2] * u->c3.c2re[ip3] + u->c2.c1im[ip2] * -u->c3.c2im[ip3] +
-                 u->c3.c1re[ip2] * u->c3.c3re[ip3] + u->c3.c1im[ip2] * -u->c3.c3im[ip3];
-   double yc13im = u->c1.c1re[ip2] * -u->c3.c1im[ip3] - u->c1.c1im[ip2] * u->c3.c1re[ip3] +
-                 u->c2.c1re[ip2] * -u->c3.c2im[ip3] - u->c2.c1im[ip2] * u->c3.c2re[ip3] +
-                 u->c3.c1re[ip2] * -u->c3.c3im[ip3] - u->c3.c1im[ip2] * u->c3.c3re[ip3];
-   double yc23re = u->c1.c2re[ip2] * u->c3.c1re[ip3] + u->c1.c2im[ip2] * -u->c3.c1im[ip3] +
-                 u->c2.c2re[ip2] * u->c3.c2re[ip3] + u->c2.c2im[ip2] * -u->c3.c2im[ip3] +
-                 u->c3.c2re[ip2] * u->c3.c3re[ip3] + u->c3.c2im[ip2] * -u->c3.c3im[ip3];
-   double yc23im = u->c1.c2re[ip2] * -u->c3.c1im[ip3] - u->c1.c2im[ip2] * u->c3.c1re[ip3] +
-                 u->c2.c2re[ip2] * -u->c3.c2im[ip3] - u->c2.c2im[ip2] * u->c3.c2re[ip3] +
-                 u->c3.c2re[ip2] * -u->c3.c3im[ip3] - u->c3.c2im[ip2] * u->c3.c3re[ip3];
-   double yc33re = u->c1.c3re[ip2] * u->c3.c1re[ip3] + u->c1.c3im[ip2] * -u->c3.c1im[ip3] +
-                 u->c2.c3re[ip2] * u->c3.c2re[ip3] + u->c2.c3im[ip2] * -u->c3.c2im[ip3] +
-                 u->c3.c3re[ip2] * u->c3.c3re[ip3] + u->c3.c3im[ip2] * -u->c3.c3im[ip3];
-   double yc33im = u->c1.c3re[ip2] * -u->c3.c1im[ip3] - u->c1.c3im[ip2] * u->c3.c1re[ip3] +
-                 u->c2.c3re[ip2] * -u->c3.c2im[ip3] - u->c2.c3im[ip2] * u->c3.c2re[ip3] +
-                 u->c3.c3re[ip2] * -u->c3.c3im[ip3] - u->c3.c3im[ip2] * u->c3.c3re[ip3];
+   double xc31re = u->c3.c1re[ip0]*u->c1.c1re[ip1] - u->c3.c1im[ip0]*u->c1.c1im[ip1]
+                 + u->c3.c2re[ip0]*u->c2.c1re[ip1] - u->c3.c2im[ip0]*u->c2.c1im[ip1]
+                 + u->c3.c3re[ip0]*u->c3.c1re[ip1] - u->c3.c3im[ip0]*u->c3.c1im[ip1];
+   double xc31im = u->c3.c1re[ip0]*u->c1.c1im[ip1] + u->c3.c1im[ip0]*u->c1.c1re[ip1]
+                 + u->c3.c2re[ip0]*u->c2.c1im[ip1] + u->c3.c2im[ip0]*u->c2.c1re[ip1]
+                 + u->c3.c3re[ip0]*u->c3.c1im[ip1] + u->c3.c3im[ip0]*u->c3.c1re[ip1];
 
-    tr += xc31re * yc13re - xc31im * yc13im;
-    tr += xc32re * yc23re - xc32im * yc23im;
-    tr += xc33re * yc33re - xc33im * yc33im;
+   double xc32re = u->c3.c1re[ip0]*u->c1.c2re[ip1] - u->c3.c1im[ip0]*u->c1.c2im[ip1]
+                 + u->c3.c2re[ip0]*u->c2.c2re[ip1] - u->c3.c2im[ip0]*u->c2.c2im[ip1]
+                 + u->c3.c3re[ip0]*u->c3.c2re[ip1] - u->c3.c3im[ip0]*u->c3.c2im[ip1];
+   double xc32im = u->c3.c1re[ip0]*u->c1.c2im[ip1] + u->c3.c1im[ip0]*u->c1.c2re[ip1]
+                 + u->c3.c2re[ip0]*u->c2.c2im[ip1] + u->c3.c2im[ip0]*u->c2.c2re[ip1]
+                 + u->c3.c3re[ip0]*u->c3.c2im[ip1] + u->c3.c3im[ip0]*u->c3.c2re[ip1];
+
+   double xc33re = u->c3.c1re[ip0]*u->c1.c3re[ip1] - u->c3.c1im[ip0]*u->c1.c3im[ip1]
+                 + u->c3.c2re[ip0]*u->c2.c3re[ip1] - u->c3.c2im[ip0]*u->c2.c3im[ip1]
+                 + u->c3.c3re[ip0]*u->c3.c3re[ip1] - u->c3.c3im[ip0]*u->c3.c3im[ip1];
+   double xc33im = u->c3.c1re[ip0]*u->c1.c3im[ip1] + u->c3.c1im[ip0]*u->c1.c3re[ip1]
+                 + u->c3.c2re[ip0]*u->c2.c3im[ip1] + u->c3.c2im[ip0]*u->c2.c3re[ip1]
+                 + u->c3.c3re[ip0]*u->c3.c3im[ip1] + u->c3.c3im[ip0]*u->c3.c3re[ip1];
+
+
+   double yc11re = u->c1.c1re[ip3]*u->c1.c1re[ip2] - u->c1.c1im[ip3]*u->c1.c1im[ip2]
+                 + u->c2.c1re[ip3]*u->c1.c2re[ip2] - u->c2.c1im[ip3]*u->c1.c2im[ip2]
+                 + u->c3.c1re[ip3]*u->c1.c3re[ip2] - u->c3.c1im[ip3]*u->c1.c3im[ip2];
+   double yc11im = -(u->c1.c1re[ip3]*u->c1.c1im[ip2] + u->c1.c1im[ip3]*u->c1.c1re[ip2]
+                   + u->c2.c1re[ip3]*u->c1.c2im[ip2] + u->c2.c1im[ip3]*u->c1.c2re[ip2]
+                   + u->c3.c1re[ip3]*u->c1.c3im[ip2] + u->c3.c1im[ip3]*u->c1.c3re[ip2]);
+
+   double yc21re = u->c1.c2re[ip3]*u->c1.c1re[ip2] - u->c1.c2im[ip3]*u->c1.c1im[ip2]
+                 + u->c2.c2re[ip3]*u->c1.c2re[ip2] - u->c2.c2im[ip3]*u->c1.c2im[ip2]
+                 + u->c3.c2re[ip3]*u->c1.c3re[ip2] - u->c3.c2im[ip3]*u->c1.c3im[ip2];
+   double yc21im = -(u->c1.c2re[ip3]*u->c1.c1im[ip2] + u->c1.c2im[ip3]*u->c1.c1re[ip2]
+                   + u->c2.c2re[ip3]*u->c1.c2im[ip2] + u->c2.c2im[ip3]*u->c1.c2re[ip2]
+                   + u->c3.c2re[ip3]*u->c1.c3im[ip2] + u->c3.c2im[ip3]*u->c1.c3re[ip2]);
+
+   double yc31re = u->c1.c3re[ip3]*u->c1.c1re[ip2] - u->c1.c3im[ip3]*u->c1.c1im[ip2]
+                 + u->c2.c3re[ip3]*u->c1.c2re[ip2] - u->c2.c3im[ip3]*u->c1.c2im[ip2]
+                 + u->c3.c3re[ip3]*u->c1.c3re[ip2] - u->c3.c3im[ip3]*u->c1.c3im[ip2];
+   double yc31im = -(u->c1.c3re[ip3]*u->c1.c1im[ip2] + u->c1.c3im[ip3]*u->c1.c1re[ip2]
+                   + u->c2.c3re[ip3]*u->c1.c2im[ip2] + u->c2.c3im[ip3]*u->c1.c2re[ip2]
+                   + u->c3.c3re[ip3]*u->c1.c3im[ip2] + u->c3.c3im[ip3]*u->c1.c3re[ip2]);
+
+   tr += xc11re*yc11re - xc11im*yc11im;
+   tr += xc12re*yc21re - xc12im*yc21im;
+   tr += xc13re*yc31re - xc13im*yc31im;
+
+   double yc12re = u->c1.c1re[ip3]*u->c2.c1re[ip2] - u->c1.c1im[ip3]*u->c2.c1im[ip2]
+                 + u->c2.c1re[ip3]*u->c2.c2re[ip2] - u->c2.c1im[ip3]*u->c2.c2im[ip2]
+                 + u->c3.c1re[ip3]*u->c2.c3re[ip2] - u->c3.c1im[ip3]*u->c2.c3im[ip2];
+   double yc12im = -(u->c1.c1re[ip3]*u->c2.c1im[ip2] + u->c1.c1im[ip3]*u->c2.c1re[ip2]
+                   + u->c2.c1re[ip3]*u->c2.c2im[ip2] + u->c2.c1im[ip3]*u->c2.c2re[ip2]
+                   + u->c3.c1re[ip3]*u->c2.c3im[ip2] + u->c3.c1im[ip3]*u->c2.c3re[ip2]);
+
+   double yc22re = u->c1.c2re[ip3]*u->c2.c1re[ip2] - u->c1.c2im[ip3]*u->c2.c1im[ip2]
+                 + u->c2.c2re[ip3]*u->c2.c2re[ip2] - u->c2.c2im[ip3]*u->c2.c2im[ip2]
+                 + u->c3.c2re[ip3]*u->c2.c3re[ip2] - u->c3.c2im[ip3]*u->c2.c3im[ip2];
+   double yc22im = -(u->c1.c2re[ip3]*u->c2.c1im[ip2] + u->c1.c2im[ip3]*u->c2.c1re[ip2]
+                   + u->c2.c2re[ip3]*u->c2.c2im[ip2] + u->c2.c2im[ip3]*u->c2.c2re[ip2]
+                   + u->c3.c2re[ip3]*u->c2.c3im[ip2] + u->c3.c2im[ip3]*u->c2.c3re[ip2]);
+
+   double yc32re = u->c1.c3re[ip3]*u->c2.c1re[ip2] - u->c1.c3im[ip3]*u->c2.c1im[ip2]
+                 + u->c2.c3re[ip3]*u->c2.c2re[ip2] - u->c2.c3im[ip3]*u->c2.c2im[ip2]
+                 + u->c3.c3re[ip3]*u->c2.c3re[ip2] - u->c3.c3im[ip3]*u->c2.c3im[ip2];
+   double yc32im = -(u->c1.c3re[ip3]*u->c2.c1im[ip2] + u->c1.c3im[ip3]*u->c2.c1re[ip2]
+                   + u->c2.c3re[ip3]*u->c2.c2im[ip2] + u->c2.c3im[ip3]*u->c2.c2re[ip2]
+                   + u->c3.c3re[ip3]*u->c2.c3im[ip2] + u->c3.c3im[ip3]*u->c2.c3re[ip2]);
+
+   tr += xc21re*yc12re - xc21im*yc12im;
+   tr += xc22re*yc22re - xc22im*yc22im;
+   tr += xc23re*yc32re - xc23im*yc32im;
+
+   double yc13re = u->c1.c1re[ip3]*u->c3.c1re[ip2] - u->c1.c1im[ip3]*u->c3.c1im[ip2]
+                 + u->c2.c1re[ip3]*u->c3.c2re[ip2] - u->c2.c1im[ip3]*u->c3.c2im[ip2]
+                 + u->c3.c1re[ip3]*u->c3.c3re[ip2] - u->c3.c1im[ip3]*u->c3.c3im[ip2];
+   double yc13im = -(u->c1.c1re[ip3]*u->c3.c1im[ip2] + u->c1.c1im[ip3]*u->c3.c1re[ip2]
+                   + u->c2.c1re[ip3]*u->c3.c2im[ip2] + u->c2.c1im[ip3]*u->c3.c2re[ip2]
+                   + u->c3.c1re[ip3]*u->c3.c3im[ip2] + u->c3.c1im[ip3]*u->c3.c3re[ip2]);
+
+   double yc23re = u->c1.c2re[ip3]*u->c3.c1re[ip2] - u->c1.c2im[ip3]*u->c3.c1im[ip2]
+                 + u->c2.c2re[ip3]*u->c3.c2re[ip2] - u->c2.c2im[ip3]*u->c3.c2im[ip2]
+                 + u->c3.c2re[ip3]*u->c3.c3re[ip2] - u->c3.c2im[ip3]*u->c3.c3im[ip2];
+   double yc23im = -(u->c1.c2re[ip3]*u->c3.c1im[ip2] + u->c1.c2im[ip3]*u->c3.c1re[ip2]
+                   + u->c2.c2re[ip3]*u->c3.c2im[ip2] + u->c2.c2im[ip3]*u->c3.c2re[ip2]
+                   + u->c3.c2re[ip3]*u->c3.c3im[ip2] + u->c3.c2im[ip3]*u->c3.c3re[ip2]);
+
+   double yc33re = u->c1.c3re[ip3]*u->c3.c1re[ip2] - u->c1.c3im[ip3]*u->c3.c1im[ip2]
+                 + u->c2.c3re[ip3]*u->c3.c2re[ip2] - u->c2.c3im[ip3]*u->c3.c2im[ip2]
+                 + u->c3.c3re[ip3]*u->c3.c3re[ip2] - u->c3.c3im[ip3]*u->c3.c3im[ip2];
+   double yc33im = -(u->c1.c3re[ip3]*u->c3.c1im[ip2] + u->c1.c3im[ip3]*u->c3.c1re[ip2]
+                   + u->c2.c3re[ip3]*u->c3.c2im[ip2] + u->c2.c3im[ip3]*u->c3.c2re[ip2]
+                   + u->c3.c3re[ip3]*u->c3.c3im[ip2] + u->c3.c3im[ip3]*u->c3.c3re[ip2]);
+
+   tr += xc31re*yc13re - xc31im*yc13im;
+   tr += xc32re*yc23re - xc32im*yc23im;
+   tr += xc33re*yc33re - xc33im*yc33im;
 
    return tr;
 }
