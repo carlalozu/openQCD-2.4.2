@@ -70,6 +70,7 @@ extern void ipt_global(int *x,int *ip,int *ix);
 /* UIDX_C */
 extern void set_uidx(void);
 extern uidx_t *uidx(void);
+extern int offset(int ix,int mu);
 #pragma omp declare target
 extern void plaq_uidx(int n,int ix,int *ip);
 #pragma omp end declare target
