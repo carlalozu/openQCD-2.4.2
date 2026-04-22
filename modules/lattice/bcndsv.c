@@ -93,19 +93,6 @@
 
 #define N0 (NPROC0*L0)
 
-static int offset(int ix,int mu)
-{
-   int CBS,cb,pos,t,sp;
-
-   CBS=BLOCK_VLM*L0_TRD;
-   cb=ix/CBS;
-   pos=ix%CBS;
-   t=pos/BLOCK_VLM;
-   sp=pos%BLOCK_VLM;
-
-   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(BLOCK_VLM)] */
-   return cb*(L0_TRD*4*BLOCK_VLM)+t*(4*BLOCK_VLM)+mu*BLOCK_VLM+sp;
-}
 
 typedef union
 {
