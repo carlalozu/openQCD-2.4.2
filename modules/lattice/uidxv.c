@@ -217,41 +217,11 @@ uidx_t *uidx(void)
    return idx;
 }
 
-int _iup(int x0,int x1,int x2,int x3,int mu)
-{
-   int y0,y1,y2,y3;
-
-   y0 = x0;
-   y1 = x1;
-   y2 = x2;
-   y3 = x3;
-   if (mu==0)
-      y0=safe_mod(x0+1,L0);
-   if (mu==1)
-      y1=safe_mod(x1+1,L1);
-   if (mu==2)
-      y2=safe_mod(x2+1,L2);
-   if (mu==3)
-      y3=safe_mod(x3+1,L3);
-   
-   return y0*L1*L2*L3+y1*L2*L3+y2*L3+y3;
-}
-
 
 #pragma omp declare target
 void plaq_uidx(int mu,int nu,int ix,int *ip)
 {
    int iy,ic;
-   int iz,x3,x2,x1,x0;
-
-   iz=ix;
-   x3=iz%L3;
-   iz/=L3;
-   x2=iz%L2;
-   iz/=L2;
-   x1=iz%L1;
-   iz/=L1;
-   x0=iz;
 
    ip[0]=offset(ix,mu);
 
@@ -261,7 +231,7 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
    }
    else
    {
-      iy=_iup(x0,x1,x2,x3,mu);
+      iy=iupT[mu][ix];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
@@ -277,7 +247,7 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=_iup(x0,x1,x2,x3,nu);
+   iy=iupT[nu][ix];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);
