@@ -145,7 +145,7 @@ void random_udv(void)
    set_flags(UNSET_UD_PHASE);
    set_bc();
    #pragma omp target update \
-    to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
-    to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
-    to(udbv->c3.base[0 : 6 * udbv->c3.volume])
+    to(udbv->c1.base[0 : 3 * udbv->c1.volume]) \
+    to(udbv->c2.base[0 : 3 * udbv->c2.volume]) \
+    to(udbv->c3.base[0 : 3 * udbv->c3.volume])
 }
