@@ -217,48 +217,10 @@ uidx_t *uidx(void)
    return idx;
 }
 
-#pragma omp declare target
-int get_iupdn(int nu,int ix){
-
-   int iz,x0,x1,x2,x3,iy;
-
-   // from thread (block) index to cartesian
-   iz = itp[ix];
-   x3=iz%L3; iz/=L3;
-   x2=iz%L2; iz/=L2;
-   x1=iz%L1; iz/=L1;
-   x0=iz;
-
-   switch(nu)
-   {
-      case 0:
-         if ((x0==(L0-1))&&(NPROC0>1)) return VOLUME;
-         iy = ((x0+1)%L0)*(L1*L2*L3)+x1*(L2*L3)+x2*L3+x3;
-         break;
-      case 1:
-         if ((x1==(L1-1))&&(NPROC1>1)) return VOLUME;
-         iy = x0*(L1*L2*L3)+((x1+1)%L1)*(L2*L3)+x2*L3+x3;
-         break;
-      case 2:
-         if ((x2==(L2-1))&&(NPROC2>1)) return VOLUME;
-         iy = x0*(L1*L2*L3)+x1*(L2*L3)+((x2+1)%L2)*L3+x3;
-         break;
-      case 3:
-         if ((x3==(L3-1))&&(NPROC3>1)) return VOLUME;
-         iy = x0*(L1*L2*L3)+x1*(L2*L3)+x2*L3+(x3+1)%L3;
-         break;
-      default:
-         iy = VOLUME;
-   }
-   // from cartesian to thread/mem index
-   return ipt[iy];
-}
-#pragma omp end declare target
 
 #pragma omp declare target
-void plaq_uidxv(int mu,int nu,int ix,int *ip)
+void plaq_uidx(int mu,int nu,int ix,int *ip)
 {
-
    int iy,ic;
 
    ip[0]=offset(ix,mu);
@@ -269,7 +231,7 @@ void plaq_uidxv(int mu,int nu,int ix,int *ip)
    }
    else
    {
-      iy=get_iupdn(mu,ix);
+      iy=iupT[mu][ix];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
@@ -285,55 +247,7 @@ void plaq_uidxv(int mu,int nu,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=get_iupdn(nu,ix);
-
-   if (iy<VOLUME)
-      ip[3]=offset(iy,mu);
-   else
-   {
-      if (iy<(VOLUME+(BNDRY/2)))
-         ic=iy-VOLUME-nfc[nu];
-      else
-         ic=iy-VOLUME-(BNDRY/2);
-
-      ip[3]=4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
-   }
-}
-#pragma omp end declare target
-
-void plaq_uidx(int n,int ix,int *ip)
-{
-   int mu,nu;
-   int iy,ic;
-
-   mu=plns[n][0];
-   nu=plns[n][1];
-
-   ip[0]=offset(ix,mu);
-
-   if ((mu==0)&&(global_time(ix)==(N0-1))&&((bc==1)||(bc==2)))
-   {
-      ip[1]=4*VOLUME+7*(BNDRY/4)+nu-1;
-   }
-   else
-   {
-      iy=iup[ix][mu];
-
-      if (iy<VOLUME)
-         ip[1]=offset(iy,nu);
-      else
-      {
-         if (iy<(VOLUME+(BNDRY/2)))
-            ic=iy-VOLUME-nfc[mu];
-         else
-            ic=iy-VOLUME-(BNDRY/2);
-
-         ip[1]=4*VOLUME+(BNDRY/4)+3*ic+nu-(nu>mu);
-      }
-   }
-
-   ip[2]=offset(ix,nu);
-   iy=iup[ix][nu];
+   iy=iupT[nu][ix];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);

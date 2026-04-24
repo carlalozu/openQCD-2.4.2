@@ -99,7 +99,7 @@ map(to : d_field[0], d_field->base[0 : d_field->volume])
 static inline void enter_su3_mat_field(su3_mat_field *m_field)
 {
 #pragma omp target enter data map(to : m_field[0])           \
-    map(to : m_field -> c1.base[0 : 6 * m_field->c1.volume]) \
+    map(to : m_field->c1.base[0 : 6 * m_field->c1.volume])   \
     map(to : m_field->c2.base[0 : 6 * m_field->c2.volume])   \
     map(to : m_field->c3.base[0 : 6 * m_field->c3.volume])
 

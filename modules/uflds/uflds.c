@@ -171,47 +171,12 @@ void random_ud(void)
 #pragma omp parallel private(k,ix,t,ifc,ud)
    {
       k=omp_get_thread_num();
-      ud=udb+k*4*VOLUME_TRD;
-
-      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
-      {
-         t=global_time(ix+(VOLUME/2));
-
-         if (t==0)
-         {
-            random_su3_dble(ud);
-            ud+=1;
-
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
-
-            for (ifc=2;ifc<8;ifc++)
-            {
-               if (bc!=1)
-                  random_su3_dble(ud);
-               ud+=1;
-            }
-         }
-         else if (t==(N0-1))
-         {
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
-
-            for (ifc=1;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
-            }
-         }
-         else
-         {
-            for (ifc=0;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
-            }
+      for (int iy=0;iy<VOLUME;iy++){
+         for (int mu=0;mu<4;mu++) {
+            ix=ipt[iy];
+            t=global_time(ix);
+            ifc=offset(ix,mu);
+            random_su3_dble(udb+ifc);
          }
       }
    }
@@ -219,7 +184,7 @@ void random_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   #pragma omp target update to(udb)
+   #pragma omp target update to(udb[:4*VOLUME])
 }
 
 
