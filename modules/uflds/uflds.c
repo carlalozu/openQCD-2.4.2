@@ -160,23 +160,29 @@ su3_dble *udfld(void)
 void random_ud(void)
 {
    int bc;
-   int k,ix,t,ifc;
-   su3_dble *ud;
+   int k,t,ifc,mu,ix;
+   su3_dble *ub;
 
-   if (udb==NULL)
-      alloc_ud();
-
+   ub=udfld();
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,t,ifc,ud)
+#pragma omp parallel private(k,ix,t,ifc,mu)
    {
       k=omp_get_thread_num();
-      for (int iy=0;iy<VOLUME;iy++){
-         for (int mu = 0; mu < 4; mu++) {
-            ix=ipt[iy];
-            t=global_time(ix);
+      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+      {
+         t=global_time(ix);
+
+         if ((t==(N0-1))&&(bc!=0))
+         {
+            ifc=offset(ix,0);
+            random_su3_dble(ub+ifc);
+         }
+
+         for (mu=1;mu<4;mu++)
+         {
             ifc=offset(ix,mu);
-            random_su3_dble(udb+ifc);
+            random_su3_dble(ub+ifc);
          }
       }
    }
