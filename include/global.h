@@ -25,24 +25,17 @@
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 32
-#define L1 32
-#define L2 16
-#define L3 16
+#define L0 4
+#define L1 4
+#define L2 4
+#define L3 4
 
-#define L0_TRD 32
-#define L1_TRD 32
-#define L2_TRD 16
-#define L3_TRD 16
+#define L0_TRD 4
+#define L1_TRD 4
+#define L2_TRD 4
+#define L3_TRD 4
 
 #define NAME_SIZE 128
-// #define N_TEAMS ((VOLUME+128-1)/128)
-#define BLOCK_SIZE_0 8
-#define BLOCK_SIZE_1 8
-#define BLOCK_SIZE_2 8
-#define BLOCK_SIZE_3 8
-#define SVOL_BLK (BLOCK_SIZE_1*BLOCK_SIZE_2*BLOCK_SIZE_3)
-#define BLOCK_VLM (BLOCK_SIZE_0*SVOL_BLK)
 
 
 /****************************** do not change *********************************/
