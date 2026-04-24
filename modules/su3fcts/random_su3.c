@@ -185,15 +185,7 @@ void random_su3_mat_field(su3_mat_field *uv, int ix)
    su3_dble u;
    random_su3_dble(&u);
 
-   uv->c1.c1re[ix]=u.c11.re; uv->c1.c1im[ix]=u.c11.im;
-   uv->c1.c2re[ix]=u.c12.re; uv->c1.c2im[ix]=u.c12.im;
-   uv->c1.c3re[ix]=u.c13.re; uv->c1.c3im[ix]=u.c13.im;
-
-   uv->c2.c1re[ix]=u.c21.re; uv->c2.c1im[ix]=u.c21.im;
-   uv->c2.c2re[ix]=u.c22.re; uv->c2.c2im[ix]=u.c22.im;
-   uv->c2.c3re[ix]=u.c23.re; uv->c2.c3im[ix]=u.c23.im;
-
-   uv->c3.c1re[ix]=u.c31.re; uv->c3.c1im[ix]=u.c31.im;
-   uv->c3.c2re[ix]=u.c32.re; uv->c3.c2im[ix]=u.c32.im;
-   uv->c3.c3re[ix]=u.c33.re; uv->c3.c3im[ix]=u.c33.im;
+   uv->c1.c1[ix]=u.c11; uv->c1.c2[ix]=u.c12; uv->c1.c3[ix]=u.c13;
+   uv->c2.c1[ix]=u.c21; uv->c2.c2[ix]=u.c22; uv->c2.c3[ix]=u.c23;
+   uv->c3.c1[ix]=u.c31; uv->c3.c2[ix]=u.c32; uv->c3.c3[ix]=u.c33;
 }

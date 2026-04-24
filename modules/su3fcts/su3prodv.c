@@ -37,24 +37,47 @@
 
 void _fsu3matconj_inverse_multiply(const su3_mat_field *u, const su3_vec_field *v, su3_vector_dble *res, int ip0, int ip1)
 {
-   res->c1.re = u->c1.c1re[ip0] * v->c1re[ip1] - u->c1.c1im[ip0] * v->c1im[ip1] +
-                u->c2.c1re[ip0] * v->c2re[ip1] - u->c2.c1im[ip0] * v->c2im[ip1] +
-                u->c3.c1re[ip0] * v->c3re[ip1] - u->c3.c1im[ip0] * v->c3im[ip1];
-   res->c1.im = -u->c1.c1re[ip0] * v->c1im[ip1] - u->c1.c1im[ip0] * v->c1re[ip1] +
-                -u->c2.c1re[ip0] * v->c2im[ip1] - u->c2.c1im[ip0] * v->c2re[ip1] +
-                -u->c3.c1re[ip0] * v->c3im[ip1] - u->c3.c1im[ip0] * v->c3re[ip1];
-   res->c2.re = u->c1.c2re[ip0] * v->c1re[ip1] - u->c1.c2im[ip0] * v->c1im[ip1] +
-                u->c2.c2re[ip0] * v->c2re[ip1] - u->c2.c2im[ip0] * v->c2im[ip1] +
-                u->c3.c2re[ip0] * v->c3re[ip1] - u->c3.c2im[ip0] * v->c3im[ip1];
-   res->c2.im = -u->c1.c2re[ip0] * v->c1im[ip1] - u->c1.c2im[ip0] * v->c1re[ip1] +
-                -u->c2.c2re[ip0] * v->c2im[ip1] - u->c2.c2im[ip0] * v->c2re[ip1] +
-                -u->c3.c2re[ip0] * v->c3im[ip1] - u->c3.c2im[ip0] * v->c3re[ip1];
-   res->c3.re = u->c1.c3re[ip0] * v->c1re[ip1] - u->c1.c3im[ip0] * v->c1im[ip1] +
-                u->c2.c3re[ip0] * v->c2re[ip1] - u->c2.c3im[ip0] * v->c2im[ip1] +
-                u->c3.c3re[ip0] * v->c3re[ip1] - u->c3.c3im[ip0] * v->c3im[ip1];
-   res->c3.im = -u->c1.c3re[ip0] * v->c1im[ip1] - u->c1.c3im[ip0] * v->c1re[ip1] +
-                -u->c2.c3re[ip0] * v->c2im[ip1] - u->c2.c3im[ip0] * v->c2re[ip1] +
-                -u->c3.c3re[ip0] * v->c3im[ip1] - u->c3.c3im[ip0] * v->c3re[ip1];
+    const complex_dble * __restrict__ u11 = u->c1.c1;
+    const complex_dble * __restrict__ u12 = u->c1.c2;
+    const complex_dble * __restrict__ u13 = u->c1.c3;
+    const complex_dble * __restrict__ u21 = u->c2.c1;
+    const complex_dble * __restrict__ u22 = u->c2.c2;
+    const complex_dble * __restrict__ u23 = u->c2.c3;
+    const complex_dble * __restrict__ u31 = u->c3.c1;
+    const complex_dble * __restrict__ u32 = u->c3.c2;
+    const complex_dble * __restrict__ u33 = u->c3.c3;
+    const complex_dble * __restrict__ v1  = v->c1;
+    const complex_dble * __restrict__ v2  = v->c2;
+    const complex_dble * __restrict__ v3  = v->c3;
+
+    complex_dble U11 = u11[ip0], U12 = u12[ip0], U13 = u13[ip0];
+    complex_dble U21 = u21[ip0], U22 = u22[ip0], U23 = u23[ip0];
+    complex_dble U31 = u31[ip0], U32 = u32[ip0], U33 = u33[ip0];
+    complex_dble V1  = v1[ip1],  V2  = v2[ip1],  V3  = v3[ip1];
+
+    res->c1.re =  U11.re * V1.re - U11.im * V1.im
+               +  U21.re * V2.re - U21.im * V2.im
+               +  U31.re * V3.re - U31.im * V3.im;
+
+    res->c1.im = -U11.re * V1.im - U11.im * V1.re
+               + -U21.re * V2.im - U21.im * V2.re
+               + -U31.re * V3.im - U31.im * V3.re;
+
+    res->c2.re =  U12.re * V1.re - U12.im * V1.im
+               +  U22.re * V2.re - U22.im * V2.im
+               +  U32.re * V3.re - U32.im * V3.im;
+
+    res->c2.im = -U12.re * V1.im - U12.im * V1.re
+               + -U22.re * V2.im - U22.im * V2.re
+               + -U32.re * V3.im - U32.im * V3.re;
+
+    res->c3.re =  U13.re * V1.re - U13.im * V1.im
+               +  U23.re * V2.re - U23.im * V2.im
+               +  U33.re * V3.re - U33.im * V3.im;
+
+    res->c3.im = -U13.re * V1.im - U13.im * V1.re
+               + -U23.re * V2.im - U23.im * V2.re
+               + -U33.re * V3.im - U33.im * V3.re;
 }
 
 /*
@@ -96,34 +119,25 @@ void fsu3matxsu3mat(
    su3_vec_field psi;
    su3_vector_dble chi;
 
-   psi.c1re=(*u).c1.c1re;
-   psi.c1im=(*u).c1.c1im;
-   psi.c2re=(*u).c2.c1re;
-   psi.c2im=(*u).c2.c1im;
-   psi.c3re=(*u).c3.c1re;
-   psi.c3im=(*u).c3.c1im;
+   psi.c1=(*u).c1.c1;
+   psi.c2=(*u).c2.c1;
+   psi.c3=(*u).c3.c1;
    fsu3matxsu3vec(u,&psi,&chi,ip0,ip1);
    (*res).c11=chi.c1;
    (*res).c21=chi.c2;
    (*res).c31=chi.c3;
 
-   psi.c1re=(*u).c1.c2re;
-   psi.c1im=(*u).c1.c2im;
-   psi.c2re=(*u).c2.c2re;
-   psi.c2im=(*u).c2.c2im;
-   psi.c3re=(*u).c3.c2re;
-   psi.c3im=(*u).c3.c2im;
+   psi.c1=(*u).c1.c2;
+   psi.c2=(*u).c2.c2;
+   psi.c3=(*u).c3.c2;
    fsu3matxsu3vec(u,&psi,&chi,ip0,ip1);
    (*res).c12=chi.c1;
    (*res).c22=chi.c2;
    (*res).c32=chi.c3;
 
-   psi.c1re=(*u).c1.c3re;
-   psi.c1im=(*u).c1.c3im;
-   psi.c2re=(*u).c2.c3re;
-   psi.c2im=(*u).c2.c3im;
-   psi.c3re=(*u).c3.c3re;
-   psi.c3im=(*u).c3.c3im;
+   psi.c1=(*u).c1.c3;
+   psi.c2=(*u).c2.c3;
+   psi.c3=(*u).c3.c3;
    fsu3matxsu3vec(u,&psi,&chi,ip0,ip1);
    (*res).c13=chi.c1;
    (*res).c23=chi.c2;
@@ -135,27 +149,24 @@ void fsu3matxsu3mat(
 void fsu3matxsu3vec(const su3_mat_field *u, const su3_vec_field *v,
                    su3_vector_dble *res, int ip0, int ip1)
 {
-    // Extract pointers
-    const complex * __restrict__ u11 = u->c1.c1;
-    const complex * __restrict__ u12 = u->c1.c2;
-    const complex * __restrict__ u13 = u->c1.c3;
-    const complex * __restrict__ u21 = u->c2.c1;
-    const complex * __restrict__ u22 = u->c2.c2;
-    const complex * __restrict__ u23 = u->c2.c3;
-    const complex * __restrict__ u31 = u->c3.c1;
-    const complex * __restrict__ u32 = u->c3.c2;
-    const complex * __restrict__ u33 = u->c3.c3;
-    const complex * __restrict__ v1  = v->c1;
-    const complex * __restrict__ v2  = v->c2;
-    const complex * __restrict__ v3  = v->c3;
+    const complex_dble * __restrict__ u11 = u->c1.c1;
+    const complex_dble * __restrict__ u12 = u->c1.c2;
+    const complex_dble * __restrict__ u13 = u->c1.c3;
+    const complex_dble * __restrict__ u21 = u->c2.c1;
+    const complex_dble * __restrict__ u22 = u->c2.c2;
+    const complex_dble * __restrict__ u23 = u->c2.c3;
+    const complex_dble * __restrict__ u31 = u->c3.c1;
+    const complex_dble * __restrict__ u32 = u->c3.c2;
+    const complex_dble * __restrict__ u33 = u->c3.c3;
+    const complex_dble * __restrict__ v1  = v->c1;
+    const complex_dble * __restrict__ v2  = v->c2;
+    const complex_dble * __restrict__ v3  = v->c3;
 
-    // Load once — each load fetches re and im together
-    complex U11 = u11[ip0], U12 = u12[ip0], U13 = u13[ip0];
-    complex U21 = u21[ip0], U22 = u22[ip0], U23 = u23[ip0];
-    complex U31 = u31[ip0], U32 = u32[ip0], U33 = u33[ip0];
-    complex V1  = v1[ip1],  V2  = v2[ip1],  V3  = v3[ip1];
+    complex_dble U11 = u11[ip0], U12 = u12[ip0], U13 = u13[ip0];
+    complex_dble U21 = u21[ip0], U22 = u22[ip0], U23 = u23[ip0];
+    complex_dble U31 = u31[ip0], U32 = u32[ip0], U33 = u33[ip0];
+    complex_dble V1  = v1[ip1],  V2  = v2[ip1],  V3  = v3[ip1];
 
-    // Multiply and accumulate manually
     res->c1.re = U11.re*V1.re - U11.im*V1.im + U12.re*V2.re - U12.im*V2.im + U13.re*V3.re - U13.im*V3.im;
     res->c1.im = U11.re*V1.im + U11.im*V1.re + U12.re*V2.im + U12.im*V2.re + U13.re*V3.im + U13.im*V3.re;
 
