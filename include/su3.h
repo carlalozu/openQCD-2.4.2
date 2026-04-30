@@ -780,29 +780,29 @@ static inline void su3_alg_mul_sub_assign(su3_alg_dble *r,double c,su3_alg_dble 
 
 #ifdef _OPENMP
 
-#pragma omp declare \
-   reduction(sum_complex : complex : \
-             omp_out.re=omp_out.re+omp_in.re, \
-             omp_out.im=omp_out.im+omp_in.im) \
-   initializer(omp_priv={0.0f,0.0f})
-
-#pragma omp declare \
-   reduction(sum_su3_alg_dble : su3_alg_dble : \
-    omp_out.c1 += omp_in.c1, \
-    omp_out.c2 += omp_in.c2, \
-    omp_out.c3 += omp_in.c3, \
-    omp_out.c4 += omp_in.c4, \
-    omp_out.c5 += omp_in.c5, \
-    omp_out.c6 += omp_in.c6, \
-    omp_out.c7 += omp_in.c7, \
-    omp_out.c8 += omp_in.c8) \
-    initializer(omp_priv={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})
-
-#pragma omp declare \
-   reduction(sum_complex_dble : complex_dble : \
-             omp_out.re=omp_out.re+omp_in.re,  \
-             omp_out.im=omp_out.im+omp_in.im)  \
-   initializer(omp_priv={0.0,0.0})
+// #pragma omp declare \
+//    reduction(sum_complex : complex : \
+//              omp_out.re=omp_out.re+omp_in.re, \
+//              omp_out.im=omp_out.im+omp_in.im) \
+//    initializer(omp_priv={0.0f,0.0f})
+// 
+// #pragma omp declare \
+//    reduction(sum_su3_alg_dble : su3_alg_dble : \
+//     omp_out.c1 += omp_in.c1, \
+//     omp_out.c2 += omp_in.c2, \
+//     omp_out.c3 += omp_in.c3, \
+//     omp_out.c4 += omp_in.c4, \
+//     omp_out.c5 += omp_in.c5, \
+//     omp_out.c6 += omp_in.c6, \
+//     omp_out.c7 += omp_in.c7, \
+//     omp_out.c8 += omp_in.c8) \
+//     initializer(omp_priv={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0})
+// 
+// #pragma omp declare \
+//    reduction(sum_complex_dble : complex_dble : \
+//              omp_out.re=omp_out.re+omp_in.re,  \
+//              omp_out.im=omp_out.im+omp_in.im)  \
+//    initializer(omp_priv={0.0,0.0})
 
 #endif
 
