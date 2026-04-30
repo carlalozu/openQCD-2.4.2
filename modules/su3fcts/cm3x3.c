@@ -1709,7 +1709,7 @@ void cm3x3_tr(su3_dble *u,su3_dble *v,complex_dble *tr)
    (*tr).im=z.im;
 }
 
-
+#pragma omp declare target
 void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr)
 {
    double r;
@@ -1728,7 +1728,7 @@ void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr)
 
    (*tr)=r;
 }
-
+#pragma omp end declare target
 
 void cm3x3_imtr(su3_dble *u,su3_dble *v,double *tr)
 {
