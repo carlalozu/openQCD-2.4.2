@@ -67,9 +67,9 @@ LIBPATH = $(MPI_HOME)/lib
 # scheduling and optimization options
 
 
-CFLAGS =  -mp=gpu -gpu=cc86 -Minfo=mp,accel
+CFLAGS =  -mp=gpu -gpu=cc90 -fopenmp
 
-LFLAGS = -mp=gpu -gpu=cc86 -fopenmp
+LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 
 
 ############################## do not change ###################################
