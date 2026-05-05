@@ -86,35 +86,6 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 }
 #pragma omp end declare target
 
-#pragma omp declare target
-static double plaq_dble_fused(su3_dble *udb, int mu, int nu,int ix)
-{
-   int ip[4];
-   double sm;
-   su3_dble wd1 ALIGNED16;
-   su3_dble wd2 ALIGNED16;
-
-   plaq_uidx(mu,nu,ix,ip);
-
-   su3xsu3(udb+ip[0],udb+ip[1],&wd1);
-   su3xsu3(udb+ip[2],udb+ip[3],&wd2);
-
-   sm =wd1.c11.re*wd2.c11.re+wd1.c11.im*wd2.c11.im;
-   sm+=wd1.c12.re*wd2.c12.re+wd1.c12.im*wd2.c12.im;
-   sm+=wd1.c13.re*wd2.c13.re+wd1.c13.im*wd2.c13.im;
-
-   sm+=wd1.c21.re*wd2.c21.re+wd1.c21.im*wd2.c21.im;
-   sm+=wd1.c22.re*wd2.c22.re+wd1.c22.im*wd2.c22.im;
-   sm+=wd1.c23.re*wd2.c23.re+wd1.c23.im*wd2.c23.im;
-
-   sm+=wd1.c31.re*wd2.c31.re+wd1.c31.im*wd2.c31.im;
-   sm+=wd1.c32.re*wd2.c32.re+wd1.c32.im*wd2.c32.im;
-   sm+=wd1.c33.re*wd2.c33.re+wd1.c33.im*wd2.c33.im;
-
-   return sm;
-}
-#pragma omp end declare target
-
 static qflt local_plaq_sum_dble(int iw)
 {
    int bc;
@@ -239,8 +210,8 @@ double plaq_action_slices(double *asl)
       rqsmB[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,n,smE,smB) \
-   reduction(sum_qflt : rqsmE[cpr[0]*L0:L0],rqsmB[cpr[0]*L0:L0])
+#pragma omp parallel private(k,ix,t,n,smE,smB)
+   // reduction(sum_qflt : rqsmE[cpr[0]*L0:L0],rqsmB[cpr[0]*L0:L0])
    {
       k=omp_get_thread_num();
 

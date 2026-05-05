@@ -704,17 +704,17 @@ typedef struct
 
 #ifdef _OPENMP
 
-#pragma omp declare \
-   reduction(sum_complex : complex : \
-             omp_out.re=omp_out.re+omp_in.re, \
-             omp_out.im=omp_out.im+omp_in.im) \
-   initializer(omp_priv={0.0f,0.0f})
-
-#pragma omp declare \
-   reduction(sum_complex_dble : complex_dble : \
-             omp_out.re=omp_out.re+omp_in.re,  \
-             omp_out.im=omp_out.im+omp_in.im)  \
-   initializer(omp_priv={0.0,0.0})
+// #pragma omp declare \
+//    reduction(sum_complex : complex : \
+//              omp_out.re=omp_out.re+omp_in.re, \
+//              omp_out.im=omp_out.im+omp_in.im) \
+//    initializer(omp_priv={0.0f,0.0f})
+// 
+// #pragma omp declare \
+//    reduction(sum_complex_dble : complex_dble : \
+//              omp_out.re=omp_out.re+omp_in.re,  \
+//              omp_out.im=omp_out.im+omp_in.im)  \
+//    initializer(omp_priv={0.0,0.0})
 
 #endif
 
