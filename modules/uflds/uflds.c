@@ -160,58 +160,29 @@ su3_dble *udfld(void)
 void random_ud(void)
 {
    int bc;
-   int k,ix,t,ifc;
-   su3_dble *ud;
+   int k,t,ifc,mu,ix;
+   su3_dble *ub;
 
-   if (udb==NULL)
-      alloc_ud();
-
+   ub=udfld();
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,t,ifc,ud)
+#pragma omp parallel private(k,ix,t,ifc,mu)
    {
       k=omp_get_thread_num();
-      ud=udb+k*4*VOLUME_TRD;
-
-      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
+      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
       {
-         t=global_time(ix+(VOLUME/2));
+         t=global_time(ix);
 
-         if (t==0)
+         // if ((t==(N0-1))&&(bc!=0))
          {
-            random_su3_dble(ud);
-            ud+=1;
-
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
-
-            for (ifc=2;ifc<8;ifc++)
-            {
-               if (bc!=1)
-                  random_su3_dble(ud);
-               ud+=1;
-            }
+            ifc=offset(ix,0);
+            random_su3_dble(ub+ifc);
          }
-         else if (t==(N0-1))
-         {
-            if (bc!=0)
-               random_su3_dble(ud);
-            ud+=1;
 
-            for (ifc=1;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
-            }
-         }
-         else
+         for (mu=1;mu<4;mu++)
          {
-            for (ifc=0;ifc<8;ifc++)
-            {
-               random_su3_dble(ud);
-               ud+=1;
-            }
+            ifc=offset(ix,mu);
+            random_su3_dble(ub+ifc);
          }
       }
    }
@@ -219,7 +190,7 @@ void random_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   #pragma omp target update to(udb)
+   #pragma omp target update to(udb[:4*VOLUME])
 }
 
 

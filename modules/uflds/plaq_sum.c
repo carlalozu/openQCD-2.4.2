@@ -98,13 +98,15 @@ static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
    fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
    fsu3matdagxsu3matdag(udbv, &wd2, ip[2], ip[3]);
    cm3x3_retr(&wd1,&wd2,&sm);
+
    return sm;
 }
 #pragma omp end declare target
 
+
 static qflt local_plaq_sum_dble(int iw)
 {
-   int bc,ix,t,n;
+   int bc;
    double wp,pa=0.0;
    qflt rqsm;
 
@@ -122,11 +124,11 @@ static qflt local_plaq_sum_dble(int iw)
    prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
-   for (ix=0;ix<VOLUME;ix++){
+   for (int ix=0;ix<VOLUME;ix++){
       for (int mu = 0; mu < 4; mu++) {
          for (int nu = mu+1; nu < 4; nu++) {
             double local_pa=0.0;
-            t=global_time(ix);
+            int t=global_time(ix);
 
             if (mu<1)
             {

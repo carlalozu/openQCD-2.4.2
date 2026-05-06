@@ -93,20 +93,6 @@
 
 #define N0 (NPROC0*L0)
 
-static int offset(int ix,int mu)
-{
-   int CBS,cb,pos,t,sp;
-
-   CBS=BLOCK_VLM*L0_TRD;
-   cb=ix/CBS;
-   pos=ix%CBS;
-   t=pos/BLOCK_VLM;
-   sp=pos%BLOCK_VLM;
-
-   /* Layout: [CB] -> [time(L0_TRD)] -> [mu(4)] -> [spatial(BLOCK_VLM)] */
-   return cb*(L0_TRD*4*BLOCK_VLM)+t*(4*BLOCK_VLM)+mu*BLOCK_VLM+sp;
-}
-
 typedef union
 {
    su3_dble u;
@@ -128,7 +114,7 @@ static int *alloc_lks(void)
 {
    int k,*a,*b;
 
-   error(ipt==NULL,1,"alloc_lks [bcnds.c]",
+   error(ipt==NULL,1,"alloc_lks [bcndsv.c]",
          "Geometry arrays are not set");
 
    if (cpr[0]==(NPROC0-1))
@@ -148,7 +134,7 @@ static int *alloc_lks(void)
    }
 
    error((nlks>0)&&((lks==NULL)||(ofs_lks==NULL)||(a==NULL)),1,
-         "alloc_lks [bcnds.c]","Unable to allocate index array");
+         "alloc_lks [bcndsv.c]","Unable to allocate index array");
 
    if (nlks>0)
    {
@@ -222,7 +208,7 @@ static int *alloc_pts(void)
 {
    int bc,k,*a,*b;
 
-   error(ipt==NULL,1,"alloc_pts [bcnds.c]",
+   error(ipt==NULL,1,"alloc_pts [bcndsv.c]",
          "Geometry arrays are not set");
    bc=bc_type();
 
@@ -246,7 +232,7 @@ static int *alloc_pts(void)
    }
 
    error((npts>0)&&((pts==NULL)||(ofs_all_pts==NULL)||(a==NULL)),1,
-         "alloc_pts [bcnds.c]","Unable to allocate index array");
+         "alloc_pts [bcndsv.c]","Unable to allocate index array");
 
    if (npts>0)
    {
@@ -566,7 +552,7 @@ void set_bc(void)
 {
    int bc,it;
 
-   error_root(query_flags(UD_PHASE_SET)==1,1,"set_bc [bcnds.c]",
+   error_root(query_flags(UD_PHASE_SET)==1,1,"set_bc [bcndsv.c]",
               "Gauge configuration must not be phase-set");
    bc=bc_type();
 
@@ -578,7 +564,7 @@ void set_bc(void)
       openSF_bc();
 
    it=check_zero(bc);
-   error(it!=1,1,"set_bc [bcnds.c]",
+   error(it!=1,1,"set_bc [bcndsv.c]",
          "Link variables vanish on an incorrect set of links");
 }
 
@@ -653,14 +639,14 @@ int check_bc(double tol)
    int bc,it,is;
    double dprms[1];
 
-   error_root(query_flags(UD_PHASE_SET)==1,1,"check_bc [bcnds.c]",
+   error_root(query_flags(UD_PHASE_SET)==1,1,"check_bc [bcndsv.c]",
               "Gauge configuration must not be phase-set");
 
    if (NPROC>1)
    {
       dprms[0]=tol;
       MPI_Bcast(dprms,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
-      error(dprms[0]!=tol,1,"check_bc [bcnds.c]","Parameter is not global");
+      error(dprms[0]!=tol,1,"check_bc [bcndsv.c]","Parameter is not global");
    }
 
    bc=bc_type();
