@@ -64,7 +64,7 @@ extern void cm3x3_dagger(su3_dble *u,su3_dble *v);
 extern void cm3x3_tr(su3_dble *u,su3_dble *v,complex_dble *tr);
 #ifndef CM3X3_C
 #pragma omp declare target
-static inline void cm3x3_retr(su3_dble *u,su3_dble *v, ,double *tr)
+static inline void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr)
 {
    double r;
 
@@ -84,7 +84,7 @@ static inline void cm3x3_retr(su3_dble *u,su3_dble *v, ,double *tr)
 }
 #pragma omp end declare target
 #else
-extern void cm3x3_retr(su3_dble *u,su3_dble *v, ,double *tr);
+extern void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr);
 #endif
 extern void cm3x3_imtr(su3_dble *u,su3_dble *v,double *tr);
 extern void cm3x3_add(su3_dble *u,su3_dble *v);

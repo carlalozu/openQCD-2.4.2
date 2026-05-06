@@ -72,8 +72,7 @@ static double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
-   su3_dble wd1 ALIGNED16;
-   su3_dble wd2 ALIGNED16;
+   su3_dble wd1,wd2;
 
    plaq_uidx(n,ix,ip);
 
@@ -102,7 +101,6 @@ static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
    return sm;
 }
 #pragma omp end declare target
-
 
 static qflt local_plaq_sum_dble(int iw)
 {
@@ -229,8 +227,8 @@ double plaq_action_slices(double *asl)
       rqsmB[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,n,smE,smB) \
-   reduction(sum_qflt : rqsmE[cpr[0]*L0:L0],rqsmB[cpr[0]*L0:L0])
+#pragma omp parallel private(k,ix,t,n,smE,smB)
+   // reduction(sum_qflt : rqsmE[cpr[0]*L0:L0],rqsmB[cpr[0]*L0:L0])
    {
       k=omp_get_thread_num();
 
