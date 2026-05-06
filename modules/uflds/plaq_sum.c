@@ -72,11 +72,9 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 {
    int ip[4];
    double sm;
-   su3_dble wd1 ALIGNED16;
-   su3_dble wd2 ALIGNED16;
+   su3_dble wd1,wd2;
 
    plaq_uidx(mu,nu,ix,ip);
-   // printf("mu, nu = (%i, %i), ix: %i, ip: (%i, %i, %i, %i)\n", mu, nu, ix, ip[0], ip[1], ip[2], ip[3]);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
