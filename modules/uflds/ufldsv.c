@@ -121,7 +121,7 @@ su3_mat_field *udfldv(void)
 void random_udv(void)
 {
    int bc;
-   int k,ix,mu,t;
+   int k,ix,iz,t;
    su3_mat_field *udv;
 
    if (udbv==NULL)
@@ -129,26 +129,14 @@ void random_udv(void)
 
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,mu,t,udv)
+#pragma omp parallel private(k,ix,iz,t,udv)
    {
-      k=omp_get_thread_num();
-
-      for (mu=0;mu<4;mu++)
-      {
-         for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
-         {
+      for (int iy=0;iy<VOLUME;iy++){
+         for (int mu=0;mu<4;mu++) {
+            ix=ipt[iy];
             t=global_time(ix);
-
-            if (mu==0)
-            {
-               if ((t!=(N0-1))||(bc!=0))
-                  random_su3_mat_field(udbv, ix);
-            }
-            else
-            {
-               if ((t!=0)||(bc!=1))
-                  random_su3_mat_field(udbv, ix);
-            }
+            iz=offset(ix,mu);
+            random_su3_mat_field(udbv, iz);
          }
       }
    }
@@ -156,5 +144,8 @@ void random_udv(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   #pragma omp target update to(udbv)
+   #pragma omp target update \
+    to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
+    to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
+    to(udbv->c3.base[0 : 6 * udbv->c3.volume])
 }

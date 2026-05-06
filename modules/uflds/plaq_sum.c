@@ -95,7 +95,7 @@ static double plaq_dblev(su3_mat_field *udbv,int mu,int nu,int ix)
    plaq_uidxv(mu,nu,ix,ip);
 
    fsu3matxsu3mat(udbv, &wd1, ip[0], ip[1]);
-   fsu3matdagxsu3matdag(udbv, &wd2, ip[2], ip[3]);
+   fsu3matdagxsu3matdag(udbv, &wd2, ip[3], ip[2]);
    cm3x3_retr(&wd1,&wd2,&sm);
 
    return sm;
