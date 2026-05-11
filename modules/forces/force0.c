@@ -316,7 +316,7 @@ void plaq_frc(void)
    add_bnd_frc();
 }
 
-
+#pragma omp declare target
 static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,bc_parms_t bcp,int ix,double c,int (*iup)[4], int (*idn)[4])
 {
    int bc,n,t,ip[4];
@@ -555,7 +555,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
       }
    }
 }
-
+#pragma omp end declare target
 
 void force0(double c)
 {
@@ -592,7 +592,7 @@ void force0(double c)
 
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
+   #pragma omp target update to(iup[:VOLUME], idn[:VOLUME])
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
 
    #pragma omp target teams distribute parallel for
