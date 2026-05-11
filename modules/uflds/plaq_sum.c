@@ -67,14 +67,14 @@ static su3_dble *udb;
 prof_section compute = {.name = "compute"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int n,int ix)
+static double plaq_dble(su3_dble *udb, int n,int ix, int **iup)
 {
    int ip[4];
    double sm;
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(n,ix,ip);
+   _plaq_uidx(n,ix,ip,iup);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
@@ -100,9 +100,10 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udb=udfld();
+
    prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa)
+   #pragma omp target teams distribute parallel for reduction(+:pa) map(to: iup[0:VOLUME])
    for (int ix=0;ix<VOLUME;ix++)
    {
       double local_pa=0.0;
@@ -110,13 +111,13 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (int n=0;n<3;n++)
-            local_pa+=plaq_dble(udb,n,ix);
+            local_pa+=plaq_dble(udb,n,ix,iup);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (int n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
+            local_pa+=plaq_dble(udb,n,ix,iup);
       }
       else if ((t==0)||(bc==0))
       {
@@ -125,13 +126,13 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (int n=3;n<6;n++)
-               local_pa+=wp*plaq_dble(udb,n,ix);
+               local_pa+=wp*plaq_dble(udb,n,ix,iup);
          }
       }
       else
       {
          for (int n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
+            local_pa+=plaq_dble(udb,n,ix,iup);
 
          local_pa+=wp*9.0;
       }
@@ -225,13 +226,13 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb,n,ix));
+               smE+=(3.0-plaq_dble(udb,n,ix,iup));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(udb,n,ix));
+               smB+=(3.0-plaq_dble(udb,n,ix,iup));
          }
 
          acc_qflt(smE,rqsmE[t].q);

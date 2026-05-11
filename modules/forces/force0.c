@@ -68,84 +68,53 @@
 
 #pragma omp declare target
 static void su3_alg_add_assign(su3_alg_dble *r,su3_alg_dble s){
-   #pragma omp atomic
+
    (*r).c1+=(s).c1;
-   #pragma omp atomic
    (*r).c2+=(s).c2;
-   #pragma omp atomic
    (*r).c3+=(s).c3;
-   #pragma omp atomic
    (*r).c4+=(s).c4;
-   #pragma omp atomic
    (*r).c5+=(s).c5;
-   #pragma omp atomic
    (*r).c6+=(s).c6;
-   #pragma omp atomic
    (*r).c7+=(s).c7;
-   #pragma omp atomic
    (*r).c8+=(s).c8;
 }
 #pragma omp end declare target
 
 #pragma omp declare target
 static void su3_alg_sub_assign(su3_alg_dble *r,su3_alg_dble s){
-   #pragma omp atomic
    (*r).c1-=(s).c1;
-   #pragma omp atomic
    (*r).c2-=(s).c2;
-   #pragma omp atomic
    (*r).c3-=(s).c3;
-   #pragma omp atomic
    (*r).c4-=(s).c4;
-   #pragma omp atomic
    (*r).c5-=(s).c5;
-   #pragma omp atomic
    (*r).c6-=(s).c6;
-   #pragma omp atomic
    (*r).c7-=(s).c7;
-   #pragma omp atomic
    (*r).c8-=(s).c8;
 }
 #pragma omp end declare target
 
 #pragma omp declare target
 static void su3_alg_mul_add_assign(su3_alg_dble *r,double c,su3_alg_dble s){
-   #pragma omp atomic
    (*r).c1+=(c)*(s).c1;
-   #pragma omp atomic
    (*r).c2+=(c)*(s).c2;
-   #pragma omp atomic
    (*r).c3+=(c)*(s).c3;
-   #pragma omp atomic
    (*r).c4+=(c)*(s).c4;
-   #pragma omp atomic
    (*r).c5+=(c)*(s).c5;
-   #pragma omp atomic
    (*r).c6+=(c)*(s).c6;
-   #pragma omp atomic
    (*r).c7+=(c)*(s).c7;
-   #pragma omp atomic
    (*r).c8+=(c)*(s).c8;
 }
 #pragma omp end declare target
 
 #pragma omp declare target
 static void su3_alg_mul_sub_assign(su3_alg_dble *r,double c,su3_alg_dble s){
-   #pragma omp atomic
    (*r).c1-=(c)*(s).c1;
-   #pragma omp atomic
    (*r).c2-=(c)*(s).c2;
-   #pragma omp atomic
    (*r).c3-=(c)*(s).c3;
-   #pragma omp atomic
    (*r).c4-=(c)*(s).c4;
-   #pragma omp atomic
    (*r).c5-=(c)*(s).c5;
-   #pragma omp atomic
    (*r).c6-=(c)*(s).c6;
-   #pragma omp atomic
    (*r).c7-=(c)*(s).c7;
-   #pragma omp atomic
    (*r).c8-=(c)*(s).c8;
 }
 #pragma omp end declare target
@@ -196,7 +165,7 @@ static void set_ofs(void)
 }
 
 #pragma omp declare target
-static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble *vd)
+static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble *vd, int **iup, int **idn)
 {
    int mu,nu,ifc;
    int iy,ib,ip[4];
@@ -211,7 +180,7 @@ static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble
 
       if (iy<VOLUME)
       {
-         plaq_uidx(n,iy,ip);
+         _plaq_uidx(n,iy,ip,iup);
 
          su3xsu3(udb+ip[0],udb+ip[1],wd+2);
          su3dagxsu3(udb+ip[2],wd+2,vd);
@@ -233,7 +202,7 @@ static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble
 
    if (iy<VOLUME)
    {
-      plaq_uidx(n,iy,ip);
+      _plaq_uidx(n,iy,ip,iup);
 
       su3xsu3dag(udb+ip[1],udb+ip[3],wd+2);
       su3xsu3(udb+ip[0],wd+2,vd+1);
@@ -256,7 +225,7 @@ static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble
 
       if (iy<VOLUME)
       {
-         plaq_uidx(n,iy,ip);
+         _plaq_uidx(n,iy,ip,iup);
 
          su3xsu3(udb+ip[2],udb+ip[3],wd+2);
          su3dagxsu3(udb+ip[0],wd+2,vd+2);
@@ -278,7 +247,7 @@ static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble
 
    if (iy<VOLUME)
    {
-      plaq_uidx(n,iy,ip);
+      _plaq_uidx(n,iy,ip,iup);
 
       su3xsu3dag(udb+ip[3],udb+ip[1],wd+2);
       su3xsu3(udb+ip[2],wd+2,vd+3);
@@ -401,7 +370,7 @@ void plaq_frc(void)
 }
 
 
-static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,bc_parms_t bcp,int ix,double c)
+static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,bc_parms_t bcp,int ix,double c,int **iup, int **idn)
 {
    int bc,n,t,ip[4];
    double r0,r1,c0,c1,*cG;
@@ -432,7 +401,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
 
          for (n=0;n<3;n++)
          {
-            plaq_uidx(n,ix,ip);
+            _plaq_uidx(n,ix,ip,iup);
 
             su3xsu3dag(udb+ip[1],udb+ip[3],wd);
             su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
@@ -457,7 +426,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
 
             if (c0!=1.0)
             {
-               set_staples(udb,hdb,n,ix,0,vd);
+               set_staples(udb,hdb,n,ix,0,vd,iup,idn);
 
                if ((t==0)&&(bc==1))
                {
@@ -577,7 +546,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
 
          for (n=3;n<6;n++)
          {
-            plaq_uidx(n,ix,ip);
+            _plaq_uidx(n,ix,ip,iup);
 
             su3xsu3dag(udb+ip[1],udb+ip[3],wd);
             su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
@@ -594,7 +563,7 @@ static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_
 
             if (c0!=1.0)
             {
-               set_staples(udb,hdb,n,ix,0,vd);
+               set_staples(udb,hdb,n,ix,0,vd,iup,idn);
 
                prod2su3alg(wd+1,vd,&X);
                su3_alg_mul_add_assign((fdb+ip[1]),r1,X);
@@ -673,16 +642,18 @@ void force0(double c)
    bcp=bc_parms();
 
    prof_begin(&force0_part_p);
+
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
 
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
 
-   #pragma omp target teams distribute parallel for
+   #pragma omp target teams distribute parallel for \
+      map(to: iup[0:VOLUME], idn[0:VOLUME])
    for (int ix=0;ix<VOLUME/2;ix++)
    {
-      force0_part(udb,hdb,fdb,lat,bcp,ix,c);
-      force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
+      force0_part(udb,hdb,fdb,lat,bcp,ix,c,iup,idn);
+      force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c,iup,idn);
    }
    #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
    add_bnd_frc();
@@ -714,7 +685,7 @@ static void wloops(int n,int ix,int t,double c0,double *trU)
 
    if (c0!=1.0)
    {
-      set_staples(udb,hdb,n,ix,1,vd);
+      set_staples(udb,hdb,n,ix,1,vd,iup,idn);
 
       if ((n<3)&&(((t==0)&&(bc==1))||
                   ((t==(N0-1))&&((bc==1)||(bc==2)))))
