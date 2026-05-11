@@ -697,7 +697,7 @@ typedef struct
    (r).c9+=(c)*(u).c9
 
 #pragma omp declare target
-static void su3_alg_add_assign(su3_alg_dble *r,su3_alg_dble s){
+static inline void su3_alg_add_assign(su3_alg_dble *r,su3_alg_dble s){
    #pragma omp atomic update
    (*r).c1+=(s).c1;
    #pragma omp atomic update
@@ -718,7 +718,7 @@ static void su3_alg_add_assign(su3_alg_dble *r,su3_alg_dble s){
 #pragma omp end declare target
 
 #pragma omp declare target
-static void su3_alg_sub_assign(su3_alg_dble *r,su3_alg_dble s){
+static inline void su3_alg_sub_assign(su3_alg_dble *r,su3_alg_dble s){
    #pragma omp atomic update
    (*r).c1-=(s).c1;
    #pragma omp atomic update
@@ -739,7 +739,7 @@ static void su3_alg_sub_assign(su3_alg_dble *r,su3_alg_dble s){
 #pragma omp end declare target
 
 #pragma omp declare target
-static void su3_alg_mul_add_assign(su3_alg_dble *r,double c,su3_alg_dble s){
+static inline void su3_alg_mul_add_assign(su3_alg_dble *r,double c,su3_alg_dble s){
    #pragma omp atomic update
    (*r).c1+=(c)*(s).c1;
    #pragma omp atomic update
@@ -760,7 +760,7 @@ static void su3_alg_mul_add_assign(su3_alg_dble *r,double c,su3_alg_dble s){
 #pragma omp end declare target
 
 #pragma omp declare target
-static void su3_alg_mul_sub_assign(su3_alg_dble *r,double c,su3_alg_dble s){
+static inline void su3_alg_mul_sub_assign(su3_alg_dble *r,double c,su3_alg_dble s){
    #pragma omp atomic update
    (*r).c1-=(c)*(s).c1;
    #pragma omp atomic update
