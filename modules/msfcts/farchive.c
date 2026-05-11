@@ -130,8 +130,9 @@ static double square_norm(int icom,double *f)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
 
-#pragma omp parallel private(k,sn,fr,fm) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k,sn,fr,fm)
    {
+      qflt loc_rqsm={{0.0,0.0}};
       k=omp_get_thread_num();
 
       fr=f+k*VOLUME_TRD;
@@ -141,8 +142,10 @@ static double square_norm(int icom,double *f)
       {
          sn=fr[0]*fr[0]+fr[1]*fr[1]+fr[2]*fr[2]+fr[3]*fr[3]+
             fr[4]*fr[4]+fr[5]*fr[5]+fr[6]*fr[6]+fr[7]*fr[7];
-         acc_qflt(sn,rqsm.q);
+         acc_qflt(sn,loc_rqsm.q);
       }
+      #pragma omp critical
+      add_qflt(loc_rqsm.q,rqsm.q,rqsm.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))

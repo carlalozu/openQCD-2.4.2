@@ -1233,10 +1233,16 @@ complex spinor_prod(int vol,int icom,spinor *s,spinor *r)
       v.re=0.0;
       v.im=0.0;
 
-#pragma omp parallel private(k) reduction(sum_complex_dble : v)
+#pragma omp parallel private(k)
       {
+         complex_dble loc_v;
          k=omp_get_thread_num();
-         v=loc_spinor_prod(vol,s+k*vol,r+k*vol);
+         loc_v=loc_spinor_prod(vol,s+k*vol,r+k*vol);
+         #pragma omp critical
+         {
+            v.re+=loc_v.re;
+            v.im+=loc_v.im;
+         }
       }
    }
 

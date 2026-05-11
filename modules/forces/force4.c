@@ -818,9 +818,9 @@ qflt small_det(int icom)
    bc=bc_type();
    ie=0;
 
-#pragma omp parallel private(k,ofs,vol,ix,t,p,z,m,pwsp) reduction(| : ie) \
-   reduction(sum_qflt : act)
+#pragma omp parallel private(k,ofs,vol,ix,t,p,z,m,pwsp) reduction(| : ie)
    {
+      qflt loc_act={{0.0,0.0}};
       pwsp=alloc_pauli_wsp();
 
       if (pwsp==NULL)
@@ -845,7 +845,7 @@ qflt small_det(int icom)
                p*=(c*z.re);
 
                if (p>0.0)
-                  acc_qflt(-log(p),act.q);
+                  acc_qflt(-log(p),loc_act.q);
                else
                   ie=1;
             }
@@ -855,6 +855,8 @@ qflt small_det(int icom)
 
          free_pauli_wsp(pwsp);
       }
+      #pragma omp critical
+      add_qflt(loc_act.q,act.q,act.q);
    }
 
    error(ie!=0,1,"sdet [force4.c]",

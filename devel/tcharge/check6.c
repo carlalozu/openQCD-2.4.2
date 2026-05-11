@@ -50,8 +50,9 @@ static double sum_fld(double *f)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
 
-#pragma omp parallel private(k,fr,fm,sm) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k,fr,fm,sm)
    {
+      qflt loc_rqsm={{0.0,0.0}};
       k=omp_get_thread_num();
 
       fr=f+k*VOLUME_TRD;
@@ -60,8 +61,10 @@ static double sum_fld(double *f)
       for (;fr<fm;fr+=4)
       {
          sm=fr[0]+fr[1]+fr[2]+fr[3];
-         acc_qflt(sm,rqsm.q);
+         acc_qflt(sm,loc_rqsm.q);
       }
+      #pragma omp critical
+      add_qflt(loc_rqsm.q,rqsm.q,rqsm.q);
    }
 
    if (NPROC>1)

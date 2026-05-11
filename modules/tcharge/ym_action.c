@@ -109,8 +109,9 @@ double ym_action(void)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
 
-#pragma omp parallel private(k,ix,t,S) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k,ix,t,S)
    {
+      qflt loc_rqsm={{0.0,0.0}};
       k=omp_get_thread_num();
 
       for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
@@ -120,9 +121,11 @@ double ym_action(void)
          if (((t>0)&&(t<tmx))||(bc==3))
          {
             S=density(ix);
-            acc_qflt(S,rqsm.q);
+            acc_qflt(S,loc_rqsm.q);
          }
       }
+      #pragma omp critical
+      add_qflt(loc_rqsm.q,rqsm.q,rqsm.q);
    }
 
    if (NPROC>1)
@@ -155,8 +158,11 @@ double ym_action_slices(double *asl)
       rqasl[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,S) reduction(sum_qflt : rqasl[cpr[0]*L0:L0])
+#pragma omp parallel private(k,ix,t,S)
    {
+      qflt loc_rqasl[L0];
+      int tl;
+      for (tl=0;tl<L0;tl++) { loc_rqasl[tl].q[0]=0.0; loc_rqasl[tl].q[1]=0.0; }
       k=omp_get_thread_num();
 
       for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
@@ -166,9 +172,12 @@ double ym_action_slices(double *asl)
          if (((t>0)&&(t<tmx))||(bc==3))
          {
             S=density(ix);
-            acc_qflt(S,rqasl[t].q);
+            acc_qflt(S,loc_rqasl[t-cpr[0]*L0].q);
          }
       }
+      #pragma omp critical
+      for (tl=0;tl<L0;tl++)
+         add_qflt(loc_rqasl[tl].q,rqasl[cpr[0]*L0+tl].q,rqasl[cpr[0]*L0+tl].q);
    }
 
    if (NPROC>1)

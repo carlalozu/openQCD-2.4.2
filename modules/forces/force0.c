@@ -757,10 +757,13 @@ qflt action0(int icom)
    act0.q[0]=0.0;
    act0.q[1]=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : act0)
+#pragma omp parallel private(k)
    {
+      qflt loc_act0;
       k=omp_get_thread_num();
-      act0=action0_part(k*VOLUME_TRD,VOLUME_TRD);
+      loc_act0=action0_part(k*VOLUME_TRD,VOLUME_TRD);
+      #pragma omp critical
+      add_qflt(loc_act0.q,act0.q,act0.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))

@@ -316,10 +316,13 @@ qflt norm_square_alg(int vol,int icom,su3_alg_dble *X)
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_norm_square_alg(vol,X+k*vol);
+         loc_rqsm=loc_norm_square_alg(vol,X+k*vol);
+         #pragma omp critical
+         add_qflt(loc_rqsm.q,rqsm.q,rqsm.q);
       }
    }
 
@@ -349,10 +352,13 @@ qflt scalar_prod_alg(int vol,int icom,su3_alg_dble *X,su3_alg_dble *Y)
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_scalar_prod_alg(vol,X+k*vol,Y+k*vol);
+         loc_rqsm=loc_scalar_prod_alg(vol,X+k*vol,Y+k*vol);
+         #pragma omp critical
+         add_qflt(loc_rqsm.q,rqsm.q,rqsm.q);
       }
    }
 

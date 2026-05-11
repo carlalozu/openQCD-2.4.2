@@ -126,10 +126,16 @@ complex_dble vprod(int n,int icom,complex *v,complex *w)
       cv.re=0.0;
       cv.im=0.0;
 
-#pragma omp parallel private(k) reduction(sum_complex_dble : cv)
+#pragma omp parallel private(k)
       {
+         complex_dble loc_cv;
          k=omp_get_thread_num();
-         cv=loc_vprod(n,v+k*n,w+k*n);
+         loc_cv=loc_vprod(n,v+k*n,w+k*n);
+         #pragma omp critical
+         {
+            cv.re+=loc_cv.re;
+            cv.im+=loc_cv.im;
+         }
       }
    }
 
