@@ -165,7 +165,7 @@ static void set_ofs(void)
 }
 
 #pragma omp declare target
-static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble *vd, int **iup, int **idn)
+static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble *vd, int (*iup)[4], int (*idn)[4])
 {
    int mu,nu,ifc;
    int iy,ib,ip[4];
@@ -370,7 +370,7 @@ void plaq_frc(void)
 }
 
 
-static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,bc_parms_t bcp,int ix,double c,int **iup, int **idn)
+static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,bc_parms_t bcp,int ix,double c,int (*iup)[4], int (*idn)[4])
 {
    int bc,n,t,ip[4];
    double r0,r1,c0,c1,*cG;

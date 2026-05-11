@@ -67,7 +67,7 @@ static su3_dble *udb;
 prof_section compute = {.name = "compute"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int n,int ix, int **iup)
+static double plaq_dble(su3_dble *udb, int n,int ix, int (*iup)[4])
 {
    int ip[4];
    double sm;

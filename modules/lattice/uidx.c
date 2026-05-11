@@ -145,7 +145,7 @@ int offset(int ix,int mu)
 }
 
 #pragma omp declare target
-int _offset(int ix,int mu, int **iup)
+int _offset(int ix,int mu, int (*iup)[4])
 {
    int iy,ib;
 
@@ -305,7 +305,7 @@ void plaq_uidx(int n,int ix,int *ip)
 
 
 #pragma omp declare target
-void _plaq_uidx(int n,int ix,int *ip, int **iup)
+void _plaq_uidx(int n,int ix,int *ip, int (*iup)[4])
 {
    int mu,nu;
    int iy,ic;
