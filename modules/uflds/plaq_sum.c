@@ -102,8 +102,9 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
 
    prof_begin(&compute);
+   #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa) map(to: iup[0:VOLUME])
+   #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
    {
       double local_pa=0.0;
