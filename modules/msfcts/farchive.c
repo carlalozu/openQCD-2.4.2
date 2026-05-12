@@ -124,13 +124,14 @@ static void alloc_fbuf(int n)
 static double square_norm(int icom,double *f)
 {
    int k;
-   double sn,*fr,*fm,*qsm[1];
+   double sn,pa,*fr,*fm,*qsm[1];
    qflt rqsm;
 
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
+   pa=0.0;
 
-#pragma omp parallel private(k,sn,fr,fm) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k,sn,fr,fm) reduction(+:pa)
    {
       k=omp_get_thread_num();
 
@@ -141,9 +142,10 @@ static double square_norm(int icom,double *f)
       {
          sn=fr[0]*fr[0]+fr[1]*fr[1]+fr[2]*fr[2]+fr[3]*fr[3]+
             fr[4]*fr[4]+fr[5]*fr[5]+fr[6]*fr[6]+fr[7]*fr[7];
-         acc_qflt(sn,rqsm.q);
+         pa+=sn;
       }
    }
+   acc_qflt(pa,rqsm.q);
 
    if ((NPROC>1)&&(icom&0x1))
    {

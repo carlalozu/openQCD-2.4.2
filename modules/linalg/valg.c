@@ -117,6 +117,7 @@ static void loc_vscale(int n,float r,complex *v)
 complex_dble vprod(int n,int icom,complex *v,complex *w)
 {
    int k;
+   double pre,pim;
    complex_dble cv,cw;
 
    if ((icom&0x2)==0)
@@ -125,12 +126,19 @@ complex_dble vprod(int n,int icom,complex *v,complex *w)
    {
       cv.re=0.0;
       cv.im=0.0;
+      pre=0.0;
+      pim=0.0;
 
-#pragma omp parallel private(k) reduction(sum_complex_dble : cv)
+#pragma omp parallel private(k) reduction(+:pre,pim)
       {
+         complex_dble loc_cv;
          k=omp_get_thread_num();
-         cv=loc_vprod(n,v+k*n,w+k*n);
+         loc_cv=loc_vprod(n,v+k*n,w+k*n);
+         pre+=loc_cv.re;
+         pim+=loc_cv.im;
       }
+      cv.re=pre;
+      cv.im=pim;
    }
 
    if ((NPROC>1)&&(icom&0x1))

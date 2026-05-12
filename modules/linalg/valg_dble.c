@@ -155,7 +155,7 @@ static void loc_vscale_dble(int n,double r,complex_dble *v)
 complex_qflt vprod_dble(int n,int icom,complex_dble *v,complex_dble *w)
 {
    int k;
-   double *qsm[2];
+   double *qsm[2],pre,pim;
    qflt reqsm,imqsm;
    complex_qflt cqsm;
 
@@ -167,17 +167,18 @@ complex_qflt vprod_dble(int n,int icom,complex_dble *v,complex_dble *w)
       reqsm.q[1]=0.0;
       imqsm.q[0]=0.0;
       imqsm.q[1]=0.0;
+      pre=0.0;
+      pim=0.0;
 
-#pragma omp parallel private(k,cqsm) reduction(sum_qflt : reqsm,imqsm)
+#pragma omp parallel private(k,cqsm) reduction(+:pre,pim)
       {
          k=omp_get_thread_num();
          cqsm=loc_vprod_dble(n,v+k*n,w+k*n);
-
-         reqsm.q[0]=cqsm.re.q[0];
-         reqsm.q[1]=cqsm.re.q[1];
-         imqsm.q[0]=cqsm.im.q[0];
-         imqsm.q[1]=cqsm.im.q[1];
+         pre+=cqsm.re.q[0];
+         pim+=cqsm.im.q[0];
       }
+      acc_qflt(pre,reqsm.q);
+      acc_qflt(pim,imqsm.q);
 
       cqsm.re.q[0]=reqsm.q[0];
       cqsm.re.q[1]=reqsm.q[1];
@@ -199,7 +200,7 @@ complex_qflt vprod_dble(int n,int icom,complex_dble *v,complex_dble *w)
 qflt vnorm_square_dble(int n,int icom,complex_dble *v)
 {
    int k;
-   double *qsm[1];
+   double *qsm[1],pa;
    qflt rqsm;
 
    if ((icom&0x2)==0)
@@ -208,12 +209,16 @@ qflt vnorm_square_dble(int n,int icom,complex_dble *v)
    {
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
+      pa=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k) reduction(+:pa)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_vnorm_square_dble(n,v+k*n);
+         loc_rqsm=loc_vnorm_square_dble(n,v+k*n);
+         pa+=loc_rqsm.q[0];
       }
+      acc_qflt(pa,rqsm.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))

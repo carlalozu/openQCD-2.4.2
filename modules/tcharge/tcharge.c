@@ -102,7 +102,7 @@ double tcharge(void)
 {
    int bc,tmx;
    int k,ix,t;
-   double Q,pi,fact,*qsm[1];
+   double Q,pa,pi,fact,*qsm[1];
    qflt rqsm;
 
    ft=ftensor();
@@ -113,10 +113,10 @@ double tcharge(void)
       tmx=N0;
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
+   pa=0.0;
 
-#pragma omp parallel private(k,ix,t,Q)
+#pragma omp parallel private(k,ix,t,Q) reduction(+:pa)
    {
-      qflt loc_rqsm={{0.0,0.0}};
       k=omp_get_thread_num();
 
       for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
@@ -126,12 +126,11 @@ double tcharge(void)
          if (((t>0)&&(t<tmx))||(bc==3))
          {
             Q=density(ix);
-            acc_qflt(Q,loc_rqsm.q);
+            pa+=Q;
          }
       }
-      #pragma omp critical
-      add_qflt(loc_rqsm.q,rqsm.q,rqsm.q);
    }
+   acc_qflt(pa,rqsm.q);
 
    if (NPROC>1)
    {
@@ -148,9 +147,9 @@ double tcharge(void)
 
 double tcharge_slices(double *qsl)
 {
-   int bc,tmx;
+   int bc,tmx,tl;
    int k,ix,t;
-   double Q,pi,fact;
+   double Q,pi,fact,paasl[L0];
 
    ft=ftensor();
    bc=bc_type();
@@ -159,6 +158,8 @@ double tcharge_slices(double *qsl)
    else
       tmx=N0;
 
+   for (tl=0;tl<L0;tl++) paasl[tl]=0.0;
+
    for (t=0;t<N0;t++)
    {
       qcsl[t]=rqcsl[t].q;
@@ -166,11 +167,8 @@ double tcharge_slices(double *qsl)
       rqcsl[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,Q)
+#pragma omp parallel private(k,ix,t,Q) reduction(+:paasl[0:L0])
    {
-      qflt loc_rqcsl[L0];
-      int tl;
-      for (tl=0;tl<L0;tl++) { loc_rqcsl[tl].q[0]=0.0; loc_rqcsl[tl].q[1]=0.0; }
       k=omp_get_thread_num();
 
       for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
@@ -180,13 +178,12 @@ double tcharge_slices(double *qsl)
          if (((t>0)&&(t<tmx))||(bc==3))
          {
             Q=density(ix);
-            acc_qflt(Q,loc_rqcsl[t-cpr[0]*L0].q);
+            paasl[t-cpr[0]*L0]+=Q;
          }
       }
-      #pragma omp critical
-      for (tl=0;tl<L0;tl++)
-         add_qflt(loc_rqcsl[tl].q,rqcsl[cpr[0]*L0+tl].q,rqcsl[cpr[0]*L0+tl].q);
    }
+   for (tl=0;tl<L0;tl++)
+      acc_qflt(paasl[tl],rqcsl[cpr[0]*L0+tl].q);
 
    if (NPROC>1)
       global_qsum(N0,qcsl,qcsl);

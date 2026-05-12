@@ -213,19 +213,20 @@ void sphere3d_msfld(int r,double *f)
 static void set_sphere_sum(int i3d,int dmax,double *f,double *sm)
 {
    int k,ofs,vol,ix,iy,x[4];
-   int d,dsq;
-   double s;
+   int d,dsq,dl;
+   double s,*pa_smx;
 
    alloc_smx(dmax);
 
-   for (d=0;d<=dmax;d++)
+   pa_smx=malloc((dmax+1)*sizeof(*pa_smx));
+   for (dl=0;dl<=dmax;dl++)
    {
-      smx[d].q[0]=0.0;
-      smx[d].q[1]=0.0;
+      smx[dl].q[0]=0.0;
+      smx[dl].q[1]=0.0;
+      pa_smx[dl]=0.0;
    }
 
-#pragma omp parallel private(k,ofs,vol,ix,iy,x,d,dsq,s) \
-   reduction(sum_qflt : smx[0:(dmax+1)])
+#pragma omp parallel private(k,ofs,vol,ix,iy,x,d,dsq,s) reduction(+:pa_smx[0:(dmax+1)])
    {
       k=omp_get_thread_num();
       vol=VOLUME_TRD;
@@ -246,9 +247,12 @@ static void set_sphere_sum(int i3d,int dmax,double *f,double *sm)
          s=f[ipt[ix]];
 
          for (d=dmax;(dsq<=(d*d))&&(d>=0);d--)
-            acc_qflt(s,smx[d].q);
+            pa_smx[d]+=s;
       }
    }
+   for (dl=0;dl<=dmax;dl++)
+      acc_qflt(pa_smx[dl],smx[dl].q);
+   free(pa_smx);
 
    if (NPROC>1)
       global_qsum(dmax+1,qsmx,qsmx);
@@ -280,13 +284,14 @@ double avg_msfld(double *f)
 {
    int k;
    double *fr,*fm;
-   double sm,*qsm[1];
+   double sm,pa,*qsm[1];
    qflt rqsm;
 
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
+   pa=0.0;
 
-#pragma omp parallel private(k,fr,fm,sm) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k,fr,fm,sm) reduction(+:pa)
    {
       k=omp_get_thread_num();
 
@@ -296,9 +301,10 @@ double avg_msfld(double *f)
       for (;fr<fm;fr+=4)
       {
          sm=fr[0]+fr[1]+fr[2]+fr[3];
-         acc_qflt(sm,rqsm.q);
+         pa+=sm;
       }
    }
+   acc_qflt(pa,rqsm.q);
 
    if (NPROC>1)
    {

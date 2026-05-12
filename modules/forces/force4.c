@@ -795,7 +795,7 @@ qflt small_det(int icom)
 {
    int bc,ie;
    int k,ofs,vol,ix,t;
-   double c,p,*qsm[1];
+   double c,p,pa,*qsm[1];
    qflt act;
    complex_dble z;
    pauli_dble *m;
@@ -804,6 +804,7 @@ qflt small_det(int icom)
 
    act.q[0]=0.0;
    act.q[1]=0.0;
+   pa=0.0;
    swp=sw_parms();
 
    if (swp.isw)
@@ -818,8 +819,7 @@ qflt small_det(int icom)
    bc=bc_type();
    ie=0;
 
-#pragma omp parallel private(k,ofs,vol,ix,t,p,z,m,pwsp) reduction(| : ie) \
-   reduction(sum_qflt : act)
+#pragma omp parallel private(k,ofs,vol,ix,t,p,z,m,pwsp) reduction(| : ie) reduction(+:pa)
    {
       pwsp=alloc_pauli_wsp();
 
@@ -845,7 +845,7 @@ qflt small_det(int icom)
                p*=(c*z.re);
 
                if (p>0.0)
-                  acc_qflt(-log(p),act.q);
+                  pa+=(-log(p));
                else
                   ie=1;
             }
@@ -856,6 +856,7 @@ qflt small_det(int icom)
          free_pauli_wsp(pwsp);
       }
    }
+   acc_qflt(pa,act.q);
 
    error(ie!=0,1,"sdet [force4.c]",
          "Workspace allocation failed or SW term has negative\n"
