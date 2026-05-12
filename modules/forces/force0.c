@@ -67,10 +67,12 @@
 #include "profiler.h"
 
 #define N0 (NPROC0*L0)
+
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
 static int nfc[8],ofs[8],hofs[8],init=0;
 #pragma omp end declare target
+
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
@@ -105,6 +107,8 @@ static void set_ofs(void)
    hofs[7]=hofs[6]+3*FACE3;
 
    init=1;
+   #pragma omp target enter data map(to : nfc[:8], ofs[:8], hofs[:8], init)
+
 }
 
 #pragma omp declare target
@@ -207,6 +211,7 @@ static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble
       vd[3]=hdb[hofs[ifc]+3*ib+mu-(mu>nu)];
    }
 }
+#pragma omp end declare target
 
 
 static void plaq_frc_part(int ofs_pt,int vol)
@@ -314,24 +319,20 @@ void plaq_frc(void)
 #pragma omp declare target
 static void force0_part(su3_dble *udb,su3_dble *hdb,su3_alg_dble *fdb,lat_parms_t lat,bc_parms_t bcp,int ix,double c,int (*iup)[4], int (*idn)[4])
 {
-   int bc,n,ix,t,ip[4];
+   int bc,n,t,ip[4];
    double r0,r1,c0,c1,*cG;
    su3_alg_dble X ALIGNED16;
    su3_dble wd[3] ALIGNED16;
    su3_dble vd[4] ALIGNED16;
-   lat_parms_t lat;
-   bc_parms_t bcp;
 
-   lat=lat_parms();
    c*=(lat.beta/6.0);
    c0=lat.c0;
    c1=lat.c1;
 
-   bcp=bc_parms();
    bc=bcp.type;
    cG=bcp.cG;
 
-   for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
+   // for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
    {
       t=global_time(ix);
 
@@ -560,6 +561,7 @@ void force0(double c)
 {
    int k,isb,ofs_pt,vol;
    lat_parms_t lat;
+   bc_parms_t bcp;
    mdflds_t *mdfs;
 
    if (query_flags(UDBUF_UP2DATE)!=1)
@@ -584,21 +586,22 @@ void force0(double c)
          set_bstap();
       hdb=bstap();
    }
+   bcp=bc_parms();
 
    prof_begin(&force0_part_p);
 
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target update to(iup[:VOLUME], idn[:VOLUME])
+   // #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update to(iup[:VOLUME], idn[:VOLUME])
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
 
-   #pragma omp target teams distribute parallel for
+   #pragma omp parallel for
    for (int ix=0;ix<VOLUME/2;ix++)
    {
       force0_part(udb,hdb,fdb,lat,bcp,ix,c,iup,idn);
       force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c,iup,idn);
    }
-   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
    add_bnd_frc();
    prof_end(&force0_part_p);
 }

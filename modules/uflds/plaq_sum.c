@@ -82,6 +82,7 @@ static double plaq_dble(su3_dble *udb, int n,int ix, int (*iup)[4])
 
    return sm;
 }
+#pragma omp end declare target
 
 
 static qflt local_plaq_sum_dble(int iw)
@@ -134,15 +135,14 @@ static qflt local_plaq_sum_dble(int iw)
          for (int n=3;n<6;n++)
             local_pa+=plaq_dble(udb,n,ix,iup);
 
-            pa+=wp*9.0;
-         }
-
-         sm+=pa;
+         local_pa+=wp*9.0;
       }
+      pa += local_pa;
+      
    }
-   acc_qflt(sm,rqsm.q);
-
+   #pragma omp target update from(pa)
    prof_end(&compute);
+   acc_qflt(pa,rqsm.q);
    return rqsm;
 }
 
