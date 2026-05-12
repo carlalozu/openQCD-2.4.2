@@ -159,9 +159,9 @@ extern size_t wsp_msize(void);
 extern void print_wsp(void);
 
 #ifdef _OPENMP
-#pragma omp declare \
-   reduction(sum_qflt : qflt : add_qflt(omp_in.q,omp_out.q,omp_out.q)) \
-   initializer(omp_priv={{0.0,0.0}})
+// #pragma omp declare \
+//    reduction(sum_qflt : qflt : add_qflt(omp_in.q,omp_out.q,omp_out.q)) \
+//    initializer(omp_priv={{0.0,0.0}})
 #endif
 
 #endif

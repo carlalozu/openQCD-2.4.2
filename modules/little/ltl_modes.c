@@ -174,8 +174,9 @@ static void vs2vds(void)
          B[j].im=0.0;
       }
 
-#pragma omp parallel private(k,j,cqsm) reduction(sum_complex_dble : B[0:l])
+#pragma omp parallel private(k,j,cqsm)
       {
+         complex_dble *loc_B=malloc(l*sizeof(complex_dble));
          k=omp_get_thread_num();
 
          vscale_dble(nvt,0,r,vds[l-1]+k*nvt);
@@ -183,9 +184,15 @@ static void vs2vds(void)
          for (j=0;j<l;j++)
          {
             cqsm=vprod_dble(nvt,0,vds[j]+k*nvt,vds[l]+k*nvt);
-            B[j].re=-cqsm.re.q[0];
-            B[j].im=-cqsm.im.q[0];
+            loc_B[j].re=-cqsm.re.q[0];
+            loc_B[j].im=-cqsm.im.q[0];
          }
+         #pragma omp critical
+         for (j=0;j<l;j++) {
+            B[j].re+=loc_B[j].re;
+            B[j].im+=loc_B[j].im;
+         }
+         free(loc_B);
       }
 
       sum_vdprod(l,B,C);
@@ -259,9 +266,9 @@ static int set_Ads(void)
    nmat=Ns*Ns;
    set_vd2zero(nmat,0,B);
 
-#pragma omp parallel private(k,l,j,cqsm) \
-   reduction(sum_complex_dble : B[0:nmat])
+#pragma omp parallel private(k,l,j,cqsm)
    {
+      complex_dble *loc_B=malloc(nmat*sizeof(complex_dble));
       k=omp_get_thread_num();
 
       for (l=0;l<Ns;l++)
@@ -269,10 +276,16 @@ static int set_Ads(void)
          for (j=0;j<Ns;j++)
          {
             cqsm=vprod_dble(nvt,0,vds[l]+k*nvt,vds[j]+nvh+k*nvt);
-            B[Ns*l+j].re=cqsm.re.q[0];
-            B[Ns*l+j].im=cqsm.im.q[0];
+            loc_B[Ns*l+j].re=cqsm.re.q[0];
+            loc_B[Ns*l+j].im=cqsm.im.q[0];
          }
       }
+      #pragma omp critical
+      for (l=0;l<nmat;l++) {
+         B[l].re+=loc_B[l].re;
+         B[l].im+=loc_B[l].im;
+      }
+      free(loc_B);
    }
 
    sum_vdprod(nmat,B,C);
@@ -311,16 +324,23 @@ void dfl_Lvd(complex_dble *vd)
 
    set_vd2zero(Ns,0,B);
 
-#pragma omp parallel private(k,l,w) reduction(sum_complex_dble : B[0:Ns])
+#pragma omp parallel private(k,l,w)
    {
+      complex_dble *loc_B=malloc(Ns*sizeof(complex_dble));
       k=omp_get_thread_num();
 
       for (l=0;l<Ns;l++)
       {
          w=vprod_dble(nvt,0,vds[l]+k*nvt,vd+k*nvt);
-         B[l].re=-w.re.q[0];
-         B[l].im=-w.im.q[0];
+         loc_B[l].re=-w.re.q[0];
+         loc_B[l].im=-w.im.q[0];
       }
+      #pragma omp critical
+      for (l=0;l<Ns;l++) {
+         B[l].re+=loc_B[l].re;
+         B[l].im+=loc_B[l].im;
+      }
+      free(loc_B);
    }
 
    sum_vdprod(Ns,B,C);
@@ -344,16 +364,23 @@ void dfl_LRvd(complex_dble *vd,complex_dble *wd)
 
    set_vd2zero(Ns,0,B);
 
-#pragma omp parallel private(k,l,w) reduction(sum_complex_dble : B[0:Ns])
+#pragma omp parallel private(k,l,w)
    {
+      complex_dble *loc_B=malloc(Ns*sizeof(complex_dble));
       k=omp_get_thread_num();
 
       for (l=0;l<Ns;l++)
       {
          w=vprod_dble(nvt,0,vds[l]+k*nvt,vd+k*nvt);
-         B[l].re=w.re.q[0];
-         B[l].im=w.im.q[0];
+         loc_B[l].re=w.re.q[0];
+         loc_B[l].im=w.im.q[0];
       }
+      #pragma omp critical
+      for (l=0;l<Ns;l++) {
+         B[l].re+=loc_B[l].re;
+         B[l].im+=loc_B[l].im;
+      }
+      free(loc_B);
    }
 
    sum_vdprod(Ns,B,C);
@@ -386,16 +413,23 @@ void dfl_RLvd(complex_dble *vd,complex_dble *wd)
 
    set_vd2zero(Ns,0,B);
 
-#pragma omp parallel private(k,l,w) reduction(sum_complex_dble : B[0:Ns])
+#pragma omp parallel private(k,l,w)
    {
+      complex_dble *loc_B=malloc(Ns*sizeof(complex_dble));
       k=omp_get_thread_num();
 
       for (l=0;l<Ns;l++)
       {
          w=vprod_dble(nvt,0,vds[l]+k*nvt,wd+k*nvt);
-         B[l].re=-w.re.q[0];
-         B[l].im=-w.im.q[0];
+         loc_B[l].re=-w.re.q[0];
+         loc_B[l].im=-w.im.q[0];
       }
+      #pragma omp critical
+      for (l=0;l<Ns;l++) {
+         B[l].re+=loc_B[l].re;
+         B[l].im+=loc_B[l].im;
+      }
+      free(loc_B);
    }
 
    sum_vdprod(Ns,B,C);
@@ -421,12 +455,19 @@ void dfl_Lv(complex *v)
 
    set_vd2zero(Ns,0,B);
 
-#pragma omp parallel private(k,l) reduction(sum_complex_dble : B[0:Ns])
+#pragma omp parallel private(k,l)
    {
+      complex_dble *loc_B=malloc(Ns*sizeof(complex_dble));
       k=omp_get_thread_num();
 
       for (l=0;l<Ns;l++)
-         B[l]=vprod(nvt,0,vs[l]+k*nvt,v+k*nvt);
+         loc_B[l]=vprod(nvt,0,vs[l]+k*nvt,v+k*nvt);
+      #pragma omp critical
+      for (l=0;l<Ns;l++) {
+         B[l].re+=loc_B[l].re;
+         B[l].im+=loc_B[l].im;
+      }
+      free(loc_B);
    }
 
    sum_vdprod(Ns,B,C);

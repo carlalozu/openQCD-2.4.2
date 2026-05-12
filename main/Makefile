@@ -112,14 +112,10 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c99 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
-         -O -DFMA3 -DPM
+CFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 
-# CFLAGS = -O1 -fopenmp -DFMA3 -DPM // for mpicc arm gnu
-# CFLAGS += -mfpmath=sse -mno-avx -DAVX  // for xm86
+LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 
-LFLAGS = -fopenmp -lmpi_gtl_cuda
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
 # x86-64 machine supporting AVX and FMA3 instructions. See the README in
