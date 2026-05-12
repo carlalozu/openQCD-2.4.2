@@ -590,18 +590,24 @@ void force0(double c)
 
    prof_begin(&force0_part_p);
 
-   // #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   // #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
-   // #pragma omp target update to(iup[:VOLUME], idn[:VOLUME])
+   printf("udb[0,1,2,3] before host: (%f,%f,%f,%f) \n", udb[0].c11.re,udb[1].c11.re,udb[2].c11.re,udb[3].c11.re);
+   printf("fdb[0,1,2,3] before host: (%.15f, %.15f, %.15f, %.15f) \n",
+    fdb[0].c1, fdb[1].c1, fdb[2].c1, fdb[3].c1);
+
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update to(iup[:VOLUME], idn[:VOLUME])
 // #pragma omp parallel private(k,isb,ofs_pt,vol)
 
-   #pragma omp parallel for
+   #pragma omp target teams distribute parallel for 
    for (int ix=0;ix<VOLUME/2;ix++)
    {
       force0_part(udb,hdb,fdb,lat,bcp,ix,c,iup,idn);
       force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c,iup,idn);
    }
-   // #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
+   printf("fdb[0,1,2,3] after host: (%.15e, %.15e, %.15e, %.15e) \n",
+      fdb[0].c1, fdb[1].c1, fdb[2].c1, fdb[3].c1);
    add_bnd_frc();
    prof_end(&force0_part_p);
 }

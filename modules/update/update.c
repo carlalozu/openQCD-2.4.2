@@ -79,6 +79,8 @@ void update_mom(void)
 
    bc=bc_type();
    mdfs=mdflds();
+   mom=(*mdfs).mom;
+   printf("mom[0,1,2,3] before host: (%f,%f,%f,%f) \n", mom[0].c1,mom[1].c1,mom[2].c1,mom[3].c1);
 
 #pragma omp parallel private(k,ofs,vol,ix,t,ifc,mom,frc)
    {
@@ -148,6 +150,8 @@ void update_mom(void)
       }
    }
    prof_end(&update_mom_p);
+   printf("mom[0,1,2,3] after host: (%f,%f,%f,%f) \n", mom[0].c1,mom[1].c1,mom[2].c1,mom[3].c1);
+
 }
 
 
