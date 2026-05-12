@@ -2018,13 +2018,11 @@ void rotate_su3alg(su3_dble *u,su3_alg_dble *X)
 
 #else
 
-#pragma omp declare target
 static void su3xsu3vec(su3_dble *u,su3_vector_dble *psi,
                        su3_vector_dble *chi)
 {
    _su3_multiply(*chi,*u,*psi);
 }
-#pragma omp end declare target
 
 
 static void su3dagxsu3vec(su3_dble *u,su3_vector_dble *psi,
@@ -2034,7 +2032,6 @@ static void su3dagxsu3vec(su3_dble *u,su3_vector_dble *psi,
 }
 
 
-#pragma omp declare target
 void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w)
 {
    su3_vector_dble psi,chi;
@@ -2063,10 +2060,8 @@ void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
 }
-#pragma omp end declare target
 
 
-#pragma omp declare target
 void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w)
 {
    su3_vector_dble psi,chi;
@@ -2095,10 +2090,8 @@ void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
 }
-#pragma omp end declare target
 
 
-#pragma omp declare target
 void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
 {
    su3_vector_dble psi,chi;
@@ -2136,10 +2129,8 @@ void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
 }
-#pragma omp end declare target
 
 
-#pragma omp declare target
 void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
 {
    su3_vector_dble psi,chi;
@@ -2177,7 +2168,6 @@ void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
    (*w).c23=chi.c2;
    (*w).c33=chi.c3;
 }
-#pragma omp end declare target
 
 
 void su3xu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v)
@@ -2353,7 +2343,7 @@ void u3algxsu3dag(u3_alg_dble *X,su3_dble *u,su3_dble *v)
    (*v).c33.im= chi.c3.im;
 }
 
-#pragma omp declare target
+
 double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X)
 {
    double tr;
@@ -2404,7 +2394,7 @@ double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X)
 
    return tr;
 }
-#pragma omp end declare target
+
 
 void prod2u3alg(su3_dble *u,su3_dble *v,u3_alg_dble *X)
 {

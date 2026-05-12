@@ -66,6 +66,9 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
+CFLAGS += -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
+         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
+         -O -DFMA3 -DPM
 
 CFLAGS =  -mp=gpu -gpu=cc90 -fopenmp
 
@@ -75,6 +78,7 @@ LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 ############################## do not change ###################################
 
 SHELL=/bin/bash
+CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)
@@ -85,7 +89,7 @@ PGMS= $(MAIN) $(MODULES)
 # rule to make dependencies
 
 $(addsuffix .d,$(PGMS)): %.d: %.c Makefile
-	@ $(GCC) -ansi $< -MM $(addprefix -I,$(INCPATH)) -o $@
+	@ $(GCC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs

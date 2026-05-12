@@ -11,19 +11,19 @@
 * Programs related to the block geometry.
 *
 *   void blk_geometry(block_t *b)
-*     Computes the index arrays b.ipt,b.iup and b.idn that describe the
+*     Computes the _index arrays b.ipt,b.iup and b.idn that describe the
 *     geometry of the block b.
 *
 *   void blk_imbed(block_t *b)
-*     Computes the index arrays b.imb and b.ibp that describe the
+*     Computes the _index arrays b.imb and b.ibp that describe the
 *     embedding of the block b in the full lattice.
 *
 *   void bnd_geometry(block_t *b)
-*     Computes the index arrays bb.ipp and bb.map that describe the
+*     Computes the _index arrays bb.ipp and bb.map that describe the
 *     geometry of the exterior boundaries bb of the block b.
 *
 *   void bnd_imbed(block_t *b)
-*     Computes the index arrays bb.imb that describe the embedding
+*     Computes the _index arrays bb.imb that describe the embedding
 *     of the exterior boundaries bb of the block b in the full lattice.
 *
 * See main/README.global for a description of the lattice geometry and
@@ -141,7 +141,7 @@ static void set_blk_ipt(block_t *b)
 }
 
 
-static int index(block_t *b,int x0,int x1,int x2,int x3)
+static int _index(block_t *b,int x0,int x1,int x2,int x3)
 {
    int *bs;
 
@@ -170,16 +170,16 @@ static void set_blk_iupdn(block_t *b)
          {
             for (x3=0;x3<bs[3];x3++)
             {
-               ix=index(b,x0,x1,x2,x3);
+               ix=_index(b,x0,x1,x2,x3);
 
-               (*b).iup[ix][0]=index(b,x0+1,x1,x2,x3);
-               (*b).idn[ix][0]=index(b,x0-1,x1,x2,x3);
-               (*b).iup[ix][1]=index(b,x0,x1+1,x2,x3);
-               (*b).idn[ix][1]=index(b,x0,x1-1,x2,x3);
-               (*b).iup[ix][2]=index(b,x0,x1,x2+1,x3);
-               (*b).idn[ix][2]=index(b,x0,x1,x2-1,x3);
-               (*b).iup[ix][3]=index(b,x0,x1,x2,x3+1);
-               (*b).idn[ix][3]=index(b,x0,x1,x2,x3-1);
+               (*b).iup[ix][0]=_index(b,x0+1,x1,x2,x3);
+               (*b).idn[ix][0]=_index(b,x0-1,x1,x2,x3);
+               (*b).iup[ix][1]=_index(b,x0,x1+1,x2,x3);
+               (*b).idn[ix][1]=_index(b,x0,x1-1,x2,x3);
+               (*b).iup[ix][2]=_index(b,x0,x1,x2+1,x3);
+               (*b).idn[ix][2]=_index(b,x0,x1,x2-1,x3);
+               (*b).iup[ix][3]=_index(b,x0,x1,x2,x3+1);
+               (*b).idn[ix][3]=_index(b,x0,x1,x2,x3-1);
             }
          }
       }

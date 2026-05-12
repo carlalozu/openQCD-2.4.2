@@ -25,19 +25,17 @@
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 4
-#define L1 4
-#define L2 4
-#define L3 4
+#define L0 64
+#define L1 8
+#define L2 8
+#define L3 8
 
-#define L0_TRD 4
-#define L1_TRD 4
-#define L2_TRD 4
-#define L3_TRD 4
+#define L0_TRD 64
+#define L1_TRD 8
+#define L2_TRD 8
+#define L3_TRD 8
 
 #define NAME_SIZE 128
-#define N_TEAMS ((VOLUME+128-1)/128)
-
 
 /****************************** do not change *********************************/
 
@@ -84,7 +82,6 @@
 #define ALIGN 6
 
 #if defined MAIN_PROGRAM
-#pragma omp declare target
 int cpr[4];
 int npr[8];
 int sbofs[16];
@@ -96,7 +93,6 @@ int (*iup)[4]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
 #else
-#pragma omp declare target
 extern int cpr[4];
 extern int npr[8];
 extern int sbofs[16];

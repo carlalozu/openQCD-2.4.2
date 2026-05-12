@@ -82,7 +82,6 @@ static double plaq_dble(su3_dble *udb, int n,int ix, int (*iup)[4])
 
    return sm;
 }
-#pragma omp end declare target
 
 
 static qflt local_plaq_sum_dble(int iw)
@@ -135,14 +134,15 @@ static qflt local_plaq_sum_dble(int iw)
          for (int n=3;n<6;n++)
             local_pa+=plaq_dble(udb,n,ix,iup);
 
-         local_pa+=wp*9.0;
+            pa+=wp*9.0;
+         }
+
+         sm+=pa;
       }
-      pa += local_pa;
-      
    }
-   #pragma omp target update from(pa)
+   acc_qflt(sm,rqsm.q);
+
    prof_end(&compute);
-   acc_qflt(pa,rqsm.q);
    return rqsm;
 }
 
@@ -191,8 +191,8 @@ double plaq_wsum_dble(int icom)
 
 double plaq_action_slices(double *asl)
 {
-   int bc,k,ix,t,n;
-   double smE,smB;
+   int bc,k,ix,t,n,tl;
+   double smE,smB,pasmE[L0],pasmB[L0];
 
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
@@ -201,6 +201,8 @@ double plaq_action_slices(double *asl)
 
    bc=bc_type();
    udb=udfld();
+
+   for (tl=0;tl<L0;tl++) { pasmE[tl]=0.0; pasmB[tl]=0.0; }
 
    for (t=0;t<N0;t++)
    {
@@ -213,8 +215,7 @@ double plaq_action_slices(double *asl)
       rqsmB[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,n,smE,smB)
-   // reduction(+: rqsmE[cpr[0]*L0:L0],rqsmB[cpr[0]*L0:L0])
+#pragma omp parallel private(k,ix,t,n,smE,smB) reduction(+:pasmE[0:L0],pasmB[0:L0])
    {
       k=omp_get_thread_num();
 
@@ -236,9 +237,14 @@ double plaq_action_slices(double *asl)
                smB+=(3.0-plaq_dble(udb,n,ix,iup));
          }
 
-         acc_qflt(smE,rqsmE[t].q);
-         acc_qflt(smB,rqsmB[t].q);
+         pasmE[t-cpr[0]*L0]+=smE;
+         pasmB[t-cpr[0]*L0]+=smB;
       }
+   }
+   for (tl=0;tl<L0;tl++)
+   {
+      acc_qflt(pasmE[tl],rqsmE[cpr[0]*L0+tl].q);
+      acc_qflt(pasmB[tl],rqsmB[cpr[0]*L0+tl].q);
    }
 
    global_qsum(2*N0,qsm,qsm);

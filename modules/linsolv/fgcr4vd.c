@@ -172,8 +172,8 @@ static int gcr_step(int vol,int m,int nkv,
                     void (*Mop)(complex_dble *v,complex_dble *w,
                                 complex_dble *z))
 {
-   int k,l;
-   double r;
+   int k,l,ll;
+   double r,pre0,pim0,pre1,*pre_arr,*pim_arr;
    complex_dble z;
    complex_qflt w;
 
@@ -181,13 +181,17 @@ static int gcr_step(int vol,int m,int nkv,
 
    if (m>0)
    {
-      for (l=0;l<m;l++)
+      pre_arr=malloc(m*sizeof(*pre_arr));
+      pim_arr=malloc(m*sizeof(*pim_arr));
+      for (ll=0;ll<m;ll++)
       {
-         cdsm0[l].re=0.0;
-         cdsm0[l].im=0.0;
+         cdsm0[ll].re=0.0;
+         cdsm0[ll].im=0.0;
+         pre_arr[ll]=0.0;
+         pim_arr[ll]=0.0;
       }
 
-#pragma omp parallel private(k,l,w)
+#pragma omp parallel private(k,l,w) reduction(+:pre_arr[0:m],pim_arr[0:m])
       {
          complex_dble *loc_cdsm=malloc(m*sizeof(complex_dble));
          k=omp_get_thread_num();
@@ -195,8 +199,8 @@ static int gcr_step(int vol,int m,int nkv,
          for (l=0;l<m;l++)
          {
             w=vprod_dble(vol,0,chi[l]+k*vol,chi[m]+k*vol);
-            loc_cdsm[l].re=w.re.q[0];
-            loc_cdsm[l].im=w.im.q[0];
+            pre_arr[l]+=w.re.q[0];
+            pim_arr[l]+=w.im.q[0];
          }
          #pragma omp critical
          for (l=0;l<m;l++) {
@@ -205,6 +209,9 @@ static int gcr_step(int vol,int m,int nkv,
          }
          free(loc_cdsm);
       }
+      for (ll=0;ll<m;ll++) { cdsm0[ll].re+=pre_arr[ll]; cdsm0[ll].im+=pim_arr[ll]; }
+      free(pre_arr);
+      free(pim_arr);
 
       global_dsum(2*m);
 
@@ -215,13 +222,11 @@ static int gcr_step(int vol,int m,int nkv,
       }
    }
 
-   for (l=0;l<2;l++)
-   {
-      cdsm0[l].re=0.0;
-      cdsm0[l].im=0.0;
-   }
+   cdsm0[0].re=0.0; cdsm0[0].im=0.0;
+   cdsm0[1].re=0.0; cdsm0[1].im=0.0;
+   pre0=0.0; pim0=0.0; pre1=0.0;
 
-#pragma omp parallel private(k,l,z,w)
+#pragma omp parallel private(k,l,z,w) reduction(+:pre0,pim0,pre1)
    {
       complex_dble loc_cdsm[2]={{0.0,0.0},{0.0,0.0}};
       k=omp_get_thread_num();
@@ -234,19 +239,14 @@ static int gcr_step(int vol,int m,int nkv,
       }
 
       w=vprod_dble(vol,0,chi[m]+k*vol,rho+k*vol);
-      loc_cdsm[0].re=w.re.q[0];
-      loc_cdsm[0].im=w.im.q[0];
+      pre0+=w.re.q[0];
+      pim0+=w.im.q[0];
 
       w.re=vnorm_square_dble(vol,0,chi[m]+k*vol);
-      loc_cdsm[1].re=w.re.q[0];
-      #pragma omp critical
-      {
-         cdsm0[0].re+=loc_cdsm[0].re;
-         cdsm0[0].im+=loc_cdsm[0].im;
-         cdsm0[1].re+=loc_cdsm[1].re;
-         cdsm0[1].im+=loc_cdsm[1].im;
-      }
+      pre1+=w.re.q[0];
    }
+   cdsm0[0].re+=pre0; cdsm0[0].im+=pim0;
+   cdsm0[1].re+=pre1;
 
    global_dsum(3);
 

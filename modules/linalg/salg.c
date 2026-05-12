@@ -1223,6 +1223,7 @@ static void loc_mulmg5(int vol,spinor *s)
 complex spinor_prod(int vol,int icom,spinor *s,spinor *r)
 {
    int k;
+   double pre,pim;
    complex z;
    complex_dble v,w;
 
@@ -1232,18 +1233,19 @@ complex spinor_prod(int vol,int icom,spinor *s,spinor *r)
    {
       v.re=0.0;
       v.im=0.0;
+      pre=0.0;
+      pim=0.0;
 
-#pragma omp parallel private(k)
+#pragma omp parallel private(k) reduction(+:pre,pim)
       {
          complex_dble loc_v;
          k=omp_get_thread_num();
          loc_v=loc_spinor_prod(vol,s+k*vol,r+k*vol);
-         #pragma omp critical
-         {
-            v.re+=loc_v.re;
-            v.im+=loc_v.im;
-         }
+         pre+=loc_v.re;
+         pim+=loc_v.im;
       }
+      v.re=pre;
+      v.im=pim;
    }
 
    if ((NPROC>1)&&(icom&0x1))
