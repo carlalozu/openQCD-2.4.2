@@ -219,9 +219,13 @@ uidx_t *uidx(void)
 
 
 #pragma omp declare target
-void plaq_uidx(int mu,int nu,int ix,int *ip)
+void plaq_uidx(int n,int ix,int *ip)
 {
+   int mu,nu;
    int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
 
    ip[0]=offset(ix,mu);
 
@@ -261,3 +265,4 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
       ip[3]=4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
    }
 }
+#pragma omp end declare target
