@@ -274,6 +274,7 @@ void set_iupdn(void)
          }
       }
    }
+   #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
 }
 
 

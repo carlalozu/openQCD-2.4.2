@@ -155,6 +155,7 @@ static void alloc_hdb(void)
    error(hdb==NULL,1,"alloc_hdb [bstap.c]",
          "Unable to allocate the boundary staple field");
 
+   #pragma omp target enter data map(to: hdb[:3*BNDRY+12*n])
    sbufs[0]=hdb+3*BNDRY;
    sbufs[1]=sbufs[0]+6*n;
 }
@@ -352,8 +353,8 @@ void set_bstap(void)
 
          send_staples(7);
       }
+      #pragma omp target update to(hdb[:3*BNDRY])
    }
-
    set_flags(SET_BSTAP);
 }
 
