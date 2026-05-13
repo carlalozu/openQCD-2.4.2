@@ -89,7 +89,6 @@ int npr[8];
 int sbofs[16];
 int sbvol[16];
 
-#pragma omp declare target
 int *ipt=NULL;
 int (*iup)[4]=NULL;
 int (*iupT)[VOLUME]=NULL;
@@ -103,7 +102,6 @@ extern int npr[8];
 extern int sbofs[16];
 extern int sbvol[16];
 
-#pragma omp declare target
 extern int *ipt;
 extern int (*iup)[4];
 extern int (*iupT)[VOLUME];

@@ -237,9 +237,13 @@ uidx_t *uidx(void)
 
 
 #pragma omp declare target
-void plaq_uidx(int mu,int nu,int ix,int *ip)
+void plaq_uidx(int n,int ix,int *ip)
 {
+   int mu,nu;
    int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
 
    ip[0]=offset(ix,mu);
 
@@ -249,7 +253,7 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
    }
    else
    {
-      iy=iupT[mu][ix];
+      iy=iup[ix][mu];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
@@ -265,7 +269,7 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=iupT[nu][ix];
+   iy=iup[ix][nu];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);

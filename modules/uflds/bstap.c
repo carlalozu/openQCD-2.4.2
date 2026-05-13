@@ -204,7 +204,7 @@ static void get_ofs(int mu,int nu,int ix,int *ip)
       if (((plns[n][0]==mu)&&(plns[n][1]==nu))||
           ((plns[n][0]==nu)&&(plns[n][1]==mu)))
       {
-         plaq_uidx(mu,nu,ix,ip);
+         plaq_uidx(n,ix,ip);
 
          if (mu==plns[n][0])
          {
