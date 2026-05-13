@@ -83,56 +83,23 @@ void update_mom(void)
    mom=(*mdfs).mom;
    frc=(*mdfs).frc;
 
-
    #pragma omp target teams distribute parallel for
-   for (int ix=0;ix<VOLUME/2;ix++)
+   for (int ix=0;ix<VOLUME;ix++)
    {
-      int off=8*ix;
-      int t=global_time(ix+(VOLUME/2));
-
-      if (t==0)
-      {
+      int t=global_time(ix);
+      int off;
+      if (!((bc==0) && (t==(N0-1)))){
+         off=offset(ix, 0);
          _su3_alg_sub_assign(mom[off],frc[off]);
-         off+=1;
-
-         if (bc!=0)
-         {
-            _su3_alg_sub_assign(mom[off],frc[off]);
-         }
-         off+=1;
-
-         for (int ifc=2;ifc<8;ifc++)
-         {
-            if (bc!=1)
-            {
-               _su3_alg_sub_assign(mom[off],frc[off]);
-            }
-            off+=1;
-         }
-      }
-      else if (t==(N0-1))
-      {
-         if (bc!=0)
-         {
-            _su3_alg_sub_assign(mom[off],frc[off]);
-         }
-         off+=1;
-
-         for (int ifc=1;ifc<8;ifc++)
-         {
-            _su3_alg_sub_assign(mom[off],frc[off]);
-            off+=1;
-         }
-      }
-      else
-      {
-         for (int ifc=0;ifc<8;ifc++)
-         {
-            _su3_alg_sub_assign(mom[off],frc[off]);
-            off+=1;
-         }
       }
 
+      if (!((bc==1) && (t==0))){
+         for (int mu=1;mu<4;mu++)
+         {
+            off=offset(ix,mu);
+            _su3_alg_sub_assign(mom[off],frc[off]);
+         }
+      }
    }
    // #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    // #pragma omp target update from((*mdfs).mom[:4*VOLUME])
@@ -158,53 +125,21 @@ void update_ud(double eps)
 
    // #pragma omp target update to((*mdfs).mom[:4*VOLUME])
    // #pragma omp target update to(ud[:4*VOLUME+7*(BNDRY/4)])
-// #pragma omp parallel private(k,ofs,vol,ix,t,ifc,ud,mom)
-//       int k=omp_get_thread_num();
-// 
-//       int vol=VOLUME_TRD/2;
-//       int ofs=(VOLUME/2)+k*vol;
-
-   
    #pragma omp target teams distribute parallel for
-   for (int ix=0;ix<VOLUME/2;ix++)
+   for (int ix=0;ix<VOLUME;ix++)
    {
-      int off=8*ix;
-      int t=global_time(ix+(VOLUME/2));
-
-      if (t==0)
-      {
+      int off;
+      int t=global_time(ix);
+      if (!((bc==0) && (t==(N0-1)))){
+         off=offset(ix, 0);
          expXsu3(eps,mom+off,ud+off);
-         off+=1;
-
-         if (bc!=0)
-            expXsu3(eps,mom+off,ud+off);
-         off+=1;
-
-         for (int ifc=2;ifc<8;ifc++)
-         {
-            if (bc!=1)
-               expXsu3(eps,mom+off,ud+off);
-            off+=1;
-         }
       }
-      else if (t==(N0-1))
-      {
-         if (bc!=0)
-            expXsu3(eps,mom+off,ud+off);
-         off+=1;
 
-         for (int ifc=1;ifc<8;ifc++)
+      if (!((bc==1) && (t==0))){
+         for (int mu=1;mu<4;mu++)
          {
+            off=offset(ix,mu);
             expXsu3(eps,mom+off,ud+off);
-            off+=1;
-         }
-      }
-      else
-      {
-         for (int ifc=0;ifc<8;ifc++)
-         {
-            expXsu3(eps,mom+off,ud+off);
-            off+=1;
          }
       }
    }
