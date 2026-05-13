@@ -25,7 +25,7 @@ DEVFCTS = dutils gtrans
 
 FLAGS = flags lat_parms dfl_parms
 
-LATTICE = bcnds geogen geometry uidx
+LATTICE = bcndsv geogen geometryv uidxv
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 

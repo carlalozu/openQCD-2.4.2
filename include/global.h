@@ -36,7 +36,6 @@
 #define L3_TRD 4
 
 #define NAME_SIZE 128
-#define N_TEAMS ((VOLUME+128-1)/128)
 
 
 /****************************** do not change *********************************/
@@ -90,8 +89,10 @@ int npr[8];
 int sbofs[16];
 int sbvol[16];
 
+#pragma omp declare target
 int *ipt=NULL;
 int (*iup)[4]=NULL;
+int (*iupT)[VOLUME]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
 #pragma omp end declare target
@@ -102,8 +103,10 @@ extern int npr[8];
 extern int sbofs[16];
 extern int sbvol[16];
 
+#pragma omp declare target
 extern int *ipt;
 extern int (*iup)[4];
+extern int (*iupT)[VOLUME];
 extern int (*idn)[4];
 extern int *map;
 #pragma omp end declare target
