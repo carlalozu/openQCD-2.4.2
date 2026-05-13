@@ -213,17 +213,17 @@ static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble
 }
 #pragma omp end declare target
 
-
-static void plaq_frc_part(int ofs_pt,int vol)
+#pragma omp declare target
+static void plaq_frc_part(su3_dble *udb,su3_alg_dble *fdb,int bc,int ix,int (*iup)[4])
 {
-   int bc,n,ix,t,ip[4];
+   int n,t,ip[4];
    double r;
    su3_alg_dble X ALIGNED16;
    su3_dble wd[2] ALIGNED16;
 
-   bc=bc_type();
+   // bc=bc_type();
 
-   for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
+   // for (ix=ofs_pt;ix<(ofs_pt+vol);ix++)
    {
       t=global_time(ix);
 
@@ -231,19 +231,20 @@ static void plaq_frc_part(int ofs_pt,int vol)
       {
          for (n=0;n<3;n++)
          {
-            plaq_uidx(n,ix,ip);
+            _plaq_uidx(n,ix,ip,iup);
 
             su3xsu3dag(udb+ip[1],udb+ip[3],wd);
             su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
-
+            
             if ((t<(N0-1))||(bc==3))
             {
                prod2su3alg(wd,wd+1,&X);
                _su3_alg_add_assign(*(fdb+ip[1]),X);
             }
-
+            
             prod2su3alg(wd+1,wd,&X);
             _su3_alg_sub_assign(*(fdb+ip[3]),X);
+            printf("ix: %i, t: %i, n: %i, fdb[%i]: %.15e\n",ix,t,n,ip[3],fdb[ip[3]].c1);
 
             su3xsu3dag(wd,udb+ip[2],wd+1);
             prod2su3alg(udb+ip[0],wd+1,&X);
@@ -265,7 +266,7 @@ static void plaq_frc_part(int ofs_pt,int vol)
 
          for (n=3;n<6;n++)
          {
-            plaq_uidx(n,ix,ip);
+            _plaq_uidx(n,ix,ip,iup);
 
             su3xsu3dag(udb+ip[1],udb+ip[3],wd);
             su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
@@ -282,7 +283,7 @@ static void plaq_frc_part(int ofs_pt,int vol)
       }
    }
 }
-
+#pragma omp end declare target
 
 void plaq_frc(void)
 {
@@ -297,6 +298,7 @@ void plaq_frc(void)
    mdfs=mdflds();
    fdb=(*mdfs).frc;
    set_frc2zero();
+   int bc=bc_type();
 
 #pragma omp parallel private(k,isb,ofs_pt,vol)
    {
@@ -308,8 +310,8 @@ void plaq_frc(void)
          vol=sbvol[isb]/2;
 
 #pragma omp barrier
-         plaq_frc_part(ofs_pt,vol);
-         plaq_frc_part(ofs_pt+(VOLUME/2),vol);
+         plaq_frc_part(udb,fdb,bc,ofs_pt,iup);
+         plaq_frc_part(udb,fdb,bc,ofs_pt+(VOLUME/2),iup);
       }
    }
 
@@ -590,9 +592,9 @@ void force0(double c)
 
    prof_begin(&force0_part_p);
 
-   printf("udb[0,1,2,3] before host: (%f,%f,%f,%f) \n", udb[0].c11.re,udb[1].c11.re,udb[2].c11.re,udb[3].c11.re);
-   printf("fdb[0,1,2,3] before host: (%.15f, %.15f, %.15f, %.15f) \n",
-    fdb[0].c1, fdb[1].c1, fdb[2].c1, fdb[3].c1);
+   // printf("udb[0,1,2,3] before host: (%f,%f,%f,%f) \n", udb[0].c11.re,udb[1].c11.re,udb[2].c11.re,udb[3].c11.re);
+   // printf("fdb[0,1,2,3] before host: (%.15f, %.15f, %.15f, %.15f) \n",
+   //  fdb[0].c1, fdb[1].c1, fdb[2].c1, fdb[3].c1);
 
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
@@ -606,8 +608,8 @@ void force0(double c)
       force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c,iup,idn);
    }
    #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
-   printf("fdb[0,1,2,3] after host: (%.15e, %.15e, %.15e, %.15e) \n",
-      fdb[0].c1, fdb[1].c1, fdb[2].c1, fdb[3].c1);
+   // printf("fdb[0,1,2,3] after host: (%.15e, %.15e, %.15e, %.15e) \n",
+      // fdb[0].c1, fdb[1].c1, fdb[2].c1, fdb[3].c1);
    add_bnd_frc();
    prof_end(&force0_part_p);
 }
