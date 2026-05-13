@@ -171,7 +171,7 @@ void random_ud(void)
       {
          t=global_time(ix);
 
-         // if ((t==(N0-1))&&(bc!=0))
+         if ((t==(N0-1))&&(bc!=0))
          {
             ifc=offset(ix,0);
             random_su3_dble(ub+ifc);
