@@ -37,7 +37,7 @@ FLAGS = flags action_parms dfl_parms dft4d_parms dft_parms force_parms \
 FORCES = force0 force1 force2 force3 force4 force5 \
          frcfcts genfrc tmcg tmcgm xtensor
 
-LATTICE = bcnds blk_geometry ftidx geogen geometry uidx
+LATTICE = bcndsv blk_geometry ftidx geogen geometryv uidxv
 
 LINALG = cmatrix cmatrix_dble liealg salg salg_dble valg valg_dble
 
