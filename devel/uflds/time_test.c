@@ -48,15 +48,13 @@ int main(int argc, char *argv[])
 {
    prof_section init_program = {.name = "init_program"};
    prof_section set_params = {.name = "set_params"};
-   prof_section benchmark = {.name = "benchmark"};
    prof_section total = {.name = "total"};
    prof_section prepare_data = {.name = "prepare_data"};
 
-   int my_rank, bc, nt, count;
+   int my_rank, bc;
    double phi[2], phi_prime[2], theta[3];
-   double nplaq1, nplaq2, p1, p2;
+   double nplaq1, p1;
    double d1, d2;
-   double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
    
    mpi_init(argc, argv);
@@ -104,17 +102,14 @@ int main(int argc, char *argv[])
    if (bc == 0)
    {
       nplaq1 = (double)((6 * N0 - 3) * N1) * (double)(N2 * N3);
-      nplaq2 = (double)((6 * N0 - 6) * N1) * (double)(N2 * N3);
    }
    else if (bc == 3)
    {
       nplaq1 = (double)(6 * N0 * N1) * (double)(N2 * N3);
-      nplaq2 = nplaq1;
    }
    else
    {
       nplaq1 = (double)((6 * N0 + 3) * N1) * (double)(N2 * N3);
-      nplaq2 = (double)(6 * N0 * N1) * (double)(N2 * N3);
    }
 
    d1 = 0.0;
@@ -155,8 +150,6 @@ int main(int argc, char *argv[])
       printf("After field initialization:\n");
       printf("Deviation from expected value (plaq_sum)  = %.1e\n",
              fabs(1.0 - p1 / (3.0 * nplaq1 + d1 + d2)));
-      printf("Deviation from expected value (plaq_wsum) = %.1e\n\n",
-             fabs(1.0 - p2 / (3.0 * nplaq2 + d1 + d2)));
    }
 
    
@@ -167,17 +160,6 @@ int main(int argc, char *argv[])
    random_ud();
    prof_end(&set_params);
    
-   nt = 0;
-   // prof_reset(&compute);
-   prof_begin(&benchmark);
-   for (count = 0; count < nt; count++)
-   {
-         p1 += plaq_sum_dble(1);
-   }
-   wdt = 2.0 * wdt / ((double)(nt));
-   p1 = 2.0 * p1 / ((double)(nt));
-   prof_end(&benchmark);
-   prof_end(&total);
 
    if (my_rank == 0)
    {
@@ -185,20 +167,12 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of teams: %i\n", N_TEAMS);
-      printf("Number of repetitions: %i\n", nt / 2);
-      printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 
-      printf("Total performance for plaq_sum_dble (MFlops/s): %d\n", (int)(flops * 1e-6 / wdt)); 
-      printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_sum_dble (MFlops/s): %d\n", (int)(flops * 1e-6 / wdt));
       printf("Result: %f\n\n", p1);
 
       prof_report(&init_program);
       prof_report(&set_params);
-      prof_report(&benchmark);
       prof_report(&prepare_data);
-      prof_report(&compute);
       prof_report(&total);
    }
 

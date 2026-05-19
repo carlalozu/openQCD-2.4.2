@@ -44,8 +44,9 @@
 #include "lattice.h"
 #include "global.h"
 
-static int *tms=NULL;
-
+#pragma omp declare target
+int *tms=NULL;
+#pragma omp end declare target
 
 static void cache_block_size(int *bs,int *cbs)
 {
@@ -278,6 +279,8 @@ void geometry(void)
       set_iupdn();
       set_map();
       set_tms();
+      #pragma omp target update to(tms[:VOLUME])
+      #pragma omp target update to(cpr[:4])
    }
 }
 
@@ -308,6 +311,7 @@ void ipt_global(int *x,int *ip,int *ix)
 }
 
 
+#pragma omp declare target
 int global_time(int ix)
 {
    if ((ix>=0)&&(ix<VOLUME))
@@ -315,3 +319,4 @@ int global_time(int ix)
    else
       return NPROC0*L0;
 }
+#pragma omp end declare target

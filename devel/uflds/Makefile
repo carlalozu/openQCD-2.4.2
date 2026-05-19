@@ -66,11 +66,15 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS += -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes \
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -mp=gpu -gpu=cc90 -fopenmp -Wall \
+         -Wno-long-long -Wstrict-prototypes \
          -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp
+LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
+
+
+# -DCGNE_DBG -DFGCR_DBG -DFGCR4VD -DGCR4V -DMSCG_DBG
+# -DDFL_MODES_DBG -DFORCE_DBG
 
 
 ############################## do not change ###################################
@@ -87,7 +91,7 @@ PGMS= $(MAIN) $(MODULES)
 # rule to make dependencies
 
 $(addsuffix .d,$(PGMS)): %.d: %.c Makefile
-	@ $(GCC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
+	@ $(GCC) -ansi $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
