@@ -82,24 +82,20 @@
 #define ALIGN 6
 
 #if defined MAIN_PROGRAM
-#pragma omp declare target
 int cpr[4];
 int npr[8];
 int sbofs[16];
 int sbvol[16];
-#pragma omp end declare target
 
 int *ipt=NULL;
 int (*iup)[4]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
 #else
-#pragma omp declare target
 extern int cpr[4];
 extern int npr[8];
 extern int sbofs[16];
 extern int sbvol[16];
-#pragma omp end declare target
 
 extern int *ipt;
 extern int (*iup)[4];
