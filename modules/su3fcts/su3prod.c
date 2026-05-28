@@ -2360,41 +2360,41 @@ void u3algxsu3dag(u3_alg_dble *X,su3_dble *u,su3_dble *v)
 double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X)
 {
    double tr;
-   su3_vector_dble psi,chi;
+   su3_vector_dble psi,chi1,chi2,chi3;
 
    psi.c1=(*v).c11;
    psi.c2=(*v).c21;
    psi.c3=(*v).c31;
-   su3xsu3vec(u,&psi,&chi);
-   tr=chi.c1.re;
-   (*X).c1 = chi.c1.im;
-   (*X).c2 = chi.c1.im;
-   (*X).c3 =-chi.c2.re;
-   (*X).c4 = chi.c2.im;
-   (*X).c5 =-chi.c3.re;
-   (*X).c6 = chi.c3.im;
+   su3xsu3vec(u,&psi,&chi1);
+   tr=chi1.c1.re;
+   (*X).c1 = chi1.c1.im;
+   (*X).c2 = chi1.c1.im;
+   (*X).c3 =-chi1.c2.re;
+   (*X).c4 = chi1.c2.im;
+   (*X).c5 =-chi1.c3.re;
+   (*X).c6 = chi1.c3.im;
 
    psi.c1=(*v).c12;
    psi.c2=(*v).c22;
    psi.c3=(*v).c32;
-   su3xsu3vec(u,&psi,&chi);
-   tr+=chi.c2.re;
-   (*X).c3+= chi.c1.re;
-   (*X).c4+= chi.c1.im;
-   (*X).c1-= chi.c2.im;
-   (*X).c7 =-chi.c3.re;
-   (*X).c8 = chi.c3.im;
+   su3xsu3vec(u,&psi,&chi2);
+   tr+=chi2.c2.re;
+   (*X).c3+= chi2.c1.re;
+   (*X).c4+= chi2.c1.im;
+   (*X).c1-= chi2.c2.im;
+   (*X).c7 =-chi2.c3.re;
+   (*X).c8 = chi2.c3.im;
 
    psi.c1=(*v).c13;
    psi.c2=(*v).c23;
    psi.c3=(*v).c33;
-   su3xsu3vec(u,&psi,&chi);
-   tr+=chi.c3.re;
-   (*X).c5+= chi.c1.re;
-   (*X).c6+= chi.c1.im;
-   (*X).c7+= chi.c2.re;
-   (*X).c8+= chi.c2.im;
-   (*X).c2-= chi.c3.im;
+   su3xsu3vec(u,&psi,&chi3);
+   tr+=chi3.c3.re;
+   (*X).c5+= chi3.c1.re;
+   (*X).c6+= chi3.c1.im;
+   (*X).c7+= chi3.c2.re;
+   (*X).c8+= chi3.c2.im;
+   (*X).c2-= chi3.c3.im;
 
    (*X).c1*=(1.0/3.0);
    (*X).c2*=(1.0/3.0);
