@@ -114,6 +114,13 @@ CFLAGS = -std=c11 -pedantic -fstrict-aliasing -mp=gpu -gpu=cc90 -fopenmp -Wall \
 
 LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 
+# CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+#          -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_90 -Wall -Wno-long-long \
+#          -Wstrict-prototypes -O -DFMA3 -DPM
+# 
+# LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
+
+
 
 # -DCGNE_DBG -DFGCR_DBG -DFGCR4VD -DGCR4V -DMSCG_DBG
 # -DDFL_MODES_DBG -DFORCE_DBG

@@ -112,10 +112,17 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -mp=gpu -gpu=cc90 -fopenmp
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -mp=gpu -gpu=cc90 -fopenmp -Wall \
+         -Wno-long-long -Wstrict-prototypes \
+         -O -DFMA3 -DPM
 
 LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 
+# CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+#          -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_90 -Wall -Wno-long-long \
+#          -Wstrict-prototypes -O -DFMA3 -DPM
+# 
+# LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
 # x86-64 machine supporting AVX and FMA3 instructions. See the README in
@@ -131,6 +138,7 @@ LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 ############################## do not change ###################################
 
 SHELL=/bin/bash
+CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)
