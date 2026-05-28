@@ -69,7 +69,7 @@
 #define N0 (NPROC0*L0)
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
-static int nfc[8],ofs[8],hofs[8],init=0;
+int nfc[8],ofs[8],hofs[8],init=0;
 #pragma omp end declare target
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
@@ -581,32 +581,19 @@ void force0(double c)
       hdb=bstap();
    }
    bc_parms_t bc=bc_parms();
-   #pragma omp target update to(udb[0:4*VOLUME], fdb[0:4*VOLUME])
-   #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], init)
 
-   int max_vol=0;
-   for (int isb=0; isb<16; isb++)
-      if (sbvol[isb]/2>max_vol) max_vol=sbvol[isb]/2;
-      
-   for (int ix_step=0; ix_step<max_vol; ix_step++)
+   #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME],lat,bc,c)
+   #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], \
+    udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME], lat, bc, \
+    bc.cG[0:2])
+
+   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],bc,lat,fdb[0:4*VOLUME],lat.beta, lat.c0, lat.c1, bc.type, bc.cG[:2],c)
+
+   prof_begin(&force0_part_p);
+   #pragma omp target teams distribute parallel for
+   for (int ix=0; ix<VOLUME; ix++)
    {
-      #pragma omp target teams num_teams(NTHREAD)
-      {
-         int k = omp_get_team_num();
-         #pragma omp parallel for num_threads(16)
-         for (int isb=0; isb<16; isb++)
-         {
-            int ofs_pt=k*(VOLUME_TRD/2)+sbofs[isb]/2;
-            int vol=sbvol[isb]/2;
-            int ix=ofs_pt+ix_step;
-
-            if (ix_step<vol)
-            {
-               force0_part(ix,bc,lat,c,iup,idn,udb,fdb,hdb);
-               force0_part(ix+(VOLUME/2),bc,lat,c,iup,idn,udb,fdb,hdb);
-            }
-         } // implicit barrier within team
-      }
+      force0_part(ix,bc,lat,c,iup,idn,udb,fdb,hdb);
    }
    #pragma omp target update from(fdb[0:4*VOLUME])
    prof_end(&force0_part_p);
@@ -614,15 +601,14 @@ void force0(double c)
    add_bnd_frc();
 }
 
-
-static void wloops(int n,int ix,int t,double c0,double *trU)
+#pragma omp declare target
+static void wloops(int n,int ix,int t,double c0,double *trU,int (*iup)[4],int (*idn)[4],int bc,su3_dble *udb,su3_dble *hdb)
 {
-   int bc,ip[4];
+   int ip[4];
    su3_dble wd[2] ALIGNED16;
    su3_dble vd[4] ALIGNED16;
 
-   bc=bc_type();
-   plaq_uidx(n,ix,ip);
+   _plaq_uidx(n,ix,ip,iup);
 
    trU[0]=0.0;
    trU[1]=0.0;
@@ -664,13 +650,12 @@ static void wloops(int n,int ix,int t,double c0,double *trU)
       }
    }
 }
-
+#pragma omp end declare target
 
 static qflt action0_part(int ofs_pt,int vol)
 {
-   int bc,ix,t,n;
+   int bc,t,n;
    double act1,c0,c1,*cG;
-   double r0,r1,trU[4];
    qflt act0;
    lat_parms_t lat;
    bc_parms_t bcp;
@@ -685,9 +670,15 @@ static qflt action0_part(int ofs_pt,int vol)
 
    act0.q[0]=0.0;
    act0.q[1]=0.0;
+   double global_act1 = 0.0;
 
-   for (ix=ofs_pt;ix<(vol+ofs_pt);ix++)
+//    #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], init, udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME],c0,c1,bc,cG[:2])
+// 
+//    #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],cG[:2],c0,c1,bc)
+//    #pragma omp target teams distribute parallel for reduction(+:global_act1) private(t,n,act1)
+   for (int ix=ofs_pt;ix<(vol+ofs_pt);ix++)
    {
+      double r0,r1,trU[4];
       t=global_time(ix);
       act1=0.0;
 
@@ -702,7 +693,7 @@ static qflt action0_part(int ofs_pt,int vol)
 
          for (n=0;n<3;n++)
          {
-            wloops(n,ix,t,c0,trU);
+            wloops(n,ix,t,c0,trU,iup,idn,bc,udb,hdb);
             act1+=(r0*trU[0]+c1*(trU[1]+trU[2]+0.5*trU[3]));
          }
       }
@@ -725,14 +716,14 @@ static qflt action0_part(int ofs_pt,int vol)
 
          for (n=3;n<6;n++)
          {
-            wloops(n,ix,t,c0,trU);
+            wloops(n,ix,t,c0,trU,iup,idn,bc,udb,hdb);
             act1+=(r0*trU[0]+r1*(trU[1]+trU[2]));
          }
       }
-
-      acc_qflt(act1,act0.q);
+      global_act1+=act1;
    }
-
+   // #pragma omp target update from(global_act1)
+   acc_qflt(global_act1,act0.q);
    return act0;
 }
 
