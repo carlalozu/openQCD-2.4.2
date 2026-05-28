@@ -582,12 +582,8 @@ void force0(double c)
    }
    bc_parms_t bc=bc_parms();
 
-   #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME],lat,bc,c)
-   #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], \
-    udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME], lat, bc, \
-    bc.cG[0:2])
-
-   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],bc,lat,fdb[0:4*VOLUME],lat.beta, lat.c0, lat.c1, bc.type, bc.cG[:2],c)
+   #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc[0:8],ofs[0:8],hofs[0:8], udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
+   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],bc,lat,fdb[0:4*VOLUME],c)
 
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
@@ -595,7 +591,7 @@ void force0(double c)
    {
       force0_part(ix,bc,lat,c,iup,idn,udb,fdb,hdb);
    }
-   #pragma omp target update from(fdb[0:4*VOLUME])
+   #pragma omp target update from(fdb[0:4*VOLUME+7*(BNDRY/4)])
    prof_end(&force0_part_p);
 
    add_bnd_frc();
