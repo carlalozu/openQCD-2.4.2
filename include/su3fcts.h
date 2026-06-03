@@ -57,9 +57,30 @@ extern void cm3x3_assign(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_swap(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_dagger(su3_dble *u,su3_dble *v);
 extern void cm3x3_tr(su3_dble *u,su3_dble *v,complex_dble *tr);
-#pragma omp declare target
+#if defined (AVX)
 extern void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr);
+#else
+#pragma omp declare target
+static inline void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr)
+{
+   double r;
+
+   r =(*u).c11.re*(*v).c11.re-(*u).c11.im*(*v).c11.im;
+   r+=(*u).c12.re*(*v).c21.re-(*u).c12.im*(*v).c21.im;
+   r+=(*u).c13.re*(*v).c31.re-(*u).c13.im*(*v).c31.im;
+
+   r+=(*u).c21.re*(*v).c12.re-(*u).c21.im*(*v).c12.im;
+   r+=(*u).c22.re*(*v).c22.re-(*u).c22.im*(*v).c22.im;
+   r+=(*u).c23.re*(*v).c32.re-(*u).c23.im*(*v).c32.im;
+
+   r+=(*u).c31.re*(*v).c13.re-(*u).c31.im*(*v).c13.im;
+   r+=(*u).c32.re*(*v).c23.re-(*u).c32.im*(*v).c23.im;
+   r+=(*u).c33.re*(*v).c33.re-(*u).c33.im*(*v).c33.im;
+
+   (*tr)=r;
+}
 #pragma omp end declare target
+#endif
 extern void cm3x3_imtr(su3_dble *u,su3_dble *v,double *tr);
 extern void cm3x3_add(su3_dble *u,su3_dble *v);
 extern void cm3x3_mul_add(su3_dble *u,su3_dble *v,su3_dble *w);
@@ -79,13 +100,225 @@ extern void project_to_su3(su3 *u);
 extern void project_to_su3_dble(su3_dble *u);
 
 /* SU3PROD_C */
-#pragma omp declare target
+#if defined (AVX)
 extern void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w);
 extern void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w);
 extern void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
 extern void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w);
 extern double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X);
+#else
+#pragma omp declare target
+static inline void su3xsu3vec(su3_dble *u,su3_vector_dble *psi,
+                       su3_vector_dble *chi)
+{
+   _su3_multiply(*chi,*u,*psi);
+}
 #pragma omp end declare target
+
+#pragma omp declare target
+static inline void su3dagxsu3vec(su3_dble *u,su3_vector_dble *psi,
+                          su3_vector_dble *chi)
+{
+   _su3_inverse_multiply(*chi,*u,*psi);
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+static inline void su3xsu3(su3_dble *u,su3_dble *v,su3_dble *w)
+{
+   su3_vector_dble psi,chi;
+
+   psi.c1=(*v).c11;
+   psi.c2=(*v).c21;
+   psi.c3=(*v).c31;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c11=chi.c1;
+   (*w).c21=chi.c2;
+   (*w).c31=chi.c3;
+
+   psi.c1=(*v).c12;
+   psi.c2=(*v).c22;
+   psi.c3=(*v).c32;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c12=chi.c1;
+   (*w).c22=chi.c2;
+   (*w).c32=chi.c3;
+
+   psi.c1=(*v).c13;
+   psi.c2=(*v).c23;
+   psi.c3=(*v).c33;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c13=chi.c1;
+   (*w).c23=chi.c2;
+   (*w).c33=chi.c3;
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+static inline void su3dagxsu3(su3_dble *u,su3_dble *v,su3_dble *w)
+{
+   su3_vector_dble psi,chi;
+
+   psi.c1=(*v).c11;
+   psi.c2=(*v).c21;
+   psi.c3=(*v).c31;
+   su3dagxsu3vec(u,&psi,&chi);
+   (*w).c11=chi.c1;
+   (*w).c21=chi.c2;
+   (*w).c31=chi.c3;
+
+   psi.c1=(*v).c12;
+   psi.c2=(*v).c22;
+   psi.c3=(*v).c32;
+   su3dagxsu3vec(u,&psi,&chi);
+   (*w).c12=chi.c1;
+   (*w).c22=chi.c2;
+   (*w).c32=chi.c3;
+
+   psi.c1=(*v).c13;
+   psi.c2=(*v).c23;
+   psi.c3=(*v).c33;
+   su3dagxsu3vec(u,&psi,&chi);
+   (*w).c13=chi.c1;
+   (*w).c23=chi.c2;
+   (*w).c33=chi.c3;
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+static inline void su3xsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
+{
+   su3_vector_dble psi,chi;
+
+   psi.c1.re= (*v).c11.re;
+   psi.c1.im=-(*v).c11.im;
+   psi.c2.re= (*v).c12.re;
+   psi.c2.im=-(*v).c12.im;
+   psi.c3.re= (*v).c13.re;
+   psi.c3.im=-(*v).c13.im;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c11=chi.c1;
+   (*w).c21=chi.c2;
+   (*w).c31=chi.c3;
+
+   psi.c1.re= (*v).c21.re;
+   psi.c1.im=-(*v).c21.im;
+   psi.c2.re= (*v).c22.re;
+   psi.c2.im=-(*v).c22.im;
+   psi.c3.re= (*v).c23.re;
+   psi.c3.im=-(*v).c23.im;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c12=chi.c1;
+   (*w).c22=chi.c2;
+   (*w).c32=chi.c3;
+
+   psi.c1.re= (*v).c31.re;
+   psi.c1.im=-(*v).c31.im;
+   psi.c2.re= (*v).c32.re;
+   psi.c2.im=-(*v).c32.im;
+   psi.c3.re= (*v).c33.re;
+   psi.c3.im=-(*v).c33.im;
+   su3xsu3vec(u,&psi,&chi);
+   (*w).c13=chi.c1;
+   (*w).c23=chi.c2;
+   (*w).c33=chi.c3;
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+static inline void su3dagxsu3dag(su3_dble *u,su3_dble *v,su3_dble *w)
+{
+   su3_vector_dble psi,chi;
+
+   psi.c1.re= (*v).c11.re;
+   psi.c1.im=-(*v).c11.im;
+   psi.c2.re= (*v).c12.re;
+   psi.c2.im=-(*v).c12.im;
+   psi.c3.re= (*v).c13.re;
+   psi.c3.im=-(*v).c13.im;
+   su3dagxsu3vec(u,&psi,&chi);
+   (*w).c11=chi.c1;
+   (*w).c21=chi.c2;
+   (*w).c31=chi.c3;
+
+   psi.c1.re= (*v).c21.re;
+   psi.c1.im=-(*v).c21.im;
+   psi.c2.re= (*v).c22.re;
+   psi.c2.im=-(*v).c22.im;
+   psi.c3.re= (*v).c23.re;
+   psi.c3.im=-(*v).c23.im;
+   su3dagxsu3vec(u,&psi,&chi);
+   (*w).c12=chi.c1;
+   (*w).c22=chi.c2;
+   (*w).c32=chi.c3;
+
+   psi.c1.re= (*v).c31.re;
+   psi.c1.im=-(*v).c31.im;
+   psi.c2.re= (*v).c32.re;
+   psi.c2.im=-(*v).c32.im;
+   psi.c3.re= (*v).c33.re;
+   psi.c3.im=-(*v).c33.im;
+   su3dagxsu3vec(u,&psi,&chi);
+   (*w).c13=chi.c1;
+   (*w).c23=chi.c2;
+   (*w).c33=chi.c3;
+}
+#pragma omp end declare target
+
+#pragma omp declare target
+static inline double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X)
+{
+   double tr;
+   su3_vector_dble psi,chi1,chi2,chi3;
+
+   psi.c1=(*v).c11;
+   psi.c2=(*v).c21;
+   psi.c3=(*v).c31;
+   su3xsu3vec(u,&psi,&chi1);
+   tr=chi1.c1.re;
+   (*X).c1 = chi1.c1.im;
+   (*X).c2 = chi1.c1.im;
+   (*X).c3 =-chi1.c2.re;
+   (*X).c4 = chi1.c2.im;
+   (*X).c5 =-chi1.c3.re;
+   (*X).c6 = chi1.c3.im;
+
+   psi.c1=(*v).c12;
+   psi.c2=(*v).c22;
+   psi.c3=(*v).c32;
+   su3xsu3vec(u,&psi,&chi2);
+   tr+=chi2.c2.re;
+   (*X).c3+= chi2.c1.re;
+   (*X).c4+= chi2.c1.im;
+   (*X).c1-= chi2.c2.im;
+   (*X).c7 =-chi2.c3.re;
+   (*X).c8 = chi2.c3.im;
+
+   psi.c1=(*v).c13;
+   psi.c2=(*v).c23;
+   psi.c3=(*v).c33;
+   su3xsu3vec(u,&psi,&chi3);
+   tr+=chi3.c3.re;
+   (*X).c5+= chi3.c1.re;
+   (*X).c6+= chi3.c1.im;
+   (*X).c7+= chi3.c2.re;
+   (*X).c8+= chi3.c2.im;
+   (*X).c2-= chi3.c3.im;
+
+   (*X).c1*=(1.0/3.0);
+   (*X).c2*=(1.0/3.0);
+   (*X).c3*=0.5;
+   (*X).c4*=0.5;
+   (*X).c5*=0.5;
+   (*X).c6*=0.5;
+   (*X).c7*=0.5;
+   (*X).c8*=0.5;
+
+   return tr;
+}
+#pragma omp end declare target
+
+#endif
 extern void su3xu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v);
 extern void su3dagxu3alg(su3_dble *u,u3_alg_dble *X,su3_dble *v);
 extern void u3algxsu3(u3_alg_dble *X,su3_dble *u,su3_dble *v);

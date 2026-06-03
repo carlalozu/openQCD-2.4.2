@@ -31,6 +31,7 @@ extern void add_bnd_frc(void);
 /* MDFLDS_C */
 extern mdflds_t *mdflds(void);
 extern void set_frc2zero(void);
+extern void set_frc2zero_gpu(void);
 extern void bnd_frc2zero(void);
 extern void bnd_mom2zero(void);
 extern void random_mom(void);

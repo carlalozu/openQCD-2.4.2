@@ -294,6 +294,31 @@ void set_frc2zero(void)
    }
 }
 
+void set_frc2zero_gpu(void)
+{
+   su3_alg_dble *frc;
+
+   if (mdfs==NULL)
+      alloc_mdflds();
+   else
+   {
+      frc=(*mdfs).frc;
+
+      #pragma omp target teams distribute parallel for
+      for (int i=0; i<4*VOLUME; i++)
+      {
+         frc[i].c1 = 0.0;
+         frc[i].c2 = 0.0;
+         frc[i].c3 = 0.0;
+         frc[i].c4 = 0.0;
+         frc[i].c5 = 0.0;
+         frc[i].c6 = 0.0;
+         frc[i].c7 = 0.0;
+         frc[i].c8 = 0.0;
+      }
+   }
+}
+
 
 void bnd_frc2zero(void)
 {
