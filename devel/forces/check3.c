@@ -134,6 +134,7 @@ int main(int argc,char *argv[])
 
    for (k=0;k<10;k++)
    {
+      prof_reset(&force0_part_p);
       random_ud();
       set_ud_phase();
       random_mom();
