@@ -565,7 +565,6 @@ void force0(double c)
    udb=udfld();
    mdfs=mdflds();
    fdb=(*mdfs).frc;
-   set_frc2zero();
 
    lat=lat_parms();
 
@@ -583,7 +582,9 @@ void force0(double c)
    bc_parms_t bc=bc_parms();
 
    #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc[0:8],ofs[0:8],hofs[0:8],udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
-   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME])
+   set_frc2zero_gpu();
+
+   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)])
 
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
