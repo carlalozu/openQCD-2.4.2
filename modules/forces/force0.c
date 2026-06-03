@@ -308,9 +308,9 @@ void plaq_frc(void)
 }
 
 
-static void force0_part(int ix,bc_parms_t bcp,lat_parms_t lat,double c,int (*iup)[4],int (*idn)[4],su3_dble *udb,su3_alg_dble *fdb,su3_dble *hdb)
+static void force0_part(int ix,int n,bc_parms_t bcp,lat_parms_t lat,double c,int (*iup)[4],int (*idn)[4],su3_dble *udb,su3_alg_dble *fdb,su3_dble *hdb)
 {
-   int bc,n,t,ip[4];
+   int bc,t,ip[4];
    double r0,r1,c0,c1,*cG;
    su3_alg_dble X ALIGNED16;
    su3_dble wd[3] ALIGNED16;
@@ -341,7 +341,8 @@ static void force0_part(int ix,bc_parms_t bcp,lat_parms_t lat,double c,int (*iup
          else if ((t==(N0-1))&&(bc!=3))
             r0*=cG[1];
 
-         for (n=0;n<3;n++)
+         // for (n=0;n<3;n++)
+         if (n<3)
          {
             _plaq_uidx(n,ix,ip,iup);
 
@@ -352,7 +353,7 @@ static void force0_part(int ix,bc_parms_t bcp,lat_parms_t lat,double c,int (*iup
             {
                prod2su3alg(wd,wd+1,&X);
                su3_alg_mul_add_assign(fdb+ip[1],r0,X);
-	    }
+	         }
 
             prod2su3alg(wd+1,wd,&X);
             su3_alg_mul_sub_assign(fdb+ip[3],r0,X);
@@ -486,7 +487,7 @@ static void force0_part(int ix,bc_parms_t bcp,lat_parms_t lat,double c,int (*iup
             r1*=(0.5*cG[1]);
          }
 
-         for (n=3;n<6;n++)
+         if ((n>2) && (n<6))
          {
             _plaq_uidx(n,ix,ip,iup);
 
@@ -586,10 +587,14 @@ void force0(double c)
    #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME])
 
    prof_begin(&force0_part_p);
-   #pragma omp target teams distribute parallel for
-   for (int ix=0; ix<VOLUME; ix++)
-   {
-      force0_part(ix,bc,lat,c,iup,idn,udb,fdb,hdb);
+   for (int n=0; n<6; n++){
+      #pragma omp target teams distribute parallel for
+      for (int ix=0; ix<VOLUME/2; ix++)
+         force0_part(ix,n,bc,lat,c,iup,idn,udb,fdb,hdb);
+
+      #pragma omp target teams distribute parallel for
+      for (int ix=0; ix<VOLUME/2; ix++)
+         force0_part(ix+VOLUME/2,n,bc,lat,c,iup,idn,udb,fdb,hdb);
    }
    prof_end(&force0_part_p);
 
