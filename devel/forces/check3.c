@@ -132,7 +132,7 @@ int main(int argc,char *argv[])
       printf("Deviation of gauge force after a phase change = %.1e\n\n",
              dev_frc);
 
-   for (k=0;k<4;k++)
+   for (k=0;k<10;k++)
    {
       random_ud();
       set_ud_phase();
@@ -181,6 +181,7 @@ int main(int argc,char *argv[])
       {
          printf("Relative deviation of dS/dt = %.2e ",fabs(dev_frc));
          printf("[significance loss = %d digits]\n",(int)(sig_loss));
+         prof_report(&force0_part_p);
       }
    }
 

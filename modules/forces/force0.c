@@ -73,7 +73,7 @@ int nfc[8],ofs[8],hofs[8],init=0;
 #pragma omp end declare target
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
-prof_section force0_part_p = {.name = "force0_part", .level=2};
+prof_section force0_part_p = {.name = "force0", .level=2};
 
 static void set_ofs(void)
 {
@@ -582,8 +582,8 @@ void force0(double c)
    }
    bc_parms_t bc=bc_parms();
 
-   #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc[0:8],ofs[0:8],hofs[0:8], udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
-   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],bc,lat,fdb[0:4*VOLUME],c)
+   #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc[0:8],ofs[0:8],hofs[0:8],udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
+   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME])
 
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
@@ -591,8 +591,9 @@ void force0(double c)
    {
       force0_part(ix,bc,lat,c,iup,idn,udb,fdb,hdb);
    }
-   #pragma omp target update from(fdb[0:4*VOLUME+7*(BNDRY/4)])
    prof_end(&force0_part_p);
+
+   #pragma omp target update from(fdb[0:4*VOLUME+7*(BNDRY/4)])
 
    add_bnd_frc();
 }
@@ -754,6 +755,8 @@ qflt action0(int icom)
    act0.q[1]=0.0;
    pa=0.0;
 
+   double total_s = 0.0;
+   double t0 = omp_get_wtime();
 #pragma omp parallel private(k) reduction(+:pa)
    {
       qflt loc_act0;
@@ -770,6 +773,8 @@ qflt action0(int icom)
    }
 
    scl_qflt(lat.beta/3.0,act0.q);
+   total_s += omp_get_wtime() - t0;
+   printf("  total CPU action0 time = %.6f s (%i threads) \n", total_s, NTHREAD);
 
    return act0;
 }
