@@ -100,14 +100,12 @@ int main(int argc,char *argv[])
 {
    int my_rank;
    double phi[2],phi_prime[2],theta[3];
-   FILE *flog=NULL;
 
    mpi_init(argc,argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
 
    if (my_rank==0)
    {
-      flog=freopen("check5.log","w",stdout);
       print_lattice_sizes();
    }
 
@@ -126,9 +124,6 @@ int main(int argc,char *argv[])
    geometry();
 
    int result=RUN_ALL_TESTS(my_rank,tests);
-
-   if (my_rank==0)
-      fclose(flog);
 
    MPI_Finalize();
    return result;
