@@ -47,8 +47,9 @@ LOGOPTION =
 # search path for modules
 
 MDIR = ../../modules
+GDIR = ../../gpu
 
-VPATH = .:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
+VPATH = .:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
           $(MDIR)/uflds:$(MDIR)/su3fcts:$(MDIR)/utils
 
 

@@ -75,8 +75,9 @@ MODULES = $(ARCHIVE) $(BLOCK) $(DEVFCTS) $(DFL) $(DIRAC) $(FLAGS) $(FORCES) \
 # search path for modules
 
 MDIR = ../../../modules
+GDIR = ../../../gpu
 
-VPATH = .:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/archive:$(MDIR)/linalg:\
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/archive:$(MDIR)/linalg:\
           $(MDIR)/random:$(MDIR)/uflds:$(MDIR)/mdflds:$(MDIR)/su3fcts:\
           $(MDIR)/utils:$(MDIR)/forces:$(MDIR)/sflds:$(MDIR)/dirac:\
 	  $(MDIR)/sw_term:$(MDIR)/tcharge:$(MDIR)/block:$(MDIR)/sap:\

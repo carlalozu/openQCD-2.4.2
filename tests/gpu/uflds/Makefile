@@ -15,7 +15,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check4
+MAIN = check4 check5
 
 DEVFCTS = dutils gtrans
 
@@ -38,8 +38,9 @@ MODULES = $(DEVFCTS) $(FLAGS) $(LATTICE) $(RANDOM) $(UFLDS) \
 # search path for modules
 
 MDIR = ../../../modules
+GDIR = ../../../gpu
 
-VPATH = .:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
+VPATH = .:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
           $(MDIR)/uflds:$(MDIR)/su3fcts:$(MDIR)/utils
 
 
