@@ -19,13 +19,13 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check1 check2 check3 check4 check5
+MAIN = time time_plaq_sum time_plaq_dble time_test
 
 DEVFCTS = dutils gtrans
 
 FLAGS = flags lat_parms dfl_parms
 
-LATTICE = bcndsv geogen geometryv uidxv
+LATTICE = bcnds geogen geometry uidx
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
@@ -47,8 +47,9 @@ LOGOPTION =
 # search path for modules
 
 MDIR = ../../modules
+GDIR = ../../gpu
 
-VPATH = .:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
+VPATH = .:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
           $(MDIR)/uflds:$(MDIR)/su3fcts:$(MDIR)/utils
 
 
@@ -66,10 +67,12 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+         -fopenmp-targets=nvptx64-nvidia-cuda --offload-arch=sm_90 -Wall -Wno-long-long \
+         -Wstrict-prototypes -O -DFMA3 -DPM
+
+LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
 
 
 ############################## do not change ###################################
@@ -86,7 +89,7 @@ PGMS= $(MAIN) $(MODULES)
 # rule to make dependencies
 
 $(addsuffix .d,$(PGMS)): %.d: %.c Makefile
-	@ $(GCC) -ansi $< -MM $(addprefix -I,$(INCPATH)) -o $@
+	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs

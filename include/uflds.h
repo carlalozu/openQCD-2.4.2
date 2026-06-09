@@ -40,6 +40,7 @@ extern void copy_bnd_ud(void);
 extern su3 *ufld(void);
 extern su3_dble *udfld(void);
 extern void random_ud(void);
+extern void random_ud_reproducible(void);
 extern void set_ud_phase(void);
 extern void unset_ud_phase(void);
 extern void renormalize_ud(void);

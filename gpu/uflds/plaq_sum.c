@@ -87,8 +87,7 @@ double plaq_dble(su3_dble *udb, int n,int ix)
 
 static qflt local_plaq_sum_dble(int iw)
 {
-   int k,ix,t,n;
-   double wp,pa;
+   double wp,pa=0.0;
    qflt rqsm;
 
    int bc=bc_type();
@@ -102,48 +101,44 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udb=udfld();
    prof_begin(&compute);
-   #pragma omp parallel private(k,ix,t,n,pa)
+   // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (int ix=0;ix<VOLUME;ix++)
    {
-      k=omp_get_thread_num();
-
-      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+      double local_pa=0.0;
+      int t=global_time(ix);
+      if ((t<(N0-1))||(bc!=0))
       {
-         pa=0.0;
-         t=global_time(ix);
-
-         if ((t<(N0-1))||(bc!=0))
-         {
-            for (n=0;n<3;n++)
-               pa+=plaq_dble(udb,n,ix);
-         }
-
-         if (((t>0)&&(t<(N0-1)))||(bc==3))
-         {
-            for (n=3;n<6;n++)
-               pa+=plaq_dble(udb,n,ix);
-         }
-         else if ((t==0)||(bc==0))
-         {
-            if (bc==1)
-               pa+=wp*9.0;
-            else
-            {
-               for (n=3;n<6;n++)
-                  pa+=wp*plaq_dble(udb,n,ix);
-            }
-         }
+         for (int n=0;n<3;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+      }
+      
+      if (((t>0)&&(t<(N0-1)))||(bc==3))
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+      }
+      else if ((t==0)||(bc==0))
+      {
+         if (bc==1)
+            local_pa+=wp*9.0;
          else
          {
-            for (n=3;n<6;n++)
-               pa+=plaq_dble(udb,n,ix);
-            pa+=wp*9.0;
+            for (int n=3;n<6;n++)
+               local_pa+=wp*plaq_dble(udb,n,ix);
          }
-
-         #pragma omp critical
-         acc_qflt(pa,rqsm.q);
       }
+      else
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+
+         local_pa+=wp*9.0;
+      }
+      pa += local_pa;
    }
    prof_end(&compute);
+   acc_qflt(pa,rqsm.q);
    return rqsm;
 }
 
