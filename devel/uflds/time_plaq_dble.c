@@ -36,6 +36,9 @@
 #define N2 (NPROC2 * L2)
 #define N3 (NPROC3 * L3)
 
+#define WARMUP_ITERS  3
+#define PROFILE_ITERS 20
+
 void flush_cache(size_t flush_size, double* flush_buf)
 {
     #pragma omp target teams distribute parallel for
@@ -46,26 +49,22 @@ void flush_cache(size_t flush_size, double* flush_buf)
 
 int main(int argc, char *argv[])
 {
-   prof_section init_program = {.name = "init_program"};
-   prof_section set_params = {.name = "set_params"};
-   prof_section benchmark = {.name = "benchmark"};
-   prof_section total = {.name = "total"};
-   prof_section prepare_data = {.name = "prepare_data"};
-   prof_section plaq_dble_p = {.name = "plaq_dble"};
+   prof_section s_prepare  = {.name = "prepare_data"};
+   prof_section s_upload   = {.name = "upload ufld"};
+   prof_section s_kernel   = {.name = "plaq_dble"};
+   prof_section s_total    = {.name = "total"};
 
    int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
    double nplaq1, nplaq2, p1, p2;
    double d1, d2;
-   double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
    static su3_dble *udb;
 
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
    
-   prof_begin(&total);
-   prof_begin(&init_program);
+   prof_begin(&s_total);
    if (my_rank == 0)
    {
       flog = freopen("time_plaq_dble.log", "w", stdout);
@@ -82,9 +81,7 @@ int main(int argc, char *argv[])
          error_root(sscanf(argv[bc + 1], "%d", &bc) != 1, 1, "main [time.c]",
                     "Syntax: time [-bc <type>]");
    }
-   prof_end(&init_program);
 
-   prof_begin(&set_params);
    check_machine();
    MPI_Bcast(&bc, 1, MPI_INT, 0, MPI_COMM_WORLD);
    phi[0] = 0.123;
@@ -99,6 +96,10 @@ int main(int argc, char *argv[])
 
    start_ranlux(0, 12345);
    geometry();
+   
+   // Map static geometry array to device once
+   #pragma omp target enter data map(to: iup[0:VOLUME][:4])
+   #pragma omp target enter data map(to: udb[0:4*VOLUME])
 
    p1 = plaq_sum_dble(1);
    p2 = plaq_wsum_dble(1);
@@ -165,73 +166,81 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
    
-
-   #pragma omp target enter data map(to: iup)
-   prof_end(&set_params);
    
-   prof_begin(&benchmark);
-   wdti = 0.0;
-   double pa, p1=0.0;
-   while (wdti < 10.0)
+   if (my_rank == 0)
+      printf("Running %d warmup iterations...\n", WARMUP_ITERS);
+
+   for (count = 0; count < WARMUP_ITERS; count++)
    {
-      wdt = 0.0;
-      for (count = 0; count < nt; count++)
+      random_ud();
+      udb = udfld();
+      #pragma omp target update to(udb[0:4*VOLUME])
+
+      double pa_warm = 0.0;
+      #pragma omp target teams distribute parallel for reduction(+:pa_warm)
+      for (int ix = 0; ix < VOLUME; ix++)
+         pa_warm += plaq_dble(udb, 0, ix, iup);
+
+      (void)pa_warm;
+   }
+   MPI_Barrier(MPI_COMM_WORLD);
+
+   if (my_rank == 0)
+      printf("Warmup done. Starting timed benchmark...\n\n");
+
+
+   double pa = 0.0;
+
+   for (count = 0; count < PROFILE_ITERS; count++)
+   {
+      /* --- prepare: field generation ----------------------------------- */
+      MPI_Barrier(MPI_COMM_WORLD);
+      prof_begin(&s_prepare);
+      random_ud();
+      udb = udfld();
+      prof_end(&s_prepare);
+      
+      /* --- upload:  H2D transfer --------------------------------------- */
+      prof_begin(&s_upload);
+      #pragma omp target update to(udb[0:4*VOLUME])
+      prof_end(&s_upload);
+
+      /* --- kernel: plaq_dble ------------------------------------------- */
+      for (int n = 0; n < 6; n++)
       {
          MPI_Barrier(MPI_COMM_WORLD);
-         prof_begin(&prepare_data);
-         wt0 = MPI_Wtime();
-
-         random_ud();
-         udb=udfld();
-         #pragma omp target update to(udb[0:4*VOLUME])
-
-         prof_end(&prepare_data);
-         
-         MPI_Barrier(MPI_COMM_WORLD);
-         wt1 = MPI_Wtime();
-
-         prof_begin(&plaq_dble_p);
-         pa=0.0;
+         pa = 0.0;
+         prof_begin(&s_kernel);
          #pragma omp target teams distribute parallel for reduction(+:pa)
-         for (int ix=0;ix<VOLUME;ix++){
-            pa+=plaq_dble(udb,0,ix,iup);
-         }
-         prof_end(&plaq_dble_p);
-
-         MPI_Barrier(MPI_COMM_WORLD);
-         wt2 = MPI_Wtime();
-
-         wdt += wt2 - wt1;
-         wdti += wt2 - wt0;
+         for (int ix = 0; ix < VOLUME; ix++)
+            pa += plaq_dble(udb, n, ix, iup);
+         prof_end(&s_kernel);
       }
 
-      nt *= 2;
-   }
+   }   
 
-   wdt = 2.0 * wdt / ((double)(nt));
-   prof_end(&benchmark);
-   prof_end(&total);
-
+   prof_end(&s_total);
+   
    if (my_rank == 0)
    {
       int flops = 432 * VOLUME;
-      printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
+      double avg_time = s_kernel.total / (double)s_kernel.count;
+
+      printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions for final time: %i\n", nt / 2);
-      printf("Average time for plaq_dble (sec): %.9f\n", wdt);
+      printf("Number of repetitions for final time: %i\n", s_kernel.count);
+      printf("Average time for plaq_dble (sec): %.9f\n", avg_time);
       printf("Flops: %d\n", flops); 
-      printf("Total performance for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / wdt)); 
-      printf("Time per lattice point & thread for plaq_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / wdt));
+      printf("Total performance for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
+      printf("Time per lattice point & thread for plaq_dble (sec): %.9f\n", avg_time/((double)(VOLUME_TRD)));
+      printf("Performance per thread for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
       printf("Result: %f\n\n", pa);
 
-      prof_report(&init_program);
-      prof_report(&set_params);
-      prof_report(&benchmark);
-      prof_report(&prepare_data);
-      prof_report(&plaq_dble_p);
-      prof_report(&total);
+      prof_report(&s_prepare);
+      prof_report(&s_upload);
+      prof_report(&s_kernel);
+      prof_report(&s_total);
    }
 
    if (my_rank == 0)

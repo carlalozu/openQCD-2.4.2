@@ -1,4 +1,3 @@
-
 /*******************************************************************************
  *
  * File time.c
@@ -36,37 +35,28 @@
 #define N2 (NPROC2 * L2)
 #define N3 (NPROC3 * L3)
 
-void flush_cache(size_t flush_size, double* flush_buf)
-{
-    #pragma omp target teams distribute parallel for
-    for (size_t j = 0; j < flush_size; j++) {
-        flush_buf[j] += 1.0; 
-    }
-}
+#define WARMUP_ITERS  3
+#define PROFILE_ITERS 20
 
 int main(int argc, char *argv[])
 {
-   prof_section init_program = {.name = "init_program"};
-   prof_section set_params = {.name = "set_params"};
-   prof_section benchmark = {.name = "benchmark"};
-   prof_section total = {.name = "total"};
-   prof_section prepare_data = {.name = "prepare_data"};
+   prof_section s_kernel  = {.name = "plaq_sum_dble"};
+   prof_section s_total   = {.name = "total"};
 
-   int my_rank, bc, nt, count;
+   int my_rank, bc;
    double phi[2], phi_prime[2], theta[3];
    double nplaq1, nplaq2, p1, p2;
    double d1, d2;
-   double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
-   
+
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-   
-   prof_begin(&total);
-   prof_begin(&init_program);
+
+   prof_begin(&s_total);
+
    if (my_rank == 0)
    {
-      flog = freopen("time.log", "w", stdout);
+      flog = freopen("time_plaq_sum_dble.log", "w", stdout);
 
       printf("\n");
       printf("Plaquette sums of the double-precision gauge field\n");
@@ -80,9 +70,7 @@ int main(int argc, char *argv[])
          error_root(sscanf(argv[bc + 1], "%d", &bc) != 1, 1, "main [time.c]",
                     "Syntax: time [-bc <type>]");
    }
-   prof_end(&init_program);
 
-   prof_begin(&set_params);
    check_machine();
    MPI_Bcast(&bc, 1, MPI_INT, 0, MPI_COMM_WORLD);
    phi[0] = 0.123;
@@ -98,6 +86,9 @@ int main(int argc, char *argv[])
    start_ranlux(0, 12345);
    geometry();
 
+   /* -------------------------------------------------------------------------
+    * Correctness check on freshly initialised (unit) field
+    * ---------------------------------------------------------------------- */
    p1 = plaq_sum_dble(1);
    p2 = plaq_wsum_dble(1);
 
@@ -117,8 +108,7 @@ int main(int argc, char *argv[])
       nplaq2 = (double)(6 * N0 * N1) * (double)(N2 * N3);
    }
 
-   d1 = 0.0;
-   d2 = 0.0;
+   d1 = d2 = 0.0;
 
    if (bc == 1)
    {
@@ -159,72 +149,56 @@ int main(int argc, char *argv[])
              fabs(1.0 - p2 / (3.0 * nplaq2 + d1 + d2)));
    }
 
-   nt = (int)(1.0e6 / (double)(VOLUME));
-   if (nt < 2)
-      nt = 2;
-   
-   size_t flush_size = 62914560 * 4 / sizeof(double);
-   double *flush_buf = malloc(flush_size * sizeof(double));
-   #pragma omp target enter data map(to : flush_buf[:flush_size])
-   
-   flush_cache(flush_size, flush_buf);
-   random_ud();
-   prof_end(&set_params);
-   
-   prof_reset(&plaq_sum_dble_p);
-   prof_begin(&benchmark);
-   wdti = 0.0;
-   while (wdti < 5.0)
+   /* -------------------------------------------------------------------------
+    * Warmup: randomise field and call plaq_sum_dble without recording.
+    * ---------------------------------------------------------------------- */
+   if (my_rank == 0)
+      printf("Running %d warmup iterations...\n", WARMUP_ITERS);
+
+   for (int count = 0; count < WARMUP_ITERS; count++)
    {
-      p1 = 0.0;
-      wdt = 0.0;
-      for (count = 0; count < nt; count++)
-      {
-         MPI_Barrier(MPI_COMM_WORLD);
-         prof_begin(&prepare_data);
-         wt0 = MPI_Wtime();
-         flush_cache(flush_size, flush_buf);
-         prof_end(&prepare_data);
-         
-         MPI_Barrier(MPI_COMM_WORLD);
-         // compute profiler defined externally
-         wt1 = MPI_Wtime();
-         p1 += plaq_sum_dble(1);
-         MPI_Barrier(MPI_COMM_WORLD);
-         wt2 = MPI_Wtime();
-
-         wdt += wt2 - wt1;
-         wdti += wt2 - wt0;
-      }
-
-      nt *= 2;
+      random_ud();
+      (void)plaq_sum_dble(1);
    }
 
-   wdt = 2.0 * wdt / ((double)(nt));
-   p1 = 2.0 * p1 / ((double)(nt));
-   prof_end(&benchmark);
-   prof_end(&total);
+   if (my_rank == 0)
+      printf("Warmup done. Starting timed benchmark...\n\n");
+
+   /* -------------------------------------------------------------------------
+    * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
+    * ---------------------------------------------------------------------- */
+   double result = 0.0;
+
+   for (int count = 0; count < PROFILE_ITERS; count++)
+   {
+      random_ud();
+
+      prof_begin(&s_kernel);
+      result = plaq_sum_dble(1);
+      prof_end(&s_kernel);
+   }
+
+   prof_end(&s_total);
 
    if (my_rank == 0)
    {
-      int flops = 432.0 * 6 * VOLUME;
-      printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
-      printf("Volume: %i\n", VOLUME);
-      printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions for final time: %i\n", nt / 2);
-      printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
-      printf("Flops: %d\n", flops); 
-      printf("Total performance for plaq_sum_dble (GFlops/s): %d\n", (int)(flops * 1e-9 / wdt)); 
-      printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_sum_dble (GFlops/s): %d\n", (int)(flops * 1e-9 / wdt));
-      printf("Result: %f\n\n", p1);
+      int    flops    = 432 * 6 * VOLUME;
+      double avg_time = s_kernel.total / (double)s_kernel.count;
 
-      prof_report(&init_program);
-      prof_report(&set_params);
-      prof_report(&benchmark);
-      prof_report(&prepare_data);
-      prof_report(&plaq_sum_dble_p);
-      prof_report(&total);
+      printf("Local size of the gauge field (KB): %d\n",
+             (int)(72 * VOLUME * sizeof(double) / 1024));
+      printf("VOLUME: %d   VOLUME_TRD: %d\n", VOLUME, VOLUME_TRD);
+      printf("Measurement iterations: %lld\n\n", (long long)s_kernel.count);
+
+      printf("avg kernel time              : %.9f s\n", avg_time);
+      printf("Total GFlops/s               : %.4f\n",
+             (double)flops * 1e-9 / avg_time);
+      printf("GFlops/s per thread          : %.4f\n",
+             (double)flops * 1e-9 / avg_time / (double)VOLUME_TRD);
+      printf("Last result                  : %f\n\n", result);
+
+      prof_report(&s_kernel);
+      prof_report(&s_total);
    }
 
    if (my_rank == 0)
