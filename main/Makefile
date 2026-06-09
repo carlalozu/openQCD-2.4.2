@@ -18,7 +18,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = cvt1 ms1 ms2 ms3 ms4 qcd1 qcd2 xms1 xms2 ym1 ym2
+MAIN = cvt1 ms1 ms2 ms3 ms4 qcd1 qcd2 xms1 xms2 ym1 ym2 ym1_time
 
 ARCHIVE = archive iodat marchive sarchive
 
@@ -112,11 +112,12 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c89 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes -Werror \
-         -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
+         -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
+         -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp
+LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
+
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
 # x86-64 machine supporting AVX and FMA3 instructions. See the README in
@@ -132,7 +133,6 @@ LFLAGS = -fopenmp
 ############################## do not change ###################################
 
 SHELL=/bin/bash
-CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)

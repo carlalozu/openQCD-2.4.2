@@ -64,19 +64,17 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
-prof_section compute = {.name = "compute"};
-
+prof_section compute = {.name = "local_plaq_sum_dble"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
+double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(mu,nu,ix,ip);
-   // printf("mu, nu = (%i, %i), ix: %i, ip: (%i, %i, %i, %i)\n", mu, nu, ix, ip[0], ip[1], ip[2], ip[3]);
+   plaq_uidx(n,ix,ip);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
@@ -86,42 +84,13 @@ static double plaq_dble(su3_dble *udb, int mu, int nu,int ix)
 }
 #pragma omp end declare target
 
-#pragma omp declare target
-static double plaq_dble_fused(su3_dble *udb, int mu, int nu,int ix)
-{
-   int ip[4];
-   double sm;
-   su3_dble wd1 ALIGNED16;
-   su3_dble wd2 ALIGNED16;
-
-   plaq_uidx(mu,nu,ix,ip);
-
-   su3xsu3(udb+ip[0],udb+ip[1],&wd1);
-   su3xsu3(udb+ip[2],udb+ip[3],&wd2);
-
-   sm =wd1.c11.re*wd2.c11.re+wd1.c11.im*wd2.c11.im;
-   sm+=wd1.c12.re*wd2.c12.re+wd1.c12.im*wd2.c12.im;
-   sm+=wd1.c13.re*wd2.c13.re+wd1.c13.im*wd2.c13.im;
-
-   sm+=wd1.c21.re*wd2.c21.re+wd1.c21.im*wd2.c21.im;
-   sm+=wd1.c22.re*wd2.c22.re+wd1.c22.im*wd2.c22.im;
-   sm+=wd1.c23.re*wd2.c23.re+wd1.c23.im*wd2.c23.im;
-
-   sm+=wd1.c31.re*wd2.c31.re+wd1.c31.im*wd2.c31.im;
-   sm+=wd1.c32.re*wd2.c32.re+wd1.c32.im*wd2.c32.im;
-   sm+=wd1.c33.re*wd2.c33.re+wd1.c33.im*wd2.c33.im;
-
-   return sm;
-}
-#pragma omp end declare target
 
 static qflt local_plaq_sum_dble(int iw)
 {
-   int bc;
    double wp,pa=0.0;
    qflt rqsm;
 
-   bc=bc_type();
+   int bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -134,39 +103,40 @@ static qflt local_plaq_sum_dble(int iw)
    prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
-   for (int ix=0;ix<VOLUME;ix++){
-      for (int mu = 0; mu < 4; mu++) {
-         for (int nu = mu+1; nu < 4; nu++) {
-            double local_pa=0.0;
-            int t=global_time(ix);
-
-            if (mu<1)
-            {
-               if ((t<(N0-1))||(bc!=0))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
-            }
-            else
-            {
-               if (((t>0)&&(t<(N0-1)))||(bc==3))
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
-               else if ((t==0)||(bc==0))
-               {
-                  if (bc==1)
-                     local_pa+=wp*3.0;
-                  else
-                     local_pa+=wp*plaq_dble(udb,mu,nu,ix);
-               }
-               else
-               {
-                  local_pa+=plaq_dble(udb,mu,nu,ix);
-                  local_pa+=wp*3.0;
-               }
-            }
-            pa+=local_pa;
+   for (int ix=0;ix<VOLUME;ix++)
+   {
+      double local_pa=0.0;
+      int t=global_time(ix);
+      if ((t<(N0-1))||(bc!=0))
+      {
+         for (int n=0;n<3;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+      }
+      
+      if (((t>0)&&(t<(N0-1)))||(bc==3))
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+      }
+      else if ((t==0)||(bc==0))
+      {
+         if (bc==1)
+            local_pa+=wp*9.0;
+         else
+         {
+            for (int n=3;n<6;n++)
+               local_pa+=wp*plaq_dble(udb,n,ix);
          }
       }
+      else
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+
+         local_pa+=wp*9.0;
+      }
+      pa += local_pa;
    }
-   #pragma omp target update from(pa)
    prof_end(&compute);
    acc_qflt(pa,rqsm.q);
    return rqsm;
@@ -252,17 +222,14 @@ double plaq_action_slices(double *asl)
 
          if ((t<(N0-1))||(bc!=0))
          {
-            int mu = 0;
-            for (int nu = mu+1; nu < 4; nu++)
-               smE+=(3.0-plaq_dble(udb,mu,nu,ix));
+            for (n=0;n<3;n++)
+               smE+=(3.0-plaq_dble(udb,n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
-            for (int mu = 1; mu < 4; mu++) {
-               for (int nu = mu+1; nu < 4; nu++)
-                  smB+=(3.0-plaq_dble(udb,mu,nu,ix));
-            }
+            for (n=3;n<6;n++)
+               smB+=(3.0-plaq_dble(udb,n,ix));
          }
 
          acc_qflt(smE,rqsmE[t].q);

@@ -17,6 +17,8 @@
 #include "su3.h"
 #endif
 
+#include "profiler.h"
+
 typedef struct
 {
    int iop;
@@ -42,6 +44,9 @@ extern void print_all_avgstat(void);
 
 /* HMC_C */
 extern int run_hmc(qflt *act0,qflt *act1);
+extern prof_section start_hmc_p;
+extern prof_section run_mdint_p;
+extern prof_section end_hmc_p;
 
 /* MDINT_C */
 extern void run_mdint(void);
@@ -84,6 +89,8 @@ extern void update_mom(void);
 extern void update_ud(double eps);
 extern void start_dfl_upd(void);
 extern void dfl_upd(void);
+extern prof_section update_mom_p;
+extern prof_section update_ud_p;
 
 /* WSIZE_C */
 extern void hmc_wsize(int *nwud,int *nws,int *nwv,int *nwvd);
