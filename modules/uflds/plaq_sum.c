@@ -64,10 +64,10 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
-prof_section compute = {.name = "compute"};
+prof_section compute = {.name = "local_plaq_sum_dble"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int n,int ix)
+double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
@@ -136,9 +136,7 @@ static qflt local_plaq_sum_dble(int iw)
          local_pa+=wp*9.0;
       }
       pa += local_pa;
-      
    }
-   #pragma omp target update from(pa)
    prof_end(&compute);
    acc_qflt(pa,rqsm.q);
    return rqsm;
