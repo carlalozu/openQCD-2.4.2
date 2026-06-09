@@ -19,7 +19,7 @@ MAIN = check3
 
 DEVFCTS = rotud
 
-FLAGS = dfl_parms flags hmc_parms lat_parms
+FLAGS = action_parms dfl_parms flags hmc_parms lat_parms rat_parms smd_parms
 
 FORCES = force0
 
@@ -33,12 +33,14 @@ RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
 SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
+SFLDS = sflds
+
 UFLDS = bstap udcom uflds uinit
 
 UTILS = endian error mutils qsum utils wspace
 
 MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
-          $(RANDOM) $(SU3FCTS) $(UFLDS) $(UTILS)
+          $(RANDOM) $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
 
 
 # search path for modules
@@ -48,7 +50,7 @@ GDIR = ../../../gpu
 
 VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
 
 
 # additional include directories
@@ -86,7 +88,7 @@ PGMS= $(MAIN) $(MODULES)
 # rule to make dependencies
 
 $(addsuffix .d,$(PGMS)): %.d: %.c Makefile
-	@ $(GCC) -ansi $< -MM $(addprefix -I,$(INCPATH)) -o $@
+	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
