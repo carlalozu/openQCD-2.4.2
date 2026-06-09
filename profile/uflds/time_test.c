@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
 
    int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
-   double nplaq1, nplaq2, p1, p2;
-   double d1, d2;
+   double p1 = 0.0;
    double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
    
@@ -97,69 +96,6 @@ int main(int argc, char *argv[])
 
    start_ranlux(0, 12345);
    geometry();
-   random_ud();
-   p1 = plaq_sum_dble(1);
-   // p2 = plaq_wsum_dble(1);
-
-   if (bc == 0)
-   {
-      nplaq1 = (double)((6 * N0 - 3) * N1) * (double)(N2 * N3);
-      nplaq2 = (double)((6 * N0 - 6) * N1) * (double)(N2 * N3);
-   }
-   else if (bc == 3)
-   {
-      nplaq1 = (double)(6 * N0 * N1) * (double)(N2 * N3);
-      nplaq2 = nplaq1;
-   }
-   else
-   {
-      nplaq1 = (double)((6 * N0 + 3) * N1) * (double)(N2 * N3);
-      nplaq2 = (double)(6 * N0 * N1) * (double)(N2 * N3);
-   }
-
-   d1 = 0.0;
-   d2 = 0.0;
-
-   if (bc == 1)
-   {
-      d1 = cos(phi[0] / (double)(N1)) +
-           cos(phi[1] / (double)(N1)) +
-           cos((phi[0] + phi[1]) / (double)(N1)) +
-           cos(phi[0] / (double)(N2)) +
-           cos(phi[1] / (double)(N2)) +
-           cos((phi[0] + phi[1]) / (double)(N2)) +
-           cos(phi[0] / (double)(N3)) +
-           cos(phi[1] / (double)(N3)) +
-           cos((phi[0] + phi[1]) / (double)(N3));
-
-      d1 = (d1 - 9.0) * (double)(N1 * N2 * N3);
-   }
-
-   if ((bc == 1) || (bc == 2))
-   {
-      d2 = cos(phi_prime[0] / (double)(N1)) +
-           cos(phi_prime[1] / (double)(N1)) +
-           cos((phi_prime[0] + phi_prime[1]) / (double)(N1)) +
-           cos(phi_prime[0] / (double)(N2)) +
-           cos(phi_prime[1] / (double)(N2)) +
-           cos((phi_prime[0] + phi_prime[1]) / (double)(N2)) +
-           cos(phi_prime[0] / (double)(N3)) +
-           cos(phi_prime[1] / (double)(N3)) +
-           cos((phi_prime[0] + phi_prime[1]) / (double)(N3));
-
-      d2 = (d2 - 9.0) * (double)(N1 * N2 * N3);
-   }
-
-   if (my_rank == 0)
-   {
-      printf("After field initialization:\n");
-      printf("Deviation from expected value (plaq_sum)  = %.1e\n",
-             fabs(1.0 - p1 / (3.0 * nplaq1 + d1 + d2)));
-      printf("Deviation from expected value (plaq_wsum) = %.1e\n\n",
-             fabs(1.0 - p2 / (3.0 * nplaq2 + d1 + d2)));
-   }
-
-   
    size_t flush_size = 114 * 4 * 1024 * 1024 / sizeof(double);
    double *flush_buf = malloc(flush_size * sizeof(double));
    
