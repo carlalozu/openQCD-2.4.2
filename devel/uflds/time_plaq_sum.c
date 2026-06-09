@@ -36,10 +36,12 @@
 #define N3 (NPROC3 * L3)
 
 #define WARMUP_ITERS  3
-#define PROFILE_ITERS 20
+#define PROFILE_ITERS 120
 
 int main(int argc, char *argv[])
 {
+   prof_section s_prepare  = {.name = "prepare_data"};
+   prof_section s_upload   = {.name = "upload ufld"};
    prof_section s_kernel  = {.name = "plaq_sum_dble"};
    prof_section s_total   = {.name = "total"};
 
@@ -170,11 +172,17 @@ int main(int argc, char *argv[])
     * ---------------------------------------------------------------------- */
    double result = 0.0;
 
+   prof_reset(&compute);
    for (int count = 0; count < PROFILE_ITERS; count++)
-   {
+   {  
+      prof_begin(&s_prepare);
       random_ud();
+      prof_end(&s_prepare);
       udb = udfld();
+
+      prof_begin(&s_upload);
       #pragma omp target update to(udb[0:4*VOLUME])
+      prof_end(&s_upload);
 
       prof_begin(&s_kernel);
       result = plaq_sum_dble(1);
@@ -199,6 +207,8 @@ int main(int argc, char *argv[])
       printf("Performance per thread for plaq_sum_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
       printf("Result: %f\n\n", result);
 
+      prof_report(&s_prepare);
+      prof_report(&s_upload);
       prof_report(&compute);
       prof_report(&s_kernel);
       prof_report(&s_total);
