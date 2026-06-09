@@ -19,7 +19,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check1 check2 check3 check4 check5 time time_test
+MAIN = check1 check2 check3 check4 check5 time time_test time_plaq_sum time_plaq_dble
 
 DEVFCTS = dutils gtrans
 
@@ -68,7 +68,7 @@ LIBPATH = $(MPI_HOME)/lib
 
 
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
-         -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
+         -fopenmp-targets=nvptx64-nvidia-cuda --offload-arch=sm_90 -Wall -Wno-long-long \
          -Wstrict-prototypes -O -DFMA3 -DPM
 
 LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
@@ -77,6 +77,7 @@ LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
 ############################## do not change ###################################
 
 SHELL=/bin/bash
+CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)
