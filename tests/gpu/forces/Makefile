@@ -17,59 +17,28 @@ all: rmxeq mkdep mkxeq
 
 MAIN = check3
 
-ARCHIVE = archive iodat marchive sarchive
+DEVFCTS = rotud
 
-BLOCK = block blk_grid map_u2blk map_sw2blk map_s2blk
+FLAGS = dfl_parms flags hmc_parms lat_parms
 
-DEVFCTS = dutils gtrans rotud
+FORCES = force0
 
-DFL = dfl_geometry dfl_modes dfl_sap_gcr dfl_subspace ltl_gcr
+LATTICE = bcnds geogen geometry uidx
 
-DIRAC = Dw_dble Dw Dw_bnd
-
-FLAGS = action_parms dfl_parms flags force_parms hmc_parms lat_parms \
-        sap_parms smd_parms solver_parms mdint_parms rat_parms
-
-FORCES = force0 force1 force2 force3 force4 force5 \
-         frcfcts genfrc tmcg tmcgm xtensor
-
-LATTICE = bcnds blk_geometry uidx ftidx geogen geometry
-
-LINALG = salg salg_dble valg valg_dble liealg cmatrix_dble cmatrix
-
-LINSOLV = cgne fgcr fgcr4vd gcr4v mscg
-
-LITTLE = Aw Aw_blk Aw_com1 Aw_com2 Aw_dble Aw_gen Aw_hop Aw_ops \
-         ltl_modes
+LINALG = liealg salg_dble
 
 MDFLDS = mdflds fcom
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
-RATFCTS = elliptic zolotarev ratfcts
-
-SAP = sap_com sap_gcr sap blk_solv
-
-SFLDS = sflds scom sdcom Pbnd Pbnd_dble unorm
-
 SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
-SW_TERM = pauli pauli_dble swalg swexp swflds sw_term
+UFLDS = bstap udcom uflds uinit
 
-TCHARGE = ftcom ftensor
+UTILS = endian error mutils qsum utils wspace
 
-UFLDS = bstap plaq_sum shift udcom uflds uinit
-
-UPDATE = chrono wsize
-
-UTILS = array endian error futils mutils qsum utils wspace
-
-VFLDS = vflds vinit vcom vdcom
-
-MODULES = $(ARCHIVE) $(BLOCK) $(DEVFCTS) $(DFL) $(DIRAC) $(FLAGS) $(FORCES) \
-          $(LATTICE) $(LINALG) $(LINSOLV) $(LITTLE) $(MDFLDS) \
-          $(RANDOM) $(RATFCTS) $(SAP) $(SFLDS) $(SU3FCTS) $(SW_TERM) \
-          $(TCHARGE) $(UFLDS) $(UPDATE) $(UTILS) $(VFLDS)
+MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
+          $(RANDOM) $(SU3FCTS) $(UFLDS) $(UTILS)
 
 
 # search path for modules
@@ -77,12 +46,9 @@ MODULES = $(ARCHIVE) $(BLOCK) $(DEVFCTS) $(DFL) $(DIRAC) $(FLAGS) $(FORCES) \
 MDIR = ../../../modules
 GDIR = ../../../gpu
 
-VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/archive:$(MDIR)/linalg:\
-          $(MDIR)/random:$(MDIR)/uflds:$(MDIR)/mdflds:$(MDIR)/su3fcts:\
-          $(MDIR)/utils:$(MDIR)/forces:$(MDIR)/sflds:$(MDIR)/dirac:\
-	  $(MDIR)/sw_term:$(MDIR)/tcharge:$(MDIR)/block:$(MDIR)/sap:\
-	  $(MDIR)/linsolv:$(MDIR)/dfl:$(MDIR)/vflds:$(MDIR)/little:\
-          $(MDIR)/update:$(MDIR)/ratfcts:$(MDIR)/devfcts
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
+          $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
+          $(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
 
 
 # additional include directories
