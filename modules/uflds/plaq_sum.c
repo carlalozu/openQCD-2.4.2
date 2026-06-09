@@ -64,10 +64,10 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
-prof_section compute = {.name = "compute"};
+prof_section plaq_sum_dble_p = {.name = "plaq_sum_dble"};
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int n,int ix,int (*iup)[4])
+double plaq_dble(su3_dble *udb, int n,int ix,int (*iup)[4])
 {
    int ip[4];
    double sm;
@@ -101,10 +101,11 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udb=udfld();
 
-   prof_begin(&compute);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target enter data map(to: iup)
    #pragma omp target update to(udb[0:4*VOLUME])
+   
+   prof_begin(&plaq_sum_dble_p);
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
    {
@@ -141,8 +142,8 @@ static qflt local_plaq_sum_dble(int iw)
       pa += local_pa;
       
    }
+   prof_end(&plaq_sum_dble_p);
    #pragma omp target update from(pa)
-   prof_end(&compute);
    acc_qflt(pa,rqsm.q);
    return rqsm;
 }

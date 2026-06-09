@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
    prof_section benchmark = {.name = "benchmark"};
    prof_section total = {.name = "total"};
    prof_section prepare_data = {.name = "prepare_data"};
+   prof_section plaq_dble_p = {.name = "plaq_dble"};
 
    int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
@@ -58,7 +59,8 @@ int main(int argc, char *argv[])
    double d1, d2;
    double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
-   
+   static su3_dble *udb;
+
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
    
@@ -66,7 +68,7 @@ int main(int argc, char *argv[])
    prof_begin(&init_program);
    if (my_rank == 0)
    {
-      flog = freopen("time.log", "w", stdout);
+      flog = freopen("time_plaq_dble.log", "w", stdout);
 
       printf("\n");
       printf("Plaquette sums of the double-precision gauge field\n");
@@ -163,33 +165,39 @@ int main(int argc, char *argv[])
    if (nt < 2)
       nt = 2;
    
-   size_t flush_size = 62914560 * 4 / sizeof(double);
-   double *flush_buf = malloc(flush_size * sizeof(double));
-   #pragma omp target enter data map(to : flush_buf[:flush_size])
-   
-   flush_cache(flush_size, flush_buf);
-   random_ud();
+
+   #pragma omp target enter data map(to: iup)
    prof_end(&set_params);
    
-   prof_reset(&compute);
    prof_begin(&benchmark);
    wdti = 0.0;
-   while (wdti < 5.0)
+   double pa, p1=0.0;
+   while (wdti < 10.0)
    {
-      p1 = 0.0;
       wdt = 0.0;
       for (count = 0; count < nt; count++)
       {
          MPI_Barrier(MPI_COMM_WORLD);
          prof_begin(&prepare_data);
          wt0 = MPI_Wtime();
-         flush_cache(flush_size, flush_buf);
+
+         random_ud();
+         udb=udfld();
+         #pragma omp target update to(udb[0:4*VOLUME])
+
          prof_end(&prepare_data);
          
          MPI_Barrier(MPI_COMM_WORLD);
-         // compute profiler defined externally
          wt1 = MPI_Wtime();
-         p1 += plaq_sum_dble(1);
+
+         prof_begin(&plaq_dble_p);
+         pa=0.0;
+         #pragma omp target teams distribute parallel for reduction(+:pa)
+         for (int ix=0;ix<VOLUME;ix++){
+            pa+=plaq_dble(udb,0,ix,iup);
+         }
+         prof_end(&plaq_dble_p);
+
          MPI_Barrier(MPI_COMM_WORLD);
          wt2 = MPI_Wtime();
 
@@ -201,29 +209,28 @@ int main(int argc, char *argv[])
    }
 
    wdt = 2.0 * wdt / ((double)(nt));
-   p1 = 2.0 * p1 / ((double)(nt));
    prof_end(&benchmark);
    prof_end(&total);
 
    if (my_rank == 0)
    {
-      int flops = 432.0 * 6 * VOLUME;
+      int flops = 432 * VOLUME;
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions: %i\n", nt / 2);
-      printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
+      printf("Number of repetitions for final time: %i\n", nt / 2);
+      printf("Average time for plaq_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 
-      printf("Total performance for plaq_sum_dble (GFlops/s): %d\n", (int)(flops * 1e-9 / wdt)); 
-      printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_sum_dble (GFlops/s): %d\n", (int)(flops * 1e-9 / wdt));
-      printf("Result: %f\n\n", p1);
+      printf("Total performance for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / wdt)); 
+      printf("Time per lattice point & thread for plaq_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
+      printf("Performance per thread for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / wdt));
+      printf("Result: %f\n\n", pa);
 
       prof_report(&init_program);
       prof_report(&set_params);
       prof_report(&benchmark);
       prof_report(&prepare_data);
-      prof_report(&compute);
+      prof_report(&plaq_dble_p);
       prof_report(&total);
    }
 

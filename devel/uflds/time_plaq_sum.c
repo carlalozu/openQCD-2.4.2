@@ -38,7 +38,7 @@
 
 void flush_cache(size_t flush_size, double* flush_buf)
 {
-    #pragma omp parallel for schedule(static)
+    #pragma omp target teams distribute parallel for
     for (size_t j = 0; j < flush_size; j++) {
         flush_buf[j] += 1.0; 
     }
@@ -48,13 +48,15 @@ int main(int argc, char *argv[])
 {
    prof_section init_program = {.name = "init_program"};
    prof_section set_params = {.name = "set_params"};
+   prof_section benchmark = {.name = "benchmark"};
    prof_section total = {.name = "total"};
    prof_section prepare_data = {.name = "prepare_data"};
 
-   int my_rank, bc;
+   int my_rank, bc, nt, count;
    double phi[2], phi_prime[2], theta[3];
-   double nplaq1, p1;
+   double nplaq1, nplaq2, p1, p2;
    double d1, d2;
+   double wt0, wt1, wt2, wdt, wdti;
    FILE *flog = NULL;
    
    mpi_init(argc, argv);
@@ -64,7 +66,7 @@ int main(int argc, char *argv[])
    prof_begin(&init_program);
    if (my_rank == 0)
    {
-      flog = freopen("time_test.log", "w", stdout);
+      flog = freopen("time.log", "w", stdout);
 
       printf("\n");
       printf("Plaquette sums of the double-precision gauge field\n");
@@ -95,22 +97,24 @@ int main(int argc, char *argv[])
 
    start_ranlux(0, 12345);
    geometry();
-   prof_end(&set_params);
 
    p1 = plaq_sum_dble(1);
-   // p2 = plaq_wsum_dble(1);
+   p2 = plaq_wsum_dble(1);
 
    if (bc == 0)
    {
       nplaq1 = (double)((6 * N0 - 3) * N1) * (double)(N2 * N3);
+      nplaq2 = (double)((6 * N0 - 6) * N1) * (double)(N2 * N3);
    }
    else if (bc == 3)
    {
       nplaq1 = (double)(6 * N0 * N1) * (double)(N2 * N3);
+      nplaq2 = nplaq1;
    }
    else
    {
       nplaq1 = (double)((6 * N0 + 3) * N1) * (double)(N2 * N3);
+      nplaq2 = (double)(6 * N0 * N1) * (double)(N2 * N3);
    }
 
    d1 = 0.0;
@@ -151,9 +155,55 @@ int main(int argc, char *argv[])
       printf("After field initialization:\n");
       printf("Deviation from expected value (plaq_sum)  = %.1e\n",
              fabs(1.0 - p1 / (3.0 * nplaq1 + d1 + d2)));
+      printf("Deviation from expected value (plaq_wsum) = %.1e\n\n",
+             fabs(1.0 - p2 / (3.0 * nplaq2 + d1 + d2)));
    }
-   prof_end(&total);
+
+   nt = (int)(1.0e6 / (double)(VOLUME));
+   if (nt < 2)
+      nt = 2;
    
+   size_t flush_size = 62914560 * 4 / sizeof(double);
+   double *flush_buf = malloc(flush_size * sizeof(double));
+   #pragma omp target enter data map(to : flush_buf[:flush_size])
+   
+   flush_cache(flush_size, flush_buf);
+   random_ud();
+   prof_end(&set_params);
+   
+   prof_reset(&plaq_sum_dble_p);
+   prof_begin(&benchmark);
+   wdti = 0.0;
+   while (wdti < 5.0)
+   {
+      p1 = 0.0;
+      wdt = 0.0;
+      for (count = 0; count < nt; count++)
+      {
+         MPI_Barrier(MPI_COMM_WORLD);
+         prof_begin(&prepare_data);
+         wt0 = MPI_Wtime();
+         flush_cache(flush_size, flush_buf);
+         prof_end(&prepare_data);
+         
+         MPI_Barrier(MPI_COMM_WORLD);
+         // compute profiler defined externally
+         wt1 = MPI_Wtime();
+         p1 += plaq_sum_dble(1);
+         MPI_Barrier(MPI_COMM_WORLD);
+         wt2 = MPI_Wtime();
+
+         wdt += wt2 - wt1;
+         wdti += wt2 - wt0;
+      }
+
+      nt *= 2;
+   }
+
+   wdt = 2.0 * wdt / ((double)(nt));
+   p1 = 2.0 * p1 / ((double)(nt));
+   prof_end(&benchmark);
+   prof_end(&total);
 
    if (my_rank == 0)
    {
@@ -161,11 +211,17 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
+      printf("Number of repetitions for final time: %i\n", nt / 2);
+      printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 
+      printf("Total performance for plaq_sum_dble (GFlops/s): %d\n", (int)(flops * 1e-9 / wdt)); 
+      printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
+      printf("Performance per thread for plaq_sum_dble (GFlops/s): %d\n", (int)(flops * 1e-9 / wdt));
       printf("Result: %f\n\n", p1);
 
       prof_report(&init_program);
       prof_report(&set_params);
+      prof_report(&benchmark);
       prof_report(&prepare_data);
       prof_report(&plaq_sum_dble_p);
       prof_report(&total);

@@ -27,6 +27,7 @@ extern void set_bstap(void);
 /* PLAQ_SUM_C */
 extern double plaq_sum_dble(int icom);
 extern double plaq_wsum_dble(int icom);
+extern double plaq_dble(su3_dble *udb, int n,int ix,int (*iup)[4]);
 extern double plaq_action_slices(double *asl);
 
 /* SHIFT_C */
@@ -43,8 +44,7 @@ extern void set_ud_phase(void);
 extern void unset_ud_phase(void);
 extern void renormalize_ud(void);
 extern void assign_ud2u(void);
-extern prof_section compute;
-
+extern prof_section plaq_sum_dble_p;
 
 /* UINIT_C */
 extern void set_u2unity(int vol,int icom,su3 *u);
