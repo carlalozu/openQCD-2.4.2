@@ -87,8 +87,8 @@ TEST(PlaqSum, UnitField)
    exp1=3.0*nplaq1_g+d1_g+d2_g;
    exp2=3.0*nplaq2_g+d1_g+d2_g;
 
-   EXPECT_NEAR(p1, exp1, 1.0e-10*fabs(exp1)+1.0e-14);
-   EXPECT_NEAR(p2, exp2, 1.0e-10*fabs(exp2)+1.0e-14);
+   EXPECT_NEAR(p1, exp1, 1.0e-15*fabs(exp1)+1.0e-14);
+   EXPECT_NEAR(p2, exp2, 1.0e-15*fabs(exp2)+1.0e-14);
 }
 
 
@@ -97,13 +97,17 @@ TEST(PlaqSum, ActionSlices)
    int t;
    double p2,act1,sum,d;
    double asl[N0];
+   static su3_dble *udb;
+   udb=udfld();
 
    random_ud();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+
    p2=plaq_wsum_dble(1);
    act1=plaq_action_slices(asl);
 
    /* act1 must equal 2*(3*nplaq2 - p2) */
-   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), 1.0e-10*fabs(act1)+1.0e-14);
+   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), 1.0e-15*fabs(act1)+1.0e-14);
 
    /* for bc==0 or bc==3 act1 must equal the sum of slices */
    if ((bc_g==0)||(bc_g==3))
@@ -121,14 +125,19 @@ TEST(PlaqSum, GaugeInvariance)
    int t;
    double p1,p2,act1,d1,d2,d3;
    double asl1[N0],asl2[N0];
+   static su3_dble *udb;
+   udb=udfld();
 
    random_ud();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+
    p1=plaq_sum_dble(1);
    p2=plaq_wsum_dble(1);
    plaq_action_slices(asl1);
 
    random_gtrans();
    apply_gtrans2ud();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
 
    d1=fabs(p1-plaq_sum_dble(1));
    d2=fabs(p2-plaq_wsum_dble(1));
@@ -136,9 +145,9 @@ TEST(PlaqSum, GaugeInvariance)
    d3=0.0;
    for (t=0;t<N0;t++) d3+=fabs(asl1[t]-asl2[t]);
 
-   EXPECT_NEAR(d1, 0.0, 1.0e-10*fabs(p1)+1.0e-14);
-   EXPECT_NEAR(d2, 0.0, 1.0e-10*fabs(p2)+1.0e-14);
-   EXPECT_NEAR(d3, 0.0, 1.0e-10*fabs(p1)*(double)(N0)+1.0e-14);
+   EXPECT_NEAR(d1, 0.0, 1.0e-15*fabs(p1)+1.0e-14);
+   EXPECT_NEAR(d2, 0.0, 1.0e-15*fabs(p2)+1.0e-14);
+   EXPECT_NEAR(d3, 0.0, 1.0e-15*fabs(p1)*(double)(N0)+1.0e-14);
 }
 
 
@@ -147,8 +156,12 @@ TEST(PlaqSum, TranslationInvariance)
    int n,t,s[4];
    double p1,p2,act1,d1,d2,d3;
    double asl1[N0],asl2[N0];
+   static su3_dble *udb;
+   udb=udfld();
 
    random_ud();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+
    p1=plaq_sum_dble(1);
    p2=plaq_wsum_dble(1);
    plaq_action_slices(asl1);
@@ -157,6 +170,7 @@ TEST(PlaqSum, TranslationInvariance)
    {
       random_shift(s);
       shift_ud(s);
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
 
       d1=fabs(p1-plaq_sum_dble(1));
       d2=fabs(p2-plaq_wsum_dble(1));
@@ -167,9 +181,9 @@ TEST(PlaqSum, TranslationInvariance)
       for (t=0;t<N0;t++)
          asl1[t]=asl2[t];
 
-      EXPECT_NEAR(d1, 0.0, 1.0e-10*fabs(p1)+1.0e-14);
-      EXPECT_NEAR(d2, 0.0, 1.0e-10*fabs(p2)+1.0e-14);
-      EXPECT_NEAR(d3, 0.0, 1.0e-10*fabs(p1)*(double)(N0)+1.0e-14);
+      EXPECT_NEAR(d1, 0.0, 1.0e-15*fabs(p1)+1.0e-14);
+      EXPECT_NEAR(d2, 0.0, 1.0e-15*fabs(p2)+1.0e-14);
+      EXPECT_NEAR(d3, 0.0, 1.0e-15*fabs(p1)*(double)(N0)+1.0e-14);
    }
 }
 
@@ -177,15 +191,19 @@ TEST(PlaqSum, TranslationInvariance)
 TEST(PlaqSum, SumVsWsum)
 {
    double p1,p2,expected;
+   static su3_dble *udb;
+   udb=udfld();
 
    if (bc_g!=1) return;
 
    random_ud();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+
    p1=plaq_sum_dble(1);
    p2=plaq_wsum_dble(1);
    expected=p1-9.0*(double)(N1*N2*N3);
 
-   EXPECT_NEAR(p2, expected, 1.0e-10*fabs(p1)+1.0e-14);
+   EXPECT_NEAR(p2, expected, 1.0e-15*fabs(p1)+1.0e-14);
 }
 
 

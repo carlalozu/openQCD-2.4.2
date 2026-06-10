@@ -57,17 +57,15 @@
 #include "lattice.h"
 #include "uflds.h"
 #include "global.h"
-#include "profiler.h"
 
 #define N0 (NPROC0*L0)
 
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
-prof_section compute = {.name = "local_plaq_sum_dble"};
 
-#pragma omp declare target
-double plaq_dble(su3_dble *udb, int n,int ix)
+
+static double plaq_dble(int n,int ix)
 {
    int ip[4];
    double sm;
@@ -82,16 +80,15 @@ double plaq_dble(su3_dble *udb, int n,int ix)
 
    return sm;
 }
-#pragma omp end declare target
 
 
 static qflt local_plaq_sum_dble(int iw)
 {
-   int k,ix,t,n;
+   int bc,k,ix,t,n;
    double wp,pa;
    qflt rqsm;
 
-   int bc=bc_type();
+   bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -101,26 +98,26 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udb=udfld();
-   prof_begin(&compute);
-   #pragma omp parallel private(k,ix,t,n,pa)
+
+#pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    {
       k=omp_get_thread_num();
 
-      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+      for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
       {
-         pa=0.0;
          t=global_time(ix);
+         pa=0.0;
 
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               pa+=plaq_dble(udb,n,ix);
+               pa+=plaq_dble(n,ix);
          }
 
          if (((t>0)&&(t<(N0-1)))||(bc==3))
          {
             for (n=3;n<6;n++)
-               pa+=plaq_dble(udb,n,ix);
+               pa+=plaq_dble(n,ix);
          }
          else if ((t==0)||(bc==0))
          {
@@ -129,21 +126,21 @@ static qflt local_plaq_sum_dble(int iw)
             else
             {
                for (n=3;n<6;n++)
-                  pa+=wp*plaq_dble(udb,n,ix);
+                  pa+=wp*plaq_dble(n,ix);
             }
          }
          else
          {
             for (n=3;n<6;n++)
-               pa+=plaq_dble(udb,n,ix);
+               pa+=plaq_dble(n,ix);
+
             pa+=wp*9.0;
          }
 
-         #pragma omp critical
          acc_qflt(pa,rqsm.q);
       }
    }
-   prof_end(&compute);
+
    return rqsm;
 }
 
@@ -228,13 +225,13 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb,n,ix));
+               smE+=(3.0-plaq_dble(n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(udb,n,ix));
+               smB+=(3.0-plaq_dble(n,ix));
          }
 
          acc_qflt(smE,rqsmE[t].q);
