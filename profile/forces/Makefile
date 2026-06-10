@@ -23,9 +23,13 @@ FORCES = force0
 
 LATTICE = bcnds geogen geometry uidx
 
+LINALG = liealg salg_dble
+
 MDFLDS = mdflds fcom
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
+
+SFLDS = sflds
 
 SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
@@ -33,8 +37,8 @@ UFLDS = bstap udcom uflds uinit
 
 UTILS = endian error mutils qsum utils wspace
 
-MODULES = $(FLAGS) $(FORCES) $(LATTICE) $(MDFLDS) $(RANDOM) \
-          $(SU3FCTS) $(UFLDS) $(UTILS)
+MODULES = $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) $(RANDOM) \
+          $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
 
 
 # search path for modules
@@ -43,8 +47,8 @@ MDIR = ../../modules
 GDIR = ../../gpu
 
 VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/flags:$(MDIR)/forces:\
-          $(MDIR)/lattice:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
+          $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
 
 
 # additional include directories

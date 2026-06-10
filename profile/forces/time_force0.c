@@ -22,6 +22,7 @@
 #include "uflds.h"
 #include "mdflds.h"
 #include "forces.h"
+#include "linalg.h"
 #include "global.h"
 #include "profiler.h"
 
@@ -42,6 +43,8 @@ int main(int argc, char *argv[])
    int my_rank, bc, iact;
    double phi[2], phi_prime[2], theta[3];
    FILE *flog = NULL;
+   qflt rqsm;
+   mdflds_t *mdfs;
 
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -86,6 +89,7 @@ int main(int argc, char *argv[])
 
    start_ranlux(0, 12345);
    geometry();
+   mdfs=mdflds();
 
    /* -------------------------------------------------------------------------
     * Warmup: randomise field and call force0 without recording.
@@ -115,22 +119,29 @@ int main(int argc, char *argv[])
       prof_begin(&s_kernel);
       force0(1.0);
       prof_end(&s_kernel);
-   }
 
+   }
+   
+   rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
    prof_end(&s_total);
 
    if (my_rank == 0)
    {
+      /* 6 planes × (3 su3prod@198 + 3 prod2su3alg@216 + 4 alg_mul@16) per site, c0=1.0 bulk */
+      long long flops = 7836LL * VOLUME;
       double avg_time = s_kernel.total / (double)s_kernel.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / 1024));
       printf("Local size of the force field  (KB): %d\n", (int)((64 * VOLUME * sizeof(double)) / 1024));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions for final time: %i\n", s_kernel.count);
+      printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
       printf("Average time for force0 (sec): %.9f\n", avg_time);
+      printf("Flops (approx, c0=1.0): %lld\n", flops);
+      printf("Total performance for force0 (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
       printf("Time per lattice point & thread for force0 (sec): %.9f\n",
              avg_time / (double)VOLUME_TRD);
+      printf("Result: %f\n\n", rqsm.q[0]);
 
       prof_report(&s_prepare);
       prof_report(&s_kernel);

@@ -127,7 +127,6 @@ int main(int argc, char *argv[])
       printf("Flops: %d\n", flops); 
       printf("Total performance for plaq_sum_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / wdt));
       printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", wdt/((double)(VOLUME_TRD)));
-      printf("Performance per thread for plaq_sum_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / wdt));
       printf("Result: %f\n\n", p1);
 
       prof_report(&init_program);
