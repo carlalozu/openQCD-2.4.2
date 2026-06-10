@@ -1,10 +1,10 @@
 ################################################################################
 #
-# Makefile for tests/gpu/forces
+# Makefile for profile/forces
 #
-# Unit tests for force0() and action0().
+# Profiling programs for force0().
 #
-# "make"       compiles and links all check programs
+# "make"       compiles and links all programs
 # "make clean" removes all generated files
 #
 ################################################################################
@@ -15,9 +15,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check3
-
-DEVFCTS = rotud
+MAIN = time_force0
 
 FLAGS = action_parms dfl_parms flags hmc_parms lat_parms rat_parms smd_parms
 
@@ -25,37 +23,33 @@ FORCES = force0
 
 LATTICE = bcnds geogen geometry uidx
 
-LINALG = liealg salg_dble
-
 MDFLDS = mdflds fcom
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
 SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
-SFLDS = sflds
-
 UFLDS = bstap udcom uflds uinit
 
 UTILS = endian error mutils qsum utils wspace
 
-MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
-          $(RANDOM) $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
+MODULES = $(FLAGS) $(FORCES) $(LATTICE) $(MDFLDS) $(RANDOM) \
+          $(SU3FCTS) $(UFLDS) $(UTILS)
 
 
 # search path for modules
 
-MDIR = ../../../modules
-GDIR = ../../../gpu
+MDIR = ../../modules
+GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
-          $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/flags:$(MDIR)/forces:\
+          $(MDIR)/lattice:$(MDIR)/mdflds:$(MDIR)/random:\
+          $(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
 
 
 # additional include directories
 
-INCPATH = $(MPI_INCLUDE) ../../../include ../..
+INCPATH = $(MPI_INCLUDE) ../../include
 
 
 # additional libraries

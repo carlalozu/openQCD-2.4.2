@@ -588,21 +588,20 @@ void force0(double c)
    }
    bcp=bc_parms();
 
-   prof_begin(&force0_part_p);
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
-
-// #pragma omp parallel private(k,isb,ofs_pt,vol)
-
+   
+   prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
    for (int ix=0;ix<VOLUME/2;ix++)
    {
       force0_part(udb,hdb,fdb,lat,bcp,ix,c);
       force0_part(udb,hdb,fdb,lat,bcp,ix+(VOLUME/2),c);
    }
+   prof_end(&force0_part_p);
+
    #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
    add_bnd_frc();
-   prof_end(&force0_part_p);
 }
 
 
