@@ -162,9 +162,9 @@ void random_ud(void)
 {
    int bc;
    int k,t,ifc,mu,ix;
-   su3_dble *ub;
+   su3_dble *ud;
 
-   ub=udfld();
+   ud=udfld();
    bc=bc_type();
 
 #pragma omp parallel private(k,ix,t,ifc,mu)
@@ -230,6 +230,8 @@ void random_ud_reproducible(void)
 
    if (udb==NULL)
       alloc_ud();
+
+   ud=udfld();
 
    bc=bc_type();
 
