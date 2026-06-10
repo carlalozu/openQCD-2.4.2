@@ -17,11 +17,17 @@
 #include "su3.h"
 #endif
 
+#include "profiler.h"
+
+
 /* BSTAP_C */
 extern su3_dble *bstap(void);
 extern void set_bstap(void);
 
 /* PLAQ_SUM_C */
+#ifndef PLAQ_SUM_C
+extern double plaq_dble(su3_dble *udb, int n,int ix);
+#endif
 extern double plaq_sum_dble(int icom);
 extern double plaq_wsum_dble(int icom);
 extern double plaq_action_slices(double *asl);
@@ -36,10 +42,13 @@ extern void copy_bnd_ud(void);
 extern su3 *ufld(void);
 extern su3_dble *udfld(void);
 extern void random_ud(void);
+extern void random_ud_reproducible(void);
 extern void set_ud_phase(void);
 extern void unset_ud_phase(void);
 extern void renormalize_ud(void);
 extern void assign_ud2u(void);
+extern prof_section compute;
+
 
 /* UINIT_C */
 extern void set_u2unity(int vol,int icom,su3 *u);

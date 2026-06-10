@@ -185,6 +185,7 @@ void set_sbofs(void)
       for (ic=0;ic<ib;ic++)
          sbofs[ib]+=sbvol[ic];
    }
+   #pragma omp target update to(sbofs[:16], sbvol[:16])
 }
 
 
@@ -272,6 +273,7 @@ void set_iupdn(void)
                idn[ix][3]=VOLUME;
          }
       }
+      #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
    }
 }
 

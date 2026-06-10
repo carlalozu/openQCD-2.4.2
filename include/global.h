@@ -37,6 +37,7 @@
 
 #define NAME_SIZE 128
 
+
 /****************************** do not change *********************************/
 
 #if ((NPROC0<1)||(NPROC1<1)||(NPROC2<1)||(NPROC3<1)|| \
@@ -82,6 +83,7 @@
 #define ALIGN 6
 
 #if defined MAIN_PROGRAM
+#pragma omp declare target
 int cpr[4];
 int npr[8];
 int sbofs[16];
@@ -91,7 +93,9 @@ int *ipt=NULL;
 int (*iup)[4]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
+#pragma omp end declare target
 #else
+#pragma omp declare target
 extern int cpr[4];
 extern int npr[8];
 extern int sbofs[16];
@@ -101,6 +105,7 @@ extern int *ipt;
 extern int (*iup)[4];
 extern int (*idn)[4];
 extern int *map;
+#pragma omp end declare target
 #endif
 
 #endif

@@ -65,7 +65,11 @@
 #include "forces.h"
 #include "update.h"
 #include "global.h"
+#include "profiler.h"
 
+prof_section start_hmc_p = {.name = "start_hmc", .level=1};
+prof_section run_mdint_p = {.name = "run_mdint", .level=1};
+prof_section end_hmc_p = {.name = "end_hmc", .level=1};
 
 static void start_hmc(qflt *act0,su3_dble *uold,su3_dble *ubnd)
 {
@@ -306,11 +310,19 @@ int run_hmc(qflt *act0,qflt *act1)
 
    uold=reserve_wud(1);
 
+   prof_begin(&start_hmc_p);
    start_hmc(act0,uold[0],ubnd);
+   prof_end(&start_hmc_p);
+
+   prof_begin(&run_mdint_p);
    run_mdint();
+   prof_end(&run_mdint_p);
+
+   prof_begin(&end_hmc_p);
    end_hmc(act1);
    iac=accept_hmc(act0,act1,uold[0],ubnd);
-
+   prof_end(&end_hmc_p);
+   
    release_wud();
 
    return iac;

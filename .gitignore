@@ -39,3 +39,9 @@
 
 # debug information files
 *.dwo
+
+# Output
+*.log
+*.csv
+output/*
+data/*

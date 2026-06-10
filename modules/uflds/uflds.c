@@ -92,7 +92,7 @@ typedef union
 static complex_dble phase[3] ALIGNED16 ={{0.0,0.0}};
 static su3 *ub=NULL;
 static su3_dble *udb=NULL;
-
+static int udb_size=0;
 
 static void alloc_u(void)
 {
@@ -135,6 +135,7 @@ static void alloc_ud(void)
 
    if ((cpr[0]==(NPROC0-1))&&((bc==1)||(bc==2)))
       n+=3;
+   udb_size=n;
 
    udb=amalloc(n*sizeof(*udb),ALIGN);
    error(udb==NULL,1,"alloc_ud [uflds.c]",
@@ -144,6 +145,7 @@ static void alloc_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
+   #pragma omp target enter data map(to: udb[:n])
 }
 
 
@@ -211,6 +213,36 @@ void random_ud(void)
                random_su3_dble(ud);
                ud+=1;
             }
+         }
+      }
+   }
+
+   set_flags(UPDATED_UD);
+   set_flags(UNSET_UD_PHASE);
+   set_bc();
+}
+
+
+void random_ud_reproducible(void)
+{
+   int bc;
+   int k,ix,t,ifc;
+   su3_dble *ud;
+
+   if (udb==NULL)
+      alloc_ud();
+
+   bc=bc_type();
+
+#pragma omp parallel private(k,ix,t,ifc,ud)
+   {
+      k=omp_get_thread_num();
+      for (int iy=0;iy<VOLUME;iy++){
+         for (int mu = 0; mu < 4; mu++) {
+            ix=ipt[iy];
+            t=global_time(ix);
+            ifc=offset(ix,mu);
+            random_su3_dble(udb+ifc);
          }
       }
    }
