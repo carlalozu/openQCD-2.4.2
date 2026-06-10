@@ -63,10 +63,13 @@ TEST(CpuVsGpu, PlaqSum)
 {
    int n;
    double p_gpu,p_ref;
+   static su3_dble *udb;
+   udb=udfld();
 
    for (n=0;n<4;n++)
    {
       random_ud();
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
       p_gpu=plaq_sum_dble(1);
       p_ref=serial_plaq_sum_ref();
       EXPECT_NEAR(p_gpu, p_ref, TOL*fabs(p_ref)+1.0e-14);
@@ -78,11 +81,14 @@ TEST(CpuVsGpu, PlaqWsum)
 {
    int n;
    double p_wsum,p_ref;
+   static su3_dble *udb;
+   udb=udfld();
 
    /* for bc==3, plaq_wsum_dble == plaq_sum_dble (no boundary weighting) */
    for (n=0;n<4;n++)
    {
       random_ud();
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
       p_wsum=plaq_wsum_dble(1);
       p_ref=serial_plaq_sum_ref();
       EXPECT_NEAR(p_wsum, p_ref, TOL*fabs(p_ref)+1.0e-14);
