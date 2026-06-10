@@ -38,6 +38,7 @@ static qflt dSdt(double c)
    mdfs=mdflds();
    check_active((*mdfs).mom);
 
+   // force0 runs on the GPU
    force0(c);
    check_active((*mdfs).frc);
 
@@ -75,7 +76,7 @@ static double chk_chs(double c)
 TEST(Force0, PhaseInvariance)
 {
    double dev=chk_chs(c_g);
-   EXPECT_NEAR(dev, 0.0, 1.0e-10);
+   EXPECT_NEAR(dev, 0.0, 1.0e-12);
 }
 
 
@@ -85,6 +86,7 @@ TEST(Force0, ForceVsActionDerivative)
    double eps,dev_frc,sig_loss;
    qflt dsdt,act,act0,act1;
 
+   // action0 runs on the CPU
    for (k=0;k<4;k++)
    {
       random_ud();
@@ -122,6 +124,7 @@ TEST(Force0, ForceVsActionDerivative)
       sig_loss=-log10(fabs(act.q[0]/act0.q[0]));
 
       scl_qflt(-1.0/eps,act.q);
+      printf("dsdt.q: %f, act.q: %f \n", dsdt.q[0], act.q[0]);
       add_qflt(dsdt.q,act.q,act.q);
       dev_frc=act.q[0]/dsdt.q[0];
 
@@ -129,7 +132,9 @@ TEST(Force0, ForceVsActionDerivative)
       ie=check_bc(0.0);
 
       EXPECT_EQ(ie, 1);
-      EXPECT_NEAR(fabs(dev_frc), 0.0, pow(10.0, -(10.0-sig_loss)));
+      // machine precission minus significant loss as an approximate of finite
+      // differences and volume
+      EXPECT_NEAR(fabs(dev_frc), 0.0, pow(10.0, -(15.0-sig_loss)));
    }
 }
 
