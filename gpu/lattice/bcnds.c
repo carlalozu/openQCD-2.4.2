@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 *
-* File bcndsv.c
+* File bcnds.c
 *
 * Copyright (C) 2005, 2010-2014, 2021 Martin Luescher, John Bulava
 *
