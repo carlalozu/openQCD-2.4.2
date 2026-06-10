@@ -65,6 +65,7 @@
 #include "forces.h"
 #include "global.h"
 #include "profiler.h"
+#include "su3_alg_ops.h"
 
 #define N0 (NPROC0*L0)
 
