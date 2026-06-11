@@ -1,8 +1,8 @@
 ################################################################################
 #
-# Makefile for tests/gpu/uflds
+# Makefile for tests/gpu/forces
 #
-# Unit tests for the GPU-offloaded plaquette-sum routines in modules/uflds/.
+# Unit tests for force0() and action0().
 #
 # "make"       compiles and links all check programs
 # "make clean" removes all generated files
@@ -15,38 +15,47 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check4 check5
+MAIN = check3
 
-DEVFCTS = dutils gtrans
+DEVFCTS = rotud
 
-FLAGS = flags lat_parms dfl_parms
+FLAGS = action_parms dfl_parms flags hmc_parms lat_parms rat_parms smd_parms
+
+FORCES = force0
 
 LATTICE = bcnds geogen geometry uidx
 
+LINALG = liealg salg_dble
+
+MDFLDS = mdflds fcom
+
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
-SU3FCTS = su3prod su3ren cm3x3 random_su3
+SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
-UFLDS = bstap plaq_sum shift udcom uflds uinit
+SFLDS = sflds
+
+UFLDS = bstap udcom uflds uinit
 
 UTILS = endian error mutils qsum utils wspace
 
-MODULES = $(DEVFCTS) $(FLAGS) $(LATTICE) $(RANDOM) $(UFLDS) \
-          $(SU3FCTS) $(UTILS)
+MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
+          $(RANDOM) $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
 
 
 # search path for modules
 
-MDIR = ../../../modules
-GDIR = ../../../gpu
+MDIR = ../../modules
+GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
-          $(MDIR)/uflds:$(MDIR)/su3fcts:$(MDIR)/utils
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
+          $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
 
 
 # additional include directories
 
-INCPATH = $(MPI_INCLUDE) ../../../include ../..
+INCPATH = $(MPI_INCLUDE) ../../include ..
 
 
 # additional libraries
