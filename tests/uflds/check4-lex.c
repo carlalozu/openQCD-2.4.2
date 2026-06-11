@@ -122,72 +122,12 @@ TEST(PlaqSum, ActionSlices)
 
 TEST(PlaqSum, GaugeInvariance)
 {
-   int t;
-   double p1,p2,d1,d2,d3;
-   double asl1[N0],asl2[N0];
-   static su3_dble *udb;
-   udb=udfld();
-
-   random_ud();
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-
-   p1=plaq_sum_dble(1);
-   p2=plaq_wsum_dble(1);
-   plaq_action_slices(asl1);
-
-   random_gtrans();
-   apply_gtrans2ud();
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-
-   d1=fabs(p1-plaq_sum_dble(1));
-   d2=fabs(p2-plaq_wsum_dble(1));
-   plaq_action_slices(asl2);
-   d3=0.0;
-   for (t=0;t<N0;t++) d3+=fabs(asl1[t]-asl2[t]);
-   d3 = d3/(double)(N0);
-
-   EXPECT_NEAR(d1, 0.0, 1.0e-14*fabs(p1));
-   EXPECT_NEAR(d2, 0.0, 1.0e-14*fabs(p2));
-   EXPECT_NEAR(d3, 0.0, 1.0e-14*fabs(d3));
+   SKIP_TEST("apply_gtrans2ud() is not available in lexicographical data layout");
 }
-
 
 TEST(PlaqSum, TranslationInvariance)
 {
-   int n,t,s[4];
-   double p1,p2,d1,d2,d3;
-   double asl1[N0],asl2[N0];
-   static su3_dble *udb;
-   udb=udfld();
-
-   random_ud();
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-
-   p1=plaq_sum_dble(1);
-   p2=plaq_wsum_dble(1);
-   plaq_action_slices(asl1);
-
-   for (n=0;n<8;n++)
-   {
-      random_shift(s);
-      shift_ud(s);
-      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-
-      d1=fabs(p1-plaq_sum_dble(1));
-      d2=fabs(p2-plaq_wsum_dble(1));
-      plaq_action_slices(asl2);
-      d3=0.0;
-      for (t=0;t<N0;t++)
-         d3+=fabs(asl1[safe_mod(t-s[0],N0)]-asl2[t]);
-      d3 = d3/(double)(N0);
-
-      for (t=0;t<N0;t++)
-         asl1[t]=asl2[t];
-
-      EXPECT_NEAR(d1, 0.0, 1.0e-14*fabs(p1));
-      EXPECT_NEAR(d2, 0.0, 1.0e-14*fabs(p2));
-      EXPECT_NEAR(d3, 0.0, 1.0e-14*fabs(d3));
-   }
+   SKIP_TEST("shift_ud() is not available in lexicographical data layout");
 }
 
 

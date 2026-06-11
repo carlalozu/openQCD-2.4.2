@@ -128,6 +128,7 @@ static void set_tms(void)
 
 void geometry(void)
 {
+   printf("Using lexicogaphical layout. \n");
    if (ipt==NULL)
    {
       set_cpr();
