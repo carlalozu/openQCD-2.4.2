@@ -1,11 +1,10 @@
 ################################################################################
 #
 # Makefile to compile and profile uflds routines within OpenQCD using OpenMP 
-# Clang offlaoding
+# Clang offloading with lexicographical data layout
 #
-#
-# "make -f Makefile.gpu"       compiles and links profile programs
-# "make -f Makefile.gpu clean" removes all generated files
+# "make -f Makefile.gpu-lex"       compiles and links profile programs
+# "make -f Makefile.gpu-lex clean" removes all generated files
 #
 #
 ################################################################################
@@ -46,7 +45,7 @@ LOGOPTION =
 MDIR = ../../modules
 GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
+VPATH = .:$(GDIR)/uflds:$(GDIR)/lattice:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
           $(MDIR)/uflds:$(MDIR)/su3fcts:$(MDIR)/utils
 
 
@@ -85,19 +84,19 @@ PGMS= $(MAIN) $(MODULES)
 
 # rule to make dependencies
 
-$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.gpu
+$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.gpu-lex
 	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
 
-$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.gpu
+$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.gpu-lex
 	$(CC) $< -c $(CFLAGS) $(LOGOPTION) $(addprefix -I,$(INCPATH))
 
 
 # rule to link object files
 
-$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.gpu
+$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.gpu-lex
 	$(CLINKER) $< $(addsuffix .o,$(MODULES)) $(LFLAGS) $(LOGOPTION) \
         $(addprefix -L,$(LIBPATH)) $(addprefix -l,$(LIBS)) -o $@
 
