@@ -78,9 +78,9 @@ int main(int argc, char *argv[])
    phi[1] = -0.534;
    phi_prime[0] = 0.912;
    phi_prime[1] = 0.078;
-   theta[0] = 0.0;
-   theta[1] = 0.0;
-   theta[2] = 0.0;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
    set_bc_parms(bc, 1.0, 1.0, 1.0, 1.0, phi, phi_prime, theta);
    print_bc_parms(0x0);
 
