@@ -66,8 +66,9 @@ static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
 prof_section compute = {.name = "local_plaq_sum_dble"};
 
+
 #pragma omp declare target
-double plaq_dble(su3_dble *udb, int n,int ix)
+static double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
@@ -83,6 +84,16 @@ double plaq_dble(su3_dble *udb, int n,int ix)
    return sm;
 }
 #pragma omp end declare target
+
+
+double local_plaq_dble(int n){
+   udb=udfld();
+   double pa;
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (int ix = 0; ix < VOLUME; ix++){
+         pa += plaq_dble(udb, n, ix);}
+   return pa;
+}
 
 
 static qflt local_plaq_sum_dble(int iw)
