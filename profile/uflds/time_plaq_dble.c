@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
    {
 
       printf("\n");
-      printf("Plaquette sums of the double-precision gauge field\n");
-      printf("--------------------------------------------------\n\n");
+      printf("Plaquette action (plaq_dble) of the double-precision gauge field\n");
+      printf("--------------------------------------------------------------\n\n");
 
       print_lattice_sizes();
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
    double pa_warm;
    for (count = 0; count < WARMUP_ITERS; count++)
    {
-      random_ud();
+      random_ud_reproducible();
       pa_warm = local_plaq_dble(0);
       (void)pa_warm;
    }
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
    {
       MPI_Barrier(MPI_COMM_WORLD);
       prof_begin(&s_prepare);
-      random_ud();
+      random_ud_reproducible();
       prof_end(&s_prepare);
       
       prof_begin(&s_upload);

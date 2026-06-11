@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
    {
 
       printf("\n");
-      printf("Plaquette sums of the double-precision gauge field\n");
-      printf("--------------------------------------------------\n\n");
+      printf("Total plaquette action (plaq_sum) of the double-precision gauge field\n");
+      printf("-------------------------------------------------------------------\n\n");
 
       print_lattice_sizes();
 
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
    for (int count = 0; count < WARMUP_ITERS; count++)
    {
-      random_ud();
+      random_ud_reproducible();
       (void)plaq_sum_dble(1);
    }
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
    for (int count = 0; count < PROFILE_ITERS; count++)
    {  
       prof_begin(&s_prepare);
-      random_ud();
+      random_ud_reproducible();
       prof_end(&s_prepare);
       
       prof_begin(&s_upload);
