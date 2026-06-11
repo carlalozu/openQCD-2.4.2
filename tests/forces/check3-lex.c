@@ -31,33 +31,21 @@
 static double c_g=0.789;
 
 
-static qflt dSdt(double c)
+
+TEST(Force0, NormSquareForce)
 {
+   qflt nrm_sq;
    mdflds_t *mdfs;
-
+   
    mdfs=mdflds();
-   check_active((*mdfs).mom);
-
-   // force0 runs on the GPU
-   force0(c);
-   check_active((*mdfs).frc);
-
-   return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
-}
-
-
-TEST(Force0, RunForce)
-{
-   int k,ie;
-   double eps,dev_frc,sig_loss;
-   qflt dsdt,act,act0,act1;
-
+   
    random_ud_reproducible();
-   random_mom();
-   dsdt=dSdt(c_g);
+   force0(c_g);
+   check_active((*mdfs).frc);
+   nrm_sq = norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
 
-   MT_PRINT("dSdt: %f", fabs(dsdt.q[0]));
-   EXPECT_TRUE(fabs(dsdt.q[0])>0);
+   MT_PRINT("norm square frc: %f", fabs(nrm_sq.q[0]));
+   EXPECT_TRUE(fabs(nrm_sq.q[0])>0);
 }
 
 TEST(Force0, PhaseInvariance)
@@ -73,7 +61,7 @@ TEST(Force0, ForceVsActionDerivative)
 
 
 static mt_test_t tests[] = {
-   MT_TEST(Force0, RunForce),
+   MT_TEST(Force0, NormSquareForce),
    MT_TEST(Force0, PhaseInvariance),
    MT_TEST(Force0, ForceVsActionDerivative),
 };

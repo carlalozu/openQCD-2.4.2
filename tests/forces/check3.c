@@ -72,6 +72,22 @@ static double chk_chs(double c)
    return sqrt(dev);
 }
 
+TEST(Force0, NormSquareForce)
+{
+   qflt nrm_sq;
+   mdflds_t *mdfs;
+   
+   mdfs=mdflds();
+   
+   random_ud_reproducible();
+   force0(c_g);
+   check_active((*mdfs).frc);
+   nrm_sq = norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
+
+   MT_PRINT("norm square frc: %f", fabs(nrm_sq.q[0]));
+   EXPECT_TRUE(fabs(nrm_sq.q[0])>0);
+}
+
 
 TEST(Force0, PhaseInvariance)
 {
@@ -140,6 +156,7 @@ TEST(Force0, ForceVsActionDerivative)
 
 
 static mt_test_t tests[] = {
+   MT_TEST(Force0, NormSquareForce),
    MT_TEST(Force0, PhaseInvariance),
    MT_TEST(Force0, ForceVsActionDerivative),
 };
