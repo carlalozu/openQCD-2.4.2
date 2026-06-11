@@ -319,12 +319,3 @@ int global_time(int ix)
       return NPROC0*L0;
 }
 #pragma omp end declare target
-
-int global_time_cart(int iy)
-{
-   if ((iy>=0)&&(iy<VOLUME))
-      return iy/(L1*L2*L3);
-      
-   else
-      return NPROC0*L0;
-}
