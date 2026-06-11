@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
 
    int my_rank, bc, iact;
    double phi[2], phi_prime[2], theta[3];
-   FILE *flog = NULL;
    qflt rqsm;
    mdflds_t *mdfs;
 
@@ -53,8 +52,6 @@ int main(int argc, char *argv[])
 
    if (my_rank == 0)
    {
-      flog = freopen("time_force0.log", "w", stdout);
-
       printf("\n");
       printf("Gauge force (force0) of the double-precision gauge field\n");
       printf("--------------------------------------------------------\n\n");
@@ -78,9 +75,9 @@ int main(int argc, char *argv[])
    phi[1] = -0.534;
    phi_prime[0] = 0.912;
    phi_prime[1] = 0.078;
-   theta[0] = 0.0;
-   theta[1] = 0.0;
-   theta[2] = 0.0;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
 
    iact = 0;
    set_hmc_parms(1, &iact, 0, 0, NULL, 1, 1.0);
@@ -99,7 +96,7 @@ int main(int argc, char *argv[])
 
    for (int count = 0; count < WARMUP_ITERS; count++)
    {
-      random_ud();
+      random_ud_reproducible();
       force0(1.0);
    }
 
@@ -113,7 +110,7 @@ int main(int argc, char *argv[])
    for (int count = 0; count < PROFILE_ITERS; count++)
    {
       prof_begin(&s_prepare);
-      random_ud();
+      random_ud_reproducible();
       prof_end(&s_prepare);
 
       prof_begin(&s_kernel);
@@ -137,7 +134,7 @@ int main(int argc, char *argv[])
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
       printf("Average time for force0 (sec): %.9f\n", avg_time);
-      printf("Flops (approx, c0=1.0): %lld\n", flops);
+      printf("Flops: %lld\n", flops);
       printf("Total performance for force0 (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
       printf("Time per lattice point & thread for force0 (sec): %.9f\n",
              avg_time / (double)VOLUME_TRD);
@@ -148,9 +145,6 @@ int main(int argc, char *argv[])
       prof_report(&force0_part_p);
       prof_report(&s_total);
    }
-
-   if (my_rank == 0)
-      fclose(flog);
 
    MPI_Finalize();
    exit(0);
