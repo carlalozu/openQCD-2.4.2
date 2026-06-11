@@ -60,7 +60,7 @@ LIBPATH = $(MPI_HOME)/lib
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall -Wno-long-long \
          -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp
+LFLAGS = -fopenmp  -lmpi_gtl_cuda
 
 
 ############################## do not change ###################################
@@ -114,7 +114,7 @@ mkdep: $(addsuffix .d,$(PGMS))
 # clean directory
 
 clean:
-	@ -rm -rf *.d *.o *.log $(MAIN)
+	@ -rm -rf *.d *.o $(MAIN)
 .PHONY: clean
 
 ################################################################################

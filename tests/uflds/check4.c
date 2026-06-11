@@ -144,10 +144,11 @@ TEST(PlaqSum, GaugeInvariance)
    plaq_action_slices(asl2);
    d3=0.0;
    for (t=0;t<N0;t++) d3+=fabs(asl1[t]-asl2[t]);
+   d3 = d3/(double)(N0);
 
-   EXPECT_NEAR(d1, 0.0, 1.0e-15*fabs(p1)+1.0e-14);
-   EXPECT_NEAR(d2, 0.0, 1.0e-15*fabs(p2)+1.0e-14);
-   EXPECT_NEAR(d3, 0.0, 1.0e-15*fabs(p1)*(double)(N0)+1.0e-14);
+   EXPECT_NEAR(d1, 0.0, 1.0e-14*fabs(p1));
+   EXPECT_NEAR(d2, 0.0, 1.0e-14*fabs(p2));
+   EXPECT_NEAR(d3, 0.0, 1.0e-14*fabs(d3));
 }
 
 
@@ -178,12 +179,14 @@ TEST(PlaqSum, TranslationInvariance)
       d3=0.0;
       for (t=0;t<N0;t++)
          d3+=fabs(asl1[safe_mod(t-s[0],N0)]-asl2[t]);
+      d3 = d3/(double)(N0);
+
       for (t=0;t<N0;t++)
          asl1[t]=asl2[t];
 
-      EXPECT_NEAR(d1, 0.0, 1.0e-15*fabs(p1)+1.0e-14);
-      EXPECT_NEAR(d2, 0.0, 1.0e-15*fabs(p2)+1.0e-14);
-      EXPECT_NEAR(d3, 0.0, 1.0e-15*fabs(p1)*(double)(N0)+1.0e-14);
+      EXPECT_NEAR(d1, 0.0, 1.0e-14*fabs(p1));
+      EXPECT_NEAR(d2, 0.0, 1.0e-14*fabs(p2));
+      EXPECT_NEAR(d3, 0.0, 1.0e-14*fabs(d3));
    }
 }
 
@@ -203,7 +206,7 @@ TEST(PlaqSum, SumVsWsum)
    p2=plaq_wsum_dble(1);
    expected=p1-9.0*(double)(N1*N2*N3);
 
-   EXPECT_NEAR(p2, expected, 1.0e-15*fabs(p1)+1.0e-14);
+   EXPECT_NEAR(p2, expected, 1.0e-14);
 }
 
 

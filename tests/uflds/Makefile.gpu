@@ -46,7 +46,7 @@ VPATH = .:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/ra
 
 # additional include directories
 
-INCPATH = $(MPI_INCLUDE) ../../include ../..
+INCPATH = $(MPI_INCLUDE) ../../include ..
 
 
 # additional libraries
@@ -78,7 +78,7 @@ PGMS= $(MAIN) $(MODULES)
 
 # rule to make dependencies
 
-$(addsuffix .d,$(PGMS)): %.d: %.c Makefile
+$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.gpu
 	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
@@ -116,7 +116,7 @@ mkdep: $(addsuffix .d,$(PGMS))
 # clean directory
 
 clean:
-	@ -rm -rf *.d *.o *.log $(MAIN)
+	@ -rm -rf *.d *.o $(MAIN)
 .PHONY: clean
 
 ################################################################################
