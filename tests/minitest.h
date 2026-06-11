@@ -10,6 +10,7 @@
 *   4. In main(), call  return RUN_ALL_TESTS(my_rank, tests);
 *
 * Assertions: EXPECT_TRUE, EXPECT_EQ, EXPECT_NEAR.
+* Skip a test with  SKIP_TEST("reason").
 * Each test is collective: MPI_Allreduce gathers failures across all ranks.
 * Output is printed only on rank 0.
 *
@@ -27,6 +28,7 @@ typedef struct {
 } mt_test_t;
 
 static int mt_failures_;
+static int mt_skipped_;
 static int mt_rank_;
 
 #define TEST(suite, name)   static void mt_fn_##suite##_##name(void)
@@ -46,6 +48,16 @@ static int mt_rank_;
       mt_failures_++; \
    } } while (0)
 
+#define MT_PRINT(fmt, ...) \
+   printf("[   INFO   ] " fmt "\n", ##__VA_ARGS__)
+
+#define SKIP_TEST(msg) \
+   do { mt_skipped_=1; \
+      if (mt_rank_==0) \
+         printf("[   INFO   ] %s\n", (msg)); \
+      return; \
+   } while (0)
+
 #define EXPECT_NEAR(a, b, tol) \
    do { \
       double _a=(double)(a), _b=(double)(b), _t=(double)(tol); \
@@ -59,7 +71,7 @@ static int mt_rank_;
 
 static inline int mt_run_(mt_test_t *tests, int n, int rank)
 {
-   int i, pass=0, fail=0, gfail;
+   int i, pass=0, fail=0, skip=0, gfail, gskip;
    mt_rank_=rank;
 
    if (rank==0) printf("[==========] Running %d test(s).\n", n);
@@ -67,9 +79,14 @@ static inline int mt_run_(mt_test_t *tests, int n, int rank)
    for (i=0; i<n; i++) {
       if (rank==0) printf("[ RUN      ] %s\n", tests[i].name);
       mt_failures_=0;
+      mt_skipped_=0;
       tests[i].fn();
       MPI_Allreduce(&mt_failures_, &gfail, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-      if (gfail==0) {
+      MPI_Allreduce(&mt_skipped_,  &gskip, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+      if (gskip) {
+         if (rank==0) printf("[  SKIPPED ] %s\n", tests[i].name);
+         skip++;
+      } else if (gfail==0) {
          if (rank==0) printf("[       OK ] %s\n", tests[i].name);
          pass++;
       } else {
@@ -81,6 +98,7 @@ static inline int mt_run_(mt_test_t *tests, int n, int rank)
    if (rank==0) {
       printf("[==========] %d test(s) ran.\n", n);
       printf("[  PASSED  ] %d test(s).\n", pass);
+      if (skip) printf("[  SKIPPED ] %d test(s).\n", skip);
       if (fail) printf("[  FAILED  ] %d test(s).\n", fail);
    }
 
