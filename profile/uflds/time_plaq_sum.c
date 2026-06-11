@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
    int my_rank, bc;
    double phi[2], phi_prime[2], theta[3];
    static su3_dble *udb;
-   FILE *flog = NULL;
 
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -57,7 +56,6 @@ int main(int argc, char *argv[])
 
    if (my_rank == 0)
    {
-      flog = freopen("time_plaq_sum_dble.log", "w", stdout);
 
       printf("\n");
       printf("Plaquette sums of the double-precision gauge field\n");
@@ -87,9 +85,6 @@ int main(int argc, char *argv[])
    start_ranlux(0, 12345);
    geometry();
 
-   /* -------------------------------------------------------------------------
-    * Warmup: randomise field and call plaq_sum_dble without recording.
-    * ---------------------------------------------------------------------- */
    if (my_rank == 0)
       printf("Running %d warmup iterations...\n", WARMUP_ITERS);
 
@@ -102,10 +97,8 @@ int main(int argc, char *argv[])
    if (my_rank == 0)
       printf("Warmup done. Starting timed benchmark...\n\n");
 
-   /* -------------------------------------------------------------------------
-    * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
-    * ---------------------------------------------------------------------- */
    double result = 0.0;
+   udb = udfld();
 
    prof_reset(&compute);
    for (int count = 0; count < PROFILE_ITERS; count++)
@@ -113,8 +106,7 @@ int main(int argc, char *argv[])
       prof_begin(&s_prepare);
       random_ud();
       prof_end(&s_prepare);
-      udb = udfld();
-
+      
       prof_begin(&s_upload);
       #pragma omp target update to(udb[0:4*VOLUME])
       prof_end(&s_upload);
@@ -134,7 +126,7 @@ int main(int argc, char *argv[])
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions for final time: %i\n", s_kernel.count);
+      printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", avg_time);
       printf("Flops: %d\n", flops); 
       printf("Total performance for plaq_sum_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
@@ -147,9 +139,6 @@ int main(int argc, char *argv[])
       prof_report(&s_kernel);
       prof_report(&s_total);
    }
-
-   if (my_rank == 0)
-      fclose(flog);
 
    MPI_Finalize();
    exit(0);
