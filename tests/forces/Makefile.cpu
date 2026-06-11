@@ -1,11 +1,11 @@
 ################################################################################
 #
-# Makefile for tests/gpu/forces
+# Makefile for tests/forces
 #
 # Unit tests for force0() and action0().
 #
-# "make"       compiles and links all check programs
-# "make clean" removes all generated files
+# "make -f Makefile.cpu"       compiles and links all check programs
+# "make -f Makefile.cpu clean" removes all generated files
 #
 ################################################################################
 
@@ -46,11 +46,10 @@ MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
 # search path for modules
 
 MDIR = ../../modules
-GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
+VPATH = .:$(MDIR)/forces:$(MDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/utils
 
 
 # additional include directories
@@ -65,13 +64,12 @@ LIBS = m
 LIBPATH = $(MPI_HOME)/lib
 
 
-# compiler and flags (GPU offload via OpenMP target)
+# compiler and flags (cpu offload via OpenMP target)
 
-CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
-         -fopenmp-targets=nvptx64-nvidia-cuda --offload-arch=sm_90 -Wall -Wno-long-long \
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall -Wno-long-long \
          -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
+LFLAGS = -fopenmp  -lmpi_gtl_cuda
 
 
 ############################## do not change ###################################
@@ -87,19 +85,19 @@ PGMS= $(MAIN) $(MODULES)
 
 # rule to make dependencies
 
-$(addsuffix .d,$(PGMS)): %.d: %.c Makefile
+$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.cpu
 	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
 
-$(addsuffix .o,$(PGMS)): %.o: %.c Makefile
+$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.cpu
 	$(CC) $< -c $(CFLAGS) $(addprefix -I,$(INCPATH))
 
 
 # rule to link object files
 
-$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile
+$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.cpu
 	$(CLINKER) $< $(addsuffix .o,$(MODULES)) $(LFLAGS) \
         $(addprefix -L,$(LIBPATH)) $(addprefix -l,$(LIBS)) -o $@
 
@@ -125,7 +123,7 @@ mkdep: $(addsuffix .d,$(PGMS))
 # clean directory
 
 clean:
-	@ -rm -rf *.d *.o *.log $(MAIN)
+	@ -rm -rf *.d *.o $(MAIN)
 .PHONY: clean
 
 ################################################################################

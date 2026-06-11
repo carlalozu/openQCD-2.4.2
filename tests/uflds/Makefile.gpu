@@ -1,11 +1,11 @@
 ################################################################################
 #
-# Makefile for tests/gpu/uflds
+# Makefile for tests/uflds
 #
 # Unit tests for the GPU-offloaded plaquette-sum routines in modules/uflds/.
 #
-# "make"       compiles and links all check programs
-# "make clean" removes all generated files
+# "make -f Makefile.gpu"       compiles and links all check programs
+# "make -f Makefile.gpu clean" removes all generated files
 #
 ################################################################################
 
