@@ -209,8 +209,7 @@ double plaq_action_slices(double *asl)
       rqsmB[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,n,smE,smB) \
-   reduction(sum_qflt : rqsmE[cpr[0]*L0:L0],rqsmB[cpr[0]*L0:L0])
+#pragma omp parallel private(k,ix,t,n,smE,smB)
    {
       k=omp_get_thread_num();
 
@@ -232,8 +231,11 @@ double plaq_action_slices(double *asl)
                smB+=(3.0-plaq_dble(udb,n,ix));
          }
 
-         acc_qflt(smE,rqsmE[t].q);
-         acc_qflt(smB,rqsmB[t].q);
+#pragma omp critical
+         {
+            acc_qflt(smE,rqsmE[t].q);
+            acc_qflt(smB,rqsmB[t].q);
+         }
       }
    }
 

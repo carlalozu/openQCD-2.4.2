@@ -1,11 +1,11 @@
 ################################################################################
 #
-# Makefile for tests/gpu/forces
+# Makefile for tests/forces with GPU offloading
 #
 # Unit tests for force0() and action0().
 #
-# "make"       compiles and links all check programs
-# "make clean" removes all generated files
+# "make -f Makefile.gpu"       compiles and links all check programs
+# "make -f Makefile.gpu clean" removes all generated files
 #
 ################################################################################
 
@@ -45,8 +45,8 @@ MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
 
 # search path for modules
 
-MDIR = ../../../modules
-GDIR = ../../../gpu
+MDIR = ../../modules
+GDIR = ../../gpu
 
 VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
@@ -55,7 +55,7 @@ VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/for
 
 # additional include directories
 
-INCPATH = $(MPI_INCLUDE) ../../../include ../..
+INCPATH = $(MPI_INCLUDE) ../../include ..
 
 
 # additional libraries
@@ -87,19 +87,19 @@ PGMS= $(MAIN) $(MODULES)
 
 # rule to make dependencies
 
-$(addsuffix .d,$(PGMS)): %.d: %.c Makefile
+$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.gpu
 	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
 
-$(addsuffix .o,$(PGMS)): %.o: %.c Makefile
+$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.gpu
 	$(CC) $< -c $(CFLAGS) $(addprefix -I,$(INCPATH))
 
 
 # rule to link object files
 
-$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile
+$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.gpu
 	$(CLINKER) $< $(addsuffix .o,$(MODULES)) $(LFLAGS) \
         $(addprefix -L,$(LIBPATH)) $(addprefix -l,$(LIBS)) -o $@
 
@@ -125,7 +125,7 @@ mkdep: $(addsuffix .d,$(PGMS))
 # clean directory
 
 clean:
-	@ -rm -rf *.d *.o *.log $(MAIN)
+	@ -rm -rf *.d *.o $(MAIN)
 .PHONY: clean
 
 ################################################################################
