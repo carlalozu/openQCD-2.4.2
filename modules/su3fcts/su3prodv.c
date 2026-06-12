@@ -10,18 +10,16 @@
  *
  * Products of double-precision 3x3 matrices in vectorized form
  *
- *   void fsu3matxsu3mat(
+ *   void fsu3xsu3(
  *     const su3_mat_field *u, const su3_mat_field *v, su3_mat_field *res, int n,
  *     int i)
  *   Computes w=u*v assuming that w is different from u.
  *
- *   void fsu3matdagxsu3matdag(
+ *   void fsu3dagxsu3dag(
  *     const su3_mat_field *u, const su3_mat_field *v, su3_mat_field *res, int n,
  *     int i)
  *   Computes w=u^dag*v^dag assuming that w is different from u and v.
  *
- *   void fsu3matxsu3mat_retrace(
- *     const su3_mat_field *u, const su3_mat_field *v, doublev *res, int i)
  *
  *******************************************************************************/
 
@@ -89,7 +87,7 @@ static void _fsu3matxsu3vec(const su3_mat_field *u, const su3_vec_field *v, su3_
  * Computes w=u^dag*v^dag assuming that w is different from u and v.
  */
 #pragma omp declare target
-void fsu3matdagxsu3matdag(
+void fsu3dagxsu3dag(
     const su3_mat_field *u, su3_dble *res, int ip0, int ip1)
 {
    su3_vec_field psi;
@@ -117,7 +115,7 @@ void fsu3matdagxsu3matdag(
 
 
 #pragma omp declare target
-void fsu3matxsu3mat(
+void fsu3xsu3(
     const su3_mat_field *u, su3_dble *res, int ip0, int ip1)
 {
    su3_vec_field psi;
