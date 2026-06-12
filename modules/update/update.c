@@ -66,9 +66,12 @@
 static int nsm=0;
 static double dtau=1.0,rtau=0.0;
 
+prof_section update_mom_p = {.name = "update_mom", .level=2};
+prof_section update_ud_p = {.name = "update_ud", .level=2};
 
 void update_mom(void)
 {
+   prof_begin(&update_mom_p);
    int bc;
    int k,ofs,vol,ix,t,ifc;
    su3_alg_dble *mom,*frc;
@@ -144,11 +147,13 @@ void update_mom(void)
          }
       }
    }
+   prof_end(&update_mom_p);
 }
 
 
 void update_ud(double eps)
 {
+   prof_begin(&update_ud_p);
    int bc;
    int k,ofs,vol,ix,t,ifc;
    su3_dble *ud;
@@ -221,6 +226,7 @@ void update_ud(double eps)
 
    step_mdtime(eps);
    set_flags(UPDATED_UD);
+   prof_end(&update_ud_p);
 }
 
 

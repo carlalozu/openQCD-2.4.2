@@ -57,6 +57,7 @@
 #include "lattice.h"
 #include "uflds.h"
 #include "global.h"
+#include "profiler.h"
 
 #define N0 (NPROC0*L0)
 
@@ -66,7 +67,8 @@ static su3_dble *udb;
 prof_section compute = {.name = "local_plaq_sum_dble"};
 
 
-static double plaq_dble(int n,int ix)
+#pragma omp declare target
+static double plaq_dble(su3_dble *udb, int n,int ix)
 {
    int ip[4];
    double sm;
@@ -81,27 +83,25 @@ static double plaq_dble(int n,int ix)
 
    return sm;
 }
+#pragma omp end declare target
+
 
 double local_plaq_dble(int n){
    udb=udfld();
    double pa;
-   #pragma omp parallel reduction(+:pa)
-   {
-      int k=omp_get_thread_num();
-      for (int ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
-         pa += plaq_dble(n, ix);
-   }
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (int ix = 0; ix < VOLUME; ix++){
+         pa += plaq_dble(udb, n, ix);}
    return pa;
 }
 
 
 static qflt local_plaq_sum_dble(int iw)
 {
-   int bc,k,ix,t,n;
-   double wp,pa;
+   double wp,pa=0.0;
    qflt rqsm;
 
-   bc=bc_type();
+   int bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -111,50 +111,45 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udb=udfld();
-
    prof_begin(&compute);
-#pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+   // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (int ix=0;ix<VOLUME;ix++)
    {
-      k=omp_get_thread_num();
-
-      for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
+      double local_pa=0.0;
+      int t=global_time(ix);
+      if ((t<(N0-1))||(bc!=0))
       {
-         t=global_time(ix);
-         pa=0.0;
-
-         if ((t<(N0-1))||(bc!=0))
-         {
-            for (n=0;n<3;n++)
-               pa+=plaq_dble(n,ix);
-         }
-
-         if (((t>0)&&(t<(N0-1)))||(bc==3))
-         {
-            for (n=3;n<6;n++)
-               pa+=plaq_dble(n,ix);
-         }
-         else if ((t==0)||(bc==0))
-         {
-            if (bc==1)
-               pa+=wp*9.0;
-            else
-            {
-               for (n=3;n<6;n++)
-                  pa+=wp*plaq_dble(n,ix);
-            }
-         }
+         for (int n=0;n<3;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+      }
+      
+      if (((t>0)&&(t<(N0-1)))||(bc==3))
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+      }
+      else if ((t==0)||(bc==0))
+      {
+         if (bc==1)
+            local_pa+=wp*9.0;
          else
          {
-            for (n=3;n<6;n++)
-               pa+=plaq_dble(n,ix);
-
-            pa+=wp*9.0;
+            for (int n=3;n<6;n++)
+               local_pa+=wp*plaq_dble(udb,n,ix);
          }
-
-         acc_qflt(pa,rqsm.q);
       }
+      else
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dble(udb,n,ix);
+
+         local_pa+=wp*9.0;
+      }
+      pa += local_pa;
    }
    prof_end(&compute);
+   acc_qflt(pa,rqsm.q);
    return rqsm;
 }
 
@@ -238,13 +233,13 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(n,ix));
+               smE+=(3.0-plaq_dble(udb,n,ix));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(n,ix));
+               smB+=(3.0-plaq_dble(udb,n,ix));
          }
 
 #pragma omp critical

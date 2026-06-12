@@ -112,11 +112,11 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c89 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes -Werror \
-         -O -mfpmath=sse -mno-avx -DAVX -DFMA3 -DPM
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
+         -Wno-long-long -Wstrict-prototypes -O -DFMA3 -DPM
 
 LFLAGS = -fopenmp
+
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
 # x86-64 machine supporting AVX and FMA3 instructions. See the README in

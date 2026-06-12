@@ -68,8 +68,8 @@
 
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
-int bc,nfc[4],ofs[4],snu[4],init=0;
-uidx_t idx[4]={{0,0,NULL,NULL}};
+int bc_uidx,nfc_uidx[4],ofs_uidx[4],snu_uidx[4],init_uidx=0;
+uidx_t idx_uidx[4]={{0,0,NULL,NULL}};
 #pragma omp end declare target
 
 static void alloc_idx(void)
@@ -77,21 +77,21 @@ static void alloc_idx(void)
    int mu,nu0,nuk;
    int *iu0,*iuk;
 
-   bc=bc_type();
-   nfc[0]=FACE0/2;
-   nfc[1]=FACE1/2;
-   nfc[2]=FACE2/2;
-   nfc[3]=FACE3/2;
+   bc_uidx=bc_type();
+   nfc_uidx[0]=FACE0/2;
+   nfc_uidx[1]=FACE1/2;
+   nfc_uidx[2]=FACE2/2;
+   nfc_uidx[3]=FACE3/2;
 
-   ofs[0]=VOLUME+(FACE0/2);
-   ofs[1]=ofs[0]+(FACE0/2)+(FACE1/2);
-   ofs[2]=ofs[1]+(FACE1/2)+(FACE2/2);
-   ofs[3]=ofs[2]+(FACE2/2)+(FACE3/2);
+   ofs_uidx[0]=VOLUME+(FACE0/2);
+   ofs_uidx[1]=ofs_uidx[0]+(FACE0/2)+(FACE1/2);
+   ofs_uidx[2]=ofs_uidx[1]+(FACE1/2)+(FACE2/2);
+   ofs_uidx[3]=ofs_uidx[2]+(FACE2/2)+(FACE3/2);
 
-   snu[0]=0;
-   snu[1]=snu[0]+(FACE0/2);
-   snu[2]=snu[1]+(FACE1/2);
-   snu[3]=snu[2]+(FACE2/2);
+   snu_uidx[0]=0;
+   snu_uidx[1]=snu_uidx[0]+(FACE0/2);
+   snu_uidx[2]=snu_uidx[1]+(FACE1/2);
+   snu_uidx[3]=snu_uidx[2]+(FACE2/2);
 
    iu0=malloc(7*(BNDRY/4)*sizeof(*iu0));
    error(iu0==NULL,1,"alloc_idx [uidx.c]",
@@ -100,23 +100,23 @@ static void alloc_idx(void)
 
    for (mu=0;mu<4;mu++)
    {
-      nu0=nfc[mu];
-      nuk=6*nfc[mu];
+      nu0=nfc_uidx[mu];
+      nuk=6*nfc_uidx[mu];
 
-      idx[mu].nu0=nu0;
-      idx[mu].nuk=nuk;
+      idx_uidx[mu].nu0=nu0;
+      idx_uidx[mu].nuk=nuk;
 
       if (nu0>0)
       {
-         idx[mu].iu0=iu0;
-         idx[mu].iuk=iuk;
+         idx_uidx[mu].iu0=iu0;
+         idx_uidx[mu].iuk=iuk;
          iu0+=nu0;
          iuk+=nuk;
       }
       else
       {
-         idx[mu].iu0=NULL;
-         idx[mu].iuk=NULL;
+         idx_uidx[mu].iu0=NULL;
+         idx_uidx[mu].iuk=NULL;
       }
    }
 }
@@ -129,21 +129,18 @@ int offset(int ix,int mu)
 
    if (ix<(VOLUME/2))
    {
-      // if even side, find the neighbouring odd site in the mu direction
       iy=iup[ix][mu];
 
       if (iy<VOLUME)
-         // recover U(x, -mu) of the correspoding odd site 
          return 8*(iy-(VOLUME/2))+2*mu+1;
       else
       {
-         // get link from the boundary ghost cells
-         ib=iy-ofs[mu]-(BNDRY/2);
-         return 4*VOLUME+snu[mu]+ib;
+         ib=iy-ofs_uidx[mu]-(BNDRY/2);
+
+         return 4*VOLUME+snu_uidx[mu]+ib;
       }
    }
    else
-      // recover U(x, mu) if x is odd site
       return 8*(ix-(VOLUME/2))+2*mu;
 }
 #pragma omp end declare target
@@ -159,9 +156,9 @@ static void set_idx(void)
 
    for (mu=0;mu<4;mu++)
    {
-      nu0=idx[mu].nu0;
-      iu0=idx[mu].iu0;
-      iuk=idx[mu].iuk;
+      nu0=idx_uidx[mu].nu0;
+      iu0=idx_uidx[mu].iu0;
+      iuk=idx_uidx[mu].iuk;
 
       if (nu0)
       {
@@ -178,14 +175,14 @@ static void set_idx(void)
 
             for (ib=ib0;ib<ib1;ib++)
             {
-               iy=ib+ofs[mu]+(BNDRY/2);
+               iy=ib+ofs_uidx[mu]+(BNDRY/2);
                iz=map[iy-VOLUME];
                iu0[ib]=8*(iz-(VOLUME/2))+2*mu+1;
             }
 
             for (ib=ib0;ib<ib1;ib++)
             {
-               iy=ib+ofs[mu];
+               iy=ib+ofs_uidx[mu];
                iz=map[iy-VOLUME];
 
                for (l=0;l<3;l++)
@@ -197,7 +194,7 @@ static void set_idx(void)
 
             for (ib=ib0;ib<ib1;ib++)
             {
-               iy=ib+ofs[mu]+(BNDRY/2);
+               iy=ib+ofs_uidx[mu]+(BNDRY/2);
                iz=map[iy-VOLUME];
 
                for (l=0;l<3;l++)
@@ -209,54 +206,58 @@ static void set_idx(void)
          }
       }
    }
-   #pragma omp target update to(nfc, ofs, snu, idx)
+   #pragma omp target update to(nfc_uidx, ofs_uidx, snu_uidx, idx_uidx)
 }
 
 
 void set_uidx(void)
 {
-   if (init==0)
+   if (init_uidx==0)
    {
       error(ipt==NULL,1,"set_uidx [uidx.c]",
             "Geometry arrays are not set");
       if (BNDRY)
          set_idx();
       else
-         bc=bc_type();
+         bc_uidx=bc_type();
          
-      init=1;
-      #pragma omp target update to(bc, init)
+      init_uidx=1;
+      #pragma omp target update to(bc_uidx, init_uidx)
    }
 }
 
 
 uidx_t *uidx(void)
 {
-   return idx;
+   return idx_uidx;
 }
 
 
 #pragma omp declare target
-void plaq_uidx(int mu,int nu,int ix,int *ip)
+void plaq_uidx(int n,int ix,int *ip)
 {
+   int mu,nu;
    int iy,ic;
+
+   mu=plns[n][0];
+   nu=plns[n][1];
 
    ip[0]=offset(ix,mu);
 
-   if ((mu==0)&&(global_time(ix)==(N0-1))&&((bc==1)||(bc==2)))
+   if ((mu==0)&&(global_time(ix)==(N0-1))&&((bc_uidx==1)||(bc_uidx==2)))
    {
       ip[1]=4*VOLUME+7*(BNDRY/4)+nu-1;
    }
    else
    {
-      iy=iupT[mu][ix];
+      iy=iup[ix][mu];
 
       if (iy<VOLUME)
          ip[1]=offset(iy,nu);
       else
       {
          if (iy<(VOLUME+(BNDRY/2)))
-            ic=iy-VOLUME-nfc[mu];
+            ic=iy-VOLUME-nfc_uidx[mu];
          else
             ic=iy-VOLUME-(BNDRY/2);
 
@@ -265,14 +266,14 @@ void plaq_uidx(int mu,int nu,int ix,int *ip)
    }
 
    ip[2]=offset(ix,nu);
-   iy=iupT[nu][ix];
+   iy=iup[ix][nu];
 
    if (iy<VOLUME)
       ip[3]=offset(iy,mu);
    else
    {
       if (iy<(VOLUME+(BNDRY/2)))
-         ic=iy-VOLUME-nfc[nu];
+         ic=iy-VOLUME-nfc_uidx[nu];
       else
          ic=iy-VOLUME-(BNDRY/2);
 

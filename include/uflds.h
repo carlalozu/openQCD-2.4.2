@@ -29,6 +29,7 @@ extern su3_dble *bstap(void);
 extern void set_bstap(void);
 
 /* PLAQ_SUM_C */
+extern double local_plaq_dble(int n);
 extern double plaq_sum_dble(int icom);
 extern double plaq_wsum_dble(int icom);
 extern double plaq_action_slices(double *asl);
@@ -45,6 +46,7 @@ extern su3_dble *udfld(void);
 extern su3_mat_field *udfldv(void);
 extern void random_ud(void);
 extern void random_udv(void);
+extern void random_ud_reproducible(void);
 extern void set_ud_phase(void);
 extern void unset_ud_phase(void);
 extern void renormalize_ud(void);

@@ -72,87 +72,23 @@ static void alloc_ipt(void)
 }
 
 
-static void update_ipt_cbs4(int k, int n0_ofs, int n1_ofs, int n2_ofs, int n3_ofs)
-{
-   int cb0,cb1,cb2,cb3;
-   int x0,x1,x2,x3;
-   int y0,y1,y2,y3;
-   int lex,mem;
-   int nbs0,nbs1,nbs2,nbs3;
-
-   nbs0=L0_TRD/BLOCK_SIZE_0;
-   nbs1=L1_TRD/BLOCK_SIZE_1;
-   nbs2=L2_TRD/BLOCK_SIZE_2;
-   nbs3=L3_TRD/BLOCK_SIZE_3;
-
-   mem=k*VOLUME_TRD;
-
-   for (cb0=0;cb0<nbs0;cb0++)
-   {
-      for (cb1=0;cb1<nbs1;cb1++)
-      {
-         for (cb2=0;cb2<nbs2;cb2++)
-         {
-            for (cb3=0;cb3<nbs3;cb3++)
-            {
-               for (x0=0;x0<BLOCK_SIZE_0;x0++)
-               {
-                  for (x1=0;x1<BLOCK_SIZE_1;x1++)
-                  {
-                     for (x2=0;x2<BLOCK_SIZE_2;x2++)
-                     {
-                        for (x3=0;x3<BLOCK_SIZE_3;x3++)
-                        {
-                           y0=n0_ofs+cb0*BLOCK_SIZE_0+x0;
-                           y1=n1_ofs+cb1*BLOCK_SIZE_1+x1;
-                           y2=n2_ofs+cb2*BLOCK_SIZE_2+x2;
-                           y3=n3_ofs+cb3*BLOCK_SIZE_3+x3;
-
-                           lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
-                           ipt[lex]=mem;
-                           mem+=1;
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
-   }
-}
-
-
 static void set_ipt(void)
 {
-   int k,n,n0,n1,n2,n3;
-   int nt1,nt2,nt3;
+   int y0,y1,y2,y3,lex;
 
    alloc_ipt();
 
-   error((L0_TRD%BLOCK_SIZE_0)!=0,1,"set_ipt [geometryv.c]",
-         "L0_TRD must be a multiple of BLOCK_SIZE_0 for cache-block layout");
-   error((L1_TRD%BLOCK_SIZE_1)!=0,1,"set_ipt [geometryv.c]",
-         "L1_TRD must be a multiple of BLOCK_SIZE_1 for cache-block layout");
-   error((L2_TRD%BLOCK_SIZE_2)!=0,1,"set_ipt [geometryv.c]",
-         "L2_TRD must be a multiple of BLOCK_SIZE_2 for cache-block layout");
-   error((L3_TRD%BLOCK_SIZE_3)!=0,1,"set_ipt [geometryv.c]",
-         "L3_TRD must be a multiple of BLOCK_SIZE_3 for cache-block layout");
-
-   nt1=L1/L1_TRD;
-   nt2=L2/L2_TRD;
-   nt3=L3/L3_TRD;
-
-#pragma omp parallel private(k,n,n0,n1,n2,n3)
-   {
-      k=omp_get_thread_num();
-
-      n=k;
-      n3=n%nt3;   n/=nt3;
-      n2=n%nt2;   n/=nt2;
-      n1=n%nt1;   n/=nt1;
-      n0=n;
-
-      update_ipt_cbs4(k,n0*L0_TRD,n1*L1_TRD,n2*L2_TRD,n3*L3_TRD);
+   int mem=0;
+   for (y0=0;y0<L0;y0++){
+      for (y1=0;y1<L1;y1++){
+         for (y2=0;y2<L2;y2++){
+            for (y3=0;y3<L3;y3++){
+               lex=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
+               ipt[lex]=mem;
+               mem+=1;
+            }
+         }
+      }
    }
    #pragma omp target enter data map(to : ipt[:VOLUME])
 }
@@ -192,6 +128,7 @@ static void set_tms(void)
 
 void geometry(void)
 {
+   printf("Using lexicogaphical layout. \n");
    if (ipt==NULL)
    {
       set_cpr();

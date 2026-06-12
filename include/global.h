@@ -15,34 +15,27 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#define NPROC0 1
+#define NPROC0 2
 #define NPROC1 1
 #define NPROC2 1
-#define NPROC3 1
+#define NPROC3 2
 
 #define NPROC0_BLK 1
 #define NPROC1_BLK 1
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 32
-#define L1 32
-#define L2 8
-#define L3 16
+#define L0 8
+#define L1 16
+#define L2 16
+#define L3 8
 
-#define L0_TRD 32
-#define L1_TRD 32
-#define L2_TRD 16
-#define L3_TRD 16
+#define L0_TRD 8
+#define L1_TRD 16
+#define L2_TRD 8
+#define L3_TRD 8
 
 #define NAME_SIZE 128
-// #define N_TEAMS ((VOLUME+128-1)/128)
-#define BLOCK_SIZE_0 8
-#define BLOCK_SIZE_1 8
-#define BLOCK_SIZE_2 8
-#define BLOCK_SIZE_3 8
-#define SVOL_BLK (BLOCK_SIZE_1*BLOCK_SIZE_2*BLOCK_SIZE_3)
-#define BLOCK_VLM (BLOCK_SIZE_0*SVOL_BLK)
 
 
 /****************************** do not change *********************************/
@@ -90,31 +83,31 @@
 #define ALIGN 8
 
 #if defined MAIN_PROGRAM
+#pragma omp declare target
 int cpr[4];
 int npr[8];
 int sbofs[16];
 int sbvol[16];
 
-#pragma omp declare target
 int *ipt=NULL;
 int (*iup)[4]=NULL;
 int (*iupT)[VOLUME]=NULL;
-#pragma omp end declare target
 int (*idn)[4]=NULL;
 int *map=NULL;
+#pragma omp end declare target
 #else
+#pragma omp declare target
 extern int cpr[4];
 extern int npr[8];
 extern int sbofs[16];
 extern int sbvol[16];
 
-#pragma omp declare target
 extern int *ipt;
 extern int (*iup)[4];
 extern int (*iupT)[VOLUME];
-#pragma omp end declare target
 extern int (*idn)[4];
 extern int *map;
+#pragma omp end declare target
 #endif
 
 #endif
