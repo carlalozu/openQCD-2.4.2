@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
       prof_end(&s_prepare);
       
       prof_begin(&s_upload);
-      update_su3_mat_field()
+      update_su3_mat_field();
       prof_end(&s_upload);
 
       for (int n = 0; n < 6; n++)

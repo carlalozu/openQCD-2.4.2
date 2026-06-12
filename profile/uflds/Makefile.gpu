@@ -16,7 +16,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = time time_plaq_sum time_plaq_dble time_plaq_sumv time_plaq_dblev
+MAIN = time_plaq_sum time_plaq_dble time_plaq_sumv time_plaq_dblev
 
 DEVFCTS = dutils gtrans
 

@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
    random_ud();
    prof_end(&set_params);
    
-   prof_reset(&compute);
+   prof_reset(&s_lcl_plq_smv);
    prof_begin(&benchmark);
    wdti = 0.0;
    while (wdti < 5.0)
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
          prof_end(&prepare_data);
          
          MPI_Barrier(MPI_COMM_WORLD);
-         // compute profiler defined externally
+         // s_lcl_plq_smv profiler defined externally
          wt1 = MPI_Wtime();
          p1 += plaq_sum_dble(1);
          MPI_Barrier(MPI_COMM_WORLD);
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
       prof_report(&set_params);
       prof_report(&benchmark);
       prof_report(&prepare_data);
-      prof_report(&compute);
+      prof_report(&s_lcl_plq_smv);
       prof_report(&total);
    }
 
