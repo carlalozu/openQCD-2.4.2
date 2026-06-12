@@ -1,3 +1,4 @@
+
 /*******************************************************************************
  *
  * File time.c
@@ -36,30 +37,29 @@
 #define N3 (NPROC3 * L3)
 
 #define WARMUP_ITERS  3
-#define PROFILE_ITERS 120
+#define PROFILE_ITERS 20
 
 int main(int argc, char *argv[])
 {
    prof_section s_prepare  = {.name = "prepare_data"};
-   prof_section s_upload   = {.name = "upload ufld"};
-   prof_section s_kernel  = {.name = "plaq_sum_dble"};
-   prof_section s_total   = {.name = "total"};
+   prof_section s_upload   = {.name = "upload ufldv"};
+   prof_section s_kernel   = {.name = "plaq_dblev"};
+   prof_section s_total    = {.name = "total"};
 
-   int my_rank, bc;
+   int my_rank, bc, count;
    double phi[2], phi_prime[2], theta[3];
-   static su3_dble *udb;
+   static su3_mat_field *udbv;
 
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-
+   
    prof_begin(&s_total);
-
    if (my_rank == 0)
    {
 
       printf("\n");
-      printf("Total plaquette action (plaq_sum) of the double-precision gauge field\n");
-      printf("-------------------------------------------------------------------\n\n");
+      printf("Plaquette action (plaq_dble) of the double-precision gauge field SoA\n");
+      printf("--------------------------------------------------------------\n\n");
 
       print_lattice_sizes();
 
@@ -84,58 +84,67 @@ int main(int argc, char *argv[])
 
    start_ranlux(0, 12345);
    geometry();
-
+   udbv = udfldv();
+   
    if (my_rank == 0)
       printf("Running %d warmup iterations...\n", WARMUP_ITERS);
 
-   for (int count = 0; count < WARMUP_ITERS; count++)
+   double pa_warm;
+   for (count = 0; count < WARMUP_ITERS; count++)
    {
-      random_ud_reproducible();
-      (void)plaq_sum_dble(1);
+      random_udv();
+      pa_warm = local_plaq_dblev(0);
+      (void)pa_warm;
    }
+   MPI_Barrier(MPI_COMM_WORLD);
 
    if (my_rank == 0)
       printf("Warmup done. Starting timed benchmark...\n\n");
 
-   double result = 0.0;
-   udb = udfld();
 
-   prof_reset(&s_lcl_plq_smv);
-   for (int count = 0; count < PROFILE_ITERS; count++)
-   {  
+   double pa = 0.0;
+   udbv = udfld();
+
+   for (count = 0; count < PROFILE_ITERS; count++)
+   {
+      MPI_Barrier(MPI_COMM_WORLD);
       prof_begin(&s_prepare);
-      random_ud_reproducible();
+      random_udv();
       prof_end(&s_prepare);
       
       prof_begin(&s_upload);
-      #pragma omp target update to(udb[0:4*VOLUME])
+      update_su3_mat_field();
       prof_end(&s_upload);
 
-      prof_begin(&s_kernel);
-      result = plaq_sum_dble(1);
-      prof_end(&s_kernel);
-   }
+      for (int n = 0; n < 6; n++)
+      {
+         MPI_Barrier(MPI_COMM_WORLD);
+         prof_begin(&s_kernel);
+         pa = local_plaq_dblev(n);
+         prof_end(&s_kernel);
+      }
+
+   }   
 
    prof_end(&s_total);
-
+   
    if (my_rank == 0)
    {
-      int    flops    = 432 * 6 * VOLUME;
+      int flops = 432 * VOLUME;
       double avg_time = s_kernel.total / (double)s_kernel.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
-      printf("Average time for plaq_sum_dble (sec): %.9f\n", avg_time);
+      printf("Average time for plaq_dble (sec): %.9f\n", avg_time);
       printf("Flops: %d\n", flops); 
-      printf("Total performance for plaq_sum_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
-      printf("Time per lattice point & thread for plaq_sum_dble (sec): %.9f\n", avg_time/((double)(VOLUME_TRD)));
-      printf("Result: %f\n\n", result);
+      printf("Total performance for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
+      printf("Time per lattice point & thread for plaq_dble (sec): %.9f\n", avg_time/((double)(VOLUME_TRD)));
+      printf("Result: %f\n\n", pa);
 
       prof_report(&s_prepare);
       prof_report(&s_upload);
-      prof_report(&s_lcl_plq_smv);
       prof_report(&s_kernel);
       prof_report(&s_total);
    }

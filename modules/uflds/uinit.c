@@ -94,6 +94,22 @@ void set_ud2unity(int vol,int icom,su3_dble *ud)
       cm3x3_unity(vol,ud);
 }
 
+void set_ud2unityv(int vol,int icom,su3_mat_field *udv)
+{
+   int k;
+
+   if (icom&0x2)
+   {
+#pragma omp parallel private(k)
+      {
+         k=omp_get_thread_num();
+         cm3x3_unityv(vol,udv,k*vol);
+      }
+   }
+   else
+      cm3x3_unityv(vol,udv,0);
+}
+
 
 void assign_ud2ud(int vol,int icom,su3_dble *ud,su3_dble *vd)
 {

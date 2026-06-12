@@ -17,6 +17,10 @@
 #include "su3.h"
 #endif
 
+#ifndef SU3V_H
+#include "su3v.h"
+#endif
+
 typedef struct
 {
    double t,d;
@@ -53,6 +57,7 @@ extern void expXsu3(double eps,su3_alg_dble *X,su3_dble *u);
 /* CM3X3_C */
 extern void cm3x3_zero(int vol,su3_dble *u);
 extern void cm3x3_unity(int vol,su3_dble *u);
+extern void cm3x3_unityv(int vol,su3_mat_field *u,int i0);
 extern void cm3x3_assign(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_swap(int vol,su3_dble *u,su3_dble *v);
 extern void cm3x3_dagger(su3_dble *u,su3_dble *v);
@@ -73,6 +78,7 @@ extern void cm3x3_lc2(complex_dble *c,su3_dble *u,su3_dble *v);
 /* RANDOM_SU3_C */
 extern void random_su3(su3 *u);
 extern void random_su3_dble(su3_dble *u);
+extern void random_su3_mat_field(su3_mat_field *uv, int ix);
 
 /* SU3REN_C */
 extern void project_to_su3(su3 *u);
@@ -93,5 +99,12 @@ extern double prod2su3alg(su3_dble *u,su3_dble *v,su3_alg_dble *X);
 extern void prod2u3alg(su3_dble *u,su3_dble *v,u3_alg_dble *X);
 extern void rotate_su3alg(su3_dble *u,su3_alg_dble *X);
 extern void lieprod_u3alg(u3_alg_dble *X,u3_alg_dble *Y,u3_alg_dble *Z);
+
+/* SU3PRODV_C */
+#pragma omp declare target
+void fsu3xsu3(const su3_mat_field *u, su3_dble *res, int ip0, int ip1);
+void fsu3dagxsu3dag(const su3_mat_field *u, su3_dble *res, int ip2, int ip3);
+#pragma omp end declare target
+
 
 #endif

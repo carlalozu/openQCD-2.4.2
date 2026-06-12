@@ -33,7 +33,9 @@ make -f Makefile.gpu clean
 make -f Makefile.gpu -j || exit 1
 
 ./time_plaq_dble >> profile.log
+./time_plaq_dblev >> profile.log
 ./time_plaq_sum >> profile.log
+./time_plaq_sumv >> profile.log
 
 echo "" >> profile.log
 echo "GPU profile lex layout" >> profile.log
@@ -41,4 +43,6 @@ make -f Makefile.gpu-lex clean
 make -f Makefile.gpu-lex -j || exit 1
 
 ./time_plaq_dble >> profile.log
+./time_plaq_dblev >> profile.log
 ./time_plaq_sum >> profile.log
+./time_plaq_sumv >> profile.log

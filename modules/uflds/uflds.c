@@ -92,7 +92,6 @@ typedef union
 static complex_dble phase[3] ALIGNED16 ={{0.0,0.0}};
 static su3 *ub=NULL;
 static su3_dble *udb=NULL;
-static int udb_size=0;
 
 static void alloc_u(void)
 {
@@ -135,7 +134,6 @@ static void alloc_ud(void)
 
    if ((cpr[0]==(NPROC0-1))&&((bc==1)||(bc==2)))
       n+=3;
-   udb_size=n;
 
    udb=amalloc(n*sizeof(*udb),ALIGN);
    error(udb==NULL,1,"alloc_ud [uflds.c]",
