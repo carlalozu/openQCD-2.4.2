@@ -252,22 +252,22 @@ void set_iupdn(void)
             iup[ix][3]=index(x0,x1,x2,x3+1);
             idn[ix][3]=index(x0,x1,x2,x3-1);
 
-            if ((x0==(L0-1))&&(NPROC0>1)){
+            if ((x0==(L0-1))&&(NPROC0>1))
                iup[ix][0]=VOLUME;
             if ((x0==0)&&(NPROC0>1))
                idn[ix][0]=VOLUME;
 
-            if ((x1==(L1-1))&&(NPROC1>1)){
+            if ((x1==(L1-1))&&(NPROC1>1))
                iup[ix][1]=VOLUME;
             if ((x1==0)&&(NPROC1>1))
                idn[ix][1]=VOLUME;
 
-            if ((x2==(L2-1))&&(NPROC2>1)){
+            if ((x2==(L2-1))&&(NPROC2>1))
                iup[ix][2]=VOLUME;
             if ((x2==0)&&(NPROC2>1))
                idn[ix][2]=VOLUME;
 
-            if ((x3==(L3-1))&&(NPROC3>1)){
+            if ((x3==(L3-1))&&(NPROC3>1))
                iup[ix][3]=VOLUME;
             if ((x3==0)&&(NPROC3>1))
                idn[ix][3]=VOLUME;

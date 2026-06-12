@@ -53,7 +53,6 @@ static void cache_block_size(int *bs,int *cbs)
 
    cbs[0]=bs[0];
 
-   // further divide subblock into 4, 3 or 2 cache block sizes
    for (mu=1;mu<4;mu++)
    {
       if ((bs[mu]%4)==0)
@@ -98,7 +97,7 @@ static void update_ipt0(int *bs,int *bo,int *ofs)
                y3=x3+bo[3];
 
                ix=y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
-               ieo=((y0+y1+y2+y3)&0x1); // 0 if even, 1 if odd
+               ieo=((y0+y1+y2+y3)&0x1);
                ipt[ix]=ofs[ieo];
                ofs[ieo]+=1;
             }
@@ -148,7 +147,6 @@ static void update_ipt2(int *ofs)
 
    subblock_sizes(sbs);
 
-   // subblocks divide thread size over two
    for (i0=0;i0<2;i0++)
    {
       for (i1=0;i1<2;i1++)
