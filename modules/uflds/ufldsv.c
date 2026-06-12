@@ -45,14 +45,7 @@
 #include "uflds.h"
 #include "global.h"
 
-#define N0 (NPROC0*L0)
-#define N1 (NPROC1*L1)
-#define N2 (NPROC2*L2)
-#define N3 (NPROC3*L3)
-
-
 static su3_mat_field *udbv=NULL;
-
 
 static void alloc_udv(void)
 {
@@ -120,10 +113,15 @@ void random_udv(void)
    set_bc();
 }
 
-void update_su3_mat_field(su3_mat_field *udbv)
+void update_su3_mat_field(void)
 {
-   #pragma omp target update \
-   to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
-   to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
-   to(udbv->c3.base[0 : 6 * udbv->c3.volume])
+   if (udbv!=NULL)
+   {
+      #pragma omp target update \
+      to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
+      to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
+      to(udbv->c3.base[0 : 6 * udbv->c3.volume])
+   }
+   else
+      printf("udbv hasn't been initialized");
 }
