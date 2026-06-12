@@ -57,9 +57,8 @@
 
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
-static su3_dble *udb;
 static su3_mat_field *udbv;
-prof_section lcl_plq_smv_s = {.name = "local_plaq_sum_dblev"};
+prof_section s_lcl_plq_smv = {.name = "local_plaq_sum_dblev"};
 
 
 #pragma omp declare target
@@ -108,7 +107,7 @@ static qflt local_plaq_sum_dblev(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udbv=udfldv();
-   prof_begin(&lcl_plq_smv_s);
+   prof_begin(&s_lcl_plq_smv);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
@@ -145,7 +144,7 @@ static qflt local_plaq_sum_dblev(int iw)
       }
       pa += local_pa;
    }
-   prof_end(&lcl_plq_smv_s);
+   prof_end(&s_lcl_plq_smv);
    acc_qflt(pa,rqsm.q);
    return rqsm;
 }

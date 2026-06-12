@@ -33,8 +33,8 @@ extern double local_plaq_dble(int n);
 extern double plaq_sum_dble(int icom);
 extern double plaq_wsum_dble(int icom);
 extern double plaq_action_slices(double *asl);
-extern prof_section lcl_plq_sm_s;
-extern prof_section lcl_plq_smv_s;
+extern prof_section s_lcl_plq_sm;
+extern prof_section s_lcl_plq_smv;
 
 /* PLAQ_SUMV_C */
 extern double local_plaq_dblev(int n);
