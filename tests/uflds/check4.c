@@ -87,6 +87,22 @@ TEST(PlaqSum, UnitField)
    exp1=3.0*nplaq1_g+d1_g+d2_g;
    exp2=3.0*nplaq2_g+d1_g+d2_g;
 
+   MT_PRINT("Expected values: %f, %f", exp1, exp2);
+   EXPECT_NEAR(p1, exp1, 1.0e-15*fabs(exp1)+1.0e-14);
+   EXPECT_NEAR(p2, exp2, 1.0e-15*fabs(exp2)+1.0e-14);
+}
+
+
+TEST(PlaqSum, UnitFieldSoA)
+{
+   double p1,p2,exp1,exp2;
+
+   p1=plaq_sum_dblev(1);
+   p2=plaq_wsum_dblev(1);
+   exp1=3.0*nplaq1_g+d1_g+d2_g;
+   exp2=3.0*nplaq2_g+d1_g+d2_g;
+
+   MT_PRINT("Expected values: %f, %f", exp1, exp2);
    EXPECT_NEAR(p1, exp1, 1.0e-15*fabs(exp1)+1.0e-14);
    EXPECT_NEAR(p2, exp2, 1.0e-15*fabs(exp2)+1.0e-14);
 }
@@ -95,13 +111,38 @@ TEST(PlaqSum, UnitField)
 TEST(PlaqSum, ActionSlices)
 {
    int t;
-   double p2,act1,sum,d;
+   double p2,act1,sum;
    double asl[N0];
    static su3_dble *udb;
    udb=udfld();
 
    random_ud();
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+
+   p2=plaq_wsum_dble(1);
+   act1=plaq_action_slices(asl);
+
+   /* act1 must equal 2*(3*nplaq2 - p2) */
+   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), 1.0e-15*fabs(act1)+1.0e-14);
+
+   /* for bc==0 or bc==3 act1 must equal the sum of slices */
+   if ((bc_g==0)||(bc_g==3))
+   {
+      sum=0.0;
+      for (t=0;t<N0;t++) sum+=asl[t];
+      EXPECT_NEAR(act1, sum, 1.0e-10*fabs(act1)+1.0e-14);
+   }
+}
+
+
+TEST(PlaqSum, ActionSlicesSoA)
+{
+   int t;
+   double p2,act1,sum,d;
+   double asl[N0];
+
+   random_udv();
+   update_su3_mat_field();
 
    p2=plaq_wsum_dble(1);
    act1=plaq_action_slices(asl);
@@ -209,13 +250,32 @@ TEST(PlaqSum, SumVsWsum)
    EXPECT_NEAR(p2, expected, 1.0e-14);
 }
 
+TEST(PlaqSum, SumVsWsumSoA)
+{
+   double p1,p2,expected;
+   
+   if (bc_g!=1) return;
+   
+   random_udv();
+   update_su3_mat_field();
+
+   p1=plaq_sum_dble(1);
+   p2=plaq_wsum_dble(1);
+   expected=p1-9.0*(double)(N1*N2*N3);
+
+   EXPECT_NEAR(p2, expected, 1.0e-14);
+}
+
 
 static mt_test_t tests[] = {
    MT_TEST(PlaqSum, UnitField),
+   MT_TEST(PlaqSum, UnitFieldSoA),
    MT_TEST(PlaqSum, ActionSlices),
+   MT_TEST(PlaqSum, ActionSlicesSoA),
    MT_TEST(PlaqSum, GaugeInvariance),
    MT_TEST(PlaqSum, TranslationInvariance),
    MT_TEST(PlaqSum, SumVsWsum),
+   MT_TEST(PlaqSum, SumVsWsumSoA),
 };
 
 
