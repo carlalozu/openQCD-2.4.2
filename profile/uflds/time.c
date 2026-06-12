@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
    #pragma omp target enter data map(to : flush_buf[:flush_size])
    
    flush_cache(flush_size, flush_buf);
-   random_udv();
+   random_ud();
    prof_end(&set_params);
    
    prof_reset(&compute);

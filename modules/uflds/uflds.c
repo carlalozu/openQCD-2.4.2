@@ -93,7 +93,6 @@ static complex_dble phase[3] ALIGNED16 ={{0.0,0.0}};
 static su3 *ub=NULL;
 static su3_dble *udb=NULL;
 
-
 static void alloc_u(void)
 {
    size_t n;

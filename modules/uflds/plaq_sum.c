@@ -94,7 +94,6 @@ double local_plaq_dble(int n){
    return pa;
 }
 
-
 static qflt local_plaq_sum_dble(int iw)
 {
    int bc,k,ix,t,n;
