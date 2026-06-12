@@ -1,55 +1,28 @@
 
 /*******************************************************************************
 *
-* File uflds.c
+* File ufldsv.c
 *
 * Copyright (C) 2006, 2010-2016, 2021 Martin Luescher, Isabel Campos
 *
 * This software is distributed under the terms of the GNU General Public
 * License (GPL)
 *
-* Allocation and initialization of the global gauge fields.
+* Allocation and initialization of the global gauge field in SoA vector layout.
 *
-*   su3 *ufld(void)
-*     Returns the base address of the single-precision gauge field. If it
-*     is not already allocated, the field is allocated and initialized to
-*     unity.
+*   su3_mat_field *udfldv(void)
+*     Returns a pointer to the double-precision gauge field in SoA vector
+*     layout. If it is not already allocated, the field is allocated and
+*     initialized to unity. Then the boundary conditions are set according
+*     to the data base by calling set_bc() [bcnds.c].
 *
-*   su3_dble *udfld(void)
-*     Returns the base address of the double-precision gauge field. If it
-*     is not already allocated, the field is allocated and initialized to
-*     unity. Then the boundary conditions are set according to the data
-*     base by calling set_bc() [bcnds.c].
-*
-*   void random_ud(void)
+*   void random_udv(void)
 *     Initializes the active double-precision link variables to uniformly
 *     distributed random SU(3) matrices. Then the boundary conditions are
 *     set according to the data base by calling set_bc() [bcnds.c].
 *
-*   void set_ud_phase(void)
-*     Multiplies the double-precision link variables U(x,k) by the phase
-*     factor exp{i*theta[k-1]/N[k]}, for all k=1,2,3, where N[mu] is the
-*     size of the (global) lattice in direction mu. The angles theta[0],
-*     theta[1],theta[2] are set by set_bc_parms() [flags/lat_parms.c]. If
-*     periodic boundary conditions are chosen in time, the variables U(x,0)
-*     at global time N[0]-1 are multiplied by -1. The program does nothing
-*     if the phase is already set according to the flags data base.
-*
-*   void unset_ud_phase(void)
-*     Removes the phase of the double-precision link variables previously
-*     set by set_ud_phase(). No action is performed if the phase is not
-*     set according to the flags data base.
-*
-*   void renormalize_ud(void)
-*     Projects the active double-precision link variables back to SU(3).
-*     The static link variables are left untouched. An error occurs if
-*     the phase of the field is set according to the flags data base [see
-*     set_ud_phase() and unset_ud_phase()].
-*
-*   void assign_ud2u(void)
-*     Assigns the double-precision gauge field to the single-precision
-*     gauge field. All link variables in the local field, including the
-*     static ones, are copied.
+*   void update_su3_mat_field(void)
+*     Update values of su3_mat_field on the GPU.
 *
 * The programs in this module are assumed to be called by the OpenMP master
 * thread on all MPI processes simultaneously. It is taken for granted that
@@ -131,7 +104,8 @@ void random_udv(void)
 
 #pragma omp parallel private(k,ix,iz,t,udv)
    {
-      for (int iy=0;iy<VOLUME;iy++){
+      k=omp_get_thread_num();
+      for (int iy=k*VOLUME_TRD;iy<(k+1)*VOLUME_TRD;iy++){
          for (int mu=0;mu<4;mu++) {
             ix=ipt[iy];
             t=global_time(ix);
@@ -144,8 +118,12 @@ void random_udv(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
+}
+
+void update_su3_mat_field(su3_mat_field *udbv)
+{
    #pragma omp target update \
-    to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
-    to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
-    to(udbv->c3.base[0 : 6 * udbv->c3.volume])
+   to(udbv->c1.base[0 : 6 * udbv->c1.volume]) \
+   to(udbv->c2.base[0 : 6 * udbv->c2.volume]) \
+   to(udbv->c3.base[0 : 6 * udbv->c3.volume])
 }

@@ -29,9 +29,9 @@ LATTICE = bcnds geogen geometry uidx
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
-SU3FCTS = su3prod su3ren cm3x3 random_su3 su3prodv
+SU3FCTS = su3prod su3ren cm3x3 random_su3 su3prod
 
-UFLDS = bstap plaq_sum shift udcom uflds ufldsv uinit
+UFLDS = bstap plaq_sum shift udcom uflds uflds uinit
 
 UTILS = endian error mutils qsum utils wspace
 
