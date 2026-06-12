@@ -39,7 +39,7 @@
 *
 *******************************************************************************/
 
-#define PLAQ_SUM_C
+#define PLAQ_SUMV_C
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -59,9 +59,7 @@ static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
 static su3_mat_field *udbv;
-prof_section compute = {.name = "local_plaq_sum_dble"};
-
-
+prof_section lcl_plq_smv_s = {.name = "local_plaq_sum_dblev"};
 
 
 #pragma omp declare target
@@ -79,6 +77,8 @@ static double plaq_dblev(su3_mat_field *udbv,int n,int ix)
    cm3x3_retr(&wd1,&wd2,&sm);
 
    return sm;
+}
+#pragma omp end declare target
 
 double local_plaq_dblev(int n){
    udbv=udfldv();
@@ -87,13 +87,13 @@ double local_plaq_dblev(int n){
    {
       int k=omp_get_thread_num();
       for (int ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
-         pa += plaq_dblev(n, ix);
+         pa += plaq_dblev(udbv, n, ix);
    }
    return pa;
 }
 
 
-static qflt local_plaq_sum_dble(int iw)
+static qflt local_plaq_sum_dblev(int iw)
 {
    double wp,pa=0.0;
    qflt rqsm;
@@ -108,7 +108,7 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udbv=udfldv();
-   prof_begin(&compute);
+   prof_begin(&lcl_plq_smv_s);
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
@@ -145,7 +145,7 @@ static qflt local_plaq_sum_dble(int iw)
       }
       pa += local_pa;
    }
-   prof_end(&compute);
+   prof_end(&lcl_plq_smv_s);
    acc_qflt(pa,rqsm.q);
    return rqsm;
 }
@@ -192,3 +192,105 @@ double plaq_wsum_dblev(int icom)
    return rqsm.q[0];
 }
 
+double plaq_action_slicesv(double *asl)
+{
+   int bc,k,ix,t,n;
+   double smE,smB;
+
+   if (query_flags(UDBUF_UP2DATE)!=1)
+      copy_bnd_ud();
+   else
+      set_uidx();
+
+   bc=bc_type();
+   udbv=udfldv();
+
+   for (t=0;t<N0;t++)
+   {
+      qsm[t]=rqsmE[t].q;
+      rqsmE[t].q[0]=0.0;
+      rqsmE[t].q[1]=0.0;
+
+      qsm[t+N0]=rqsmB[t].q;
+      rqsmB[t].q[0]=0.0;
+      rqsmB[t].q[1]=0.0;
+   }
+
+#pragma omp parallel private(k,ix,t,n,smE,smB)
+   {
+      k=omp_get_thread_num();
+
+      for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
+      {
+         t=global_time(ix);
+         smE=0.0;
+         smB=0.0;
+
+         if ((t<(N0-1))||(bc!=0))
+         {
+            for (n=0;n<3;n++)
+               smE+=(3.0-plaq_dblev(udbv,n,ix));
+         }
+
+         if ((t>0)||(bc!=1))
+         {
+            for (n=3;n<6;n++)
+               smB+=(3.0-plaq_dblev(udbv,n,ix));
+         }
+
+#pragma omp critical
+         {
+            acc_qflt(smE,rqsmE[t].q);
+            acc_qflt(smB,rqsmB[t].q);
+         }
+      }
+   }
+
+   global_qsum(2*N0,qsm,qsm);
+
+   if (bc!=3)
+      add_qflt(rqsmE[0].q,rqsmB[0].q,rqsmB[0].q);
+   else
+   {
+      rqsmB[0].q[0]*=2.0;
+      rqsmB[0].q[1]*=2.0;
+      add_qflt(rqsmE[0].q,rqsmB[0].q,rqsmB[0].q);
+      add_qflt(rqsmE[N0-1].q,rqsmB[0].q,rqsmB[0].q);
+   }
+
+   if (bc==0)
+   {
+      for (t=1;t<(N0-1);t++)
+      {
+         rqsmB[t].q[0]*=2.0;
+         rqsmB[t].q[1]*=2.0;
+         add_qflt(rqsmE[t].q,rqsmB[t].q,rqsmB[t].q);
+         add_qflt(rqsmE[t-1].q,rqsmB[t].q,rqsmB[t].q);
+      }
+
+      add_qflt(rqsmE[N0-2].q,rqsmB[N0-1].q,rqsmB[N0-1].q);
+   }
+   else
+   {
+      for (t=1;t<N0;t++)
+      {
+         rqsmB[t].q[0]*=2.0;
+         rqsmB[t].q[1]*=2.0;
+         add_qflt(rqsmE[t].q,rqsmB[t].q,rqsmB[t].q);
+         add_qflt(rqsmE[t-1].q,rqsmB[t].q,rqsmB[t].q);
+      }
+   }
+
+   for (t=0;t<N0;t++)
+   {
+      asl[t]=rqsmB[t].q[0];
+
+      if (t>0)
+         add_qflt(rqsmB[t].q,rqsmB[0].q,rqsmB[0].q);
+   }
+
+   if ((bc==1)||(bc==2))
+      add_qflt(rqsmE[N0-1].q,rqsmB[0].q,rqsmB[0].q);
+
+   return rqsmB[0].q[0];
+}
