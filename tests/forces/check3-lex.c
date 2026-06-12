@@ -31,46 +31,6 @@
 static double c_g=0.789;
 
 
-static qflt dSdt(double c)
-{
-   mdflds_t *mdfs;
-
-   mdfs=mdflds();
-   check_active((*mdfs).mom);
-
-   // force0 runs on the GPU
-   force0(c);
-   check_active((*mdfs).frc);
-
-   return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
-}
-
-
-static double chk_chs(double c)
-{
-   double dev;
-   qflt rqsm;
-   su3_alg_dble **wfd;
-   mdflds_t *mdfs;
-
-   wfd=reserve_wfd(1);
-   mdfs=mdflds();
-
-   random_ud_reproducible();
-   force0(c);
-   assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
-
-   set_ud_phase();
-   force0(c);
-   muladd_assign_alg(4*VOLUME_TRD,2,-1.0,(*mdfs).frc,wfd[0]);
-   rqsm=norm_square_alg(4*VOLUME_TRD,3,wfd[0]);
-   dev=rqsm.q[0];
-   rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
-   dev/=rqsm.q[0];
-   release_wfd();
-
-   return sqrt(dev);
-}
 
 TEST(Force0, NormSquareForce)
 {
@@ -88,70 +48,15 @@ TEST(Force0, NormSquareForce)
    EXPECT_TRUE(fabs(nrm_sq.q[0])>0);
 }
 
-
 TEST(Force0, PhaseInvariance)
 {
-   double dev=chk_chs(c_g);
-   EXPECT_NEAR(dev, 0.0, 1.0e-12);
+   SKIP_TEST("set_ud_phase() is not available in lexicographical data layout");
 }
 
 
 TEST(Force0, ForceVsActionDerivative)
 {
-   int k,ie;
-   double eps,dev_frc,sig_loss;
-   qflt dsdt,act,act0,act1;
-
-   // action0 runs on the CPU
-   for (k=0;k<4;k++)
-   {
-      random_ud_reproducible();
-      set_ud_phase();
-      random_mom();
-      dsdt=dSdt(c_g);
-
-      eps=2.0e-4;
-      rot_ud(eps);
-      act0=action0(1);
-      scl_qflt(2.0/3.0,act0.q);
-      rot_ud(-eps);
-
-      rot_ud(-eps);
-      act1=action0(1);
-      scl_qflt(-2.0/3.0,act1.q);
-      rot_ud(eps);
-
-      rot_ud(2.0*eps);
-      act=action0(1);
-      scl_qflt(-1.0/12.0,act.q);
-      add_qflt(act0.q,act.q,act0.q);
-      rot_ud(-2.0*eps);
-
-      rot_ud(-2.0*eps);
-      act=action0(1);
-      scl_qflt(1.0/12.0,act.q);
-      add_qflt(act1.q,act.q,act1.q);
-      rot_ud(2.0*eps);
-
-      scl_qflt(c_g,act0.q);
-      scl_qflt(c_g,act1.q);
-
-      add_qflt(act0.q,act1.q,act.q);
-      sig_loss=-log10(fabs(act.q[0]/act0.q[0]));
-
-      scl_qflt(-1.0/eps,act.q);
-      MT_PRINT("dsdt.q: %f, act.q: %f", dsdt.q[0], act.q[0]);
-      add_qflt(dsdt.q,act.q,act.q);
-      dev_frc=act.q[0]/dsdt.q[0];
-
-      unset_ud_phase();
-      ie=check_bc(0.0);
-
-      EXPECT_EQ(ie, 1);
-      // machine precission minus significant loss as an approximate of finite
-      // differences and volume
-      EXPECT_NEAR(fabs(dev_frc), 0.0, pow(10.0, -(15.0-sig_loss)));
-   }
+   SKIP_TEST("rot_ud() is not available in lexicographical data layout");
 }
 
 

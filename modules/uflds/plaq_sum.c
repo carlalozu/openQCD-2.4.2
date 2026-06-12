@@ -63,6 +63,7 @@
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
 static su3_dble *udb;
+prof_section compute = {.name = "local_plaq_sum_dble"};
 
 
 static double plaq_dble(int n,int ix)
@@ -81,6 +82,17 @@ static double plaq_dble(int n,int ix)
    return sm;
 }
 
+double local_plaq_dble(int n){
+   udb=udfld();
+   double pa;
+   #pragma omp parallel reduction(+:pa)
+   {
+      int k=omp_get_thread_num();
+      for (int ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
+         pa += plaq_dble(n, ix);
+   }
+   return pa;
+}
 
 static qflt local_plaq_sum_dble(int iw)
 {
@@ -99,6 +111,7 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[1]=0.0;
    udb=udfld();
 
+   prof_begin(&compute);
 #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    {
       k=omp_get_thread_num();
@@ -140,7 +153,7 @@ static qflt local_plaq_sum_dble(int iw)
          acc_qflt(pa,rqsm.q);
       }
    }
-
+   prof_end(&compute);
    return rqsm;
 }
 

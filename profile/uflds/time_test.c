@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
    phi[1] = -0.534;
    phi_prime[0] = 0.912;
    phi_prime[1] = 0.078;
-   theta[0] = 0.0;
-   theta[1] = 0.0;
-   theta[2] = 0.0;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
    set_bc_parms(bc, 1.0, 1.0, 1.0, 1.0, phi, phi_prime, theta);
    print_bc_parms(0x0);
 
@@ -121,7 +121,6 @@ int main(int argc, char *argv[])
       printf("Local size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of teams: %i\n", N_TEAMS);
       printf("Number of repetitions: %i\n", nt / 2);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", wdt);
       printf("Flops: %d\n", flops); 

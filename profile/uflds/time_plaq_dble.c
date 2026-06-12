@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
 
    int my_rank, bc, count;
    double phi[2], phi_prime[2], theta[3];
-   FILE *flog = NULL;
    static su3_dble *udb;
 
    mpi_init(argc, argv);
@@ -57,11 +56,10 @@ int main(int argc, char *argv[])
    prof_begin(&s_total);
    if (my_rank == 0)
    {
-      flog = freopen("time_plaq_dble.log", "w", stdout);
 
       printf("\n");
-      printf("Plaquette sums of the double-precision gauge field\n");
-      printf("--------------------------------------------------\n\n");
+      printf("Plaquette action (plaq_dble) of the double-precision gauge field\n");
+      printf("--------------------------------------------------------------\n\n");
 
       print_lattice_sizes();
 
@@ -78,29 +76,24 @@ int main(int argc, char *argv[])
    phi[1] = -0.534;
    phi_prime[0] = 0.912;
    phi_prime[1] = 0.078;
-   theta[0] = 0.0;
-   theta[1] = 0.0;
-   theta[2] = 0.0;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
    set_bc_parms(bc, 1.0, 1.0, 1.0, 1.0, phi, phi_prime, theta);
    print_bc_parms(0x0);
 
    start_ranlux(0, 12345);
    geometry();
+   udb = udfld();
    
    if (my_rank == 0)
       printf("Running %d warmup iterations...\n", WARMUP_ITERS);
 
+   double pa_warm;
    for (count = 0; count < WARMUP_ITERS; count++)
    {
-      random_ud();
-      udb = udfld();
-      #pragma omp target update to(udb[0:4*VOLUME])
-
-      double pa_warm = 0.0;
-      #pragma omp target teams distribute parallel for reduction(+:pa_warm)
-      for (int ix = 0; ix < VOLUME; ix++)
-         pa_warm += plaq_dble(udb, 0, ix);
-
+      random_ud_reproducible();
+      pa_warm = local_plaq_dble(0);
       (void)pa_warm;
    }
    MPI_Barrier(MPI_COMM_WORLD);
@@ -110,30 +103,24 @@ int main(int argc, char *argv[])
 
 
    double pa = 0.0;
+   udb = udfld();
 
    for (count = 0; count < PROFILE_ITERS; count++)
    {
-      /* --- prepare: field generation ----------------------------------- */
       MPI_Barrier(MPI_COMM_WORLD);
       prof_begin(&s_prepare);
-      random_ud();
-      udb = udfld();
+      random_ud_reproducible();
       prof_end(&s_prepare);
       
-      /* --- upload:  H2D transfer --------------------------------------- */
       prof_begin(&s_upload);
       #pragma omp target update to(udb[0:4*VOLUME])
       prof_end(&s_upload);
 
-      /* --- kernel: plaq_dble ------------------------------------------- */
       for (int n = 0; n < 6; n++)
       {
          MPI_Barrier(MPI_COMM_WORLD);
-         pa = 0.0;
          prof_begin(&s_kernel);
-         #pragma omp target teams distribute parallel for reduction(+:pa)
-         for (int ix = 0; ix < VOLUME; ix++)
-            pa += plaq_dble(udb, n, ix);
+         pa = local_plaq_dble(n);
          prof_end(&s_kernel);
       }
 
@@ -149,7 +136,7 @@ int main(int argc, char *argv[])
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions for final time: %i\n", s_kernel.count);
+      printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
       printf("Average time for plaq_dble (sec): %.9f\n", avg_time);
       printf("Flops: %d\n", flops); 
       printf("Total performance for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
@@ -161,9 +148,6 @@ int main(int argc, char *argv[])
       prof_report(&s_kernel);
       prof_report(&s_total);
    }
-
-   if (my_rank == 0)
-      fclose(flog);
 
    MPI_Finalize();
    exit(0);

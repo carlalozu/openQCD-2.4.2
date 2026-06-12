@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
    int my_rank, bc;
    double phi[2], phi_prime[2], theta[3];
    static su3_dble *udb;
-   FILE *flog = NULL;
 
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -57,11 +56,10 @@ int main(int argc, char *argv[])
 
    if (my_rank == 0)
    {
-      flog = freopen("time_plaq_sum_dble.log", "w", stdout);
 
       printf("\n");
-      printf("Plaquette sums of the double-precision gauge field\n");
-      printf("--------------------------------------------------\n\n");
+      printf("Total plaquette action (plaq_sum) of the double-precision gauge field\n");
+      printf("-------------------------------------------------------------------\n\n");
 
       print_lattice_sizes();
 
@@ -78,43 +76,37 @@ int main(int argc, char *argv[])
    phi[1] = -0.534;
    phi_prime[0] = 0.912;
    phi_prime[1] = 0.078;
-   theta[0] = 0.0;
-   theta[1] = 0.0;
-   theta[2] = 0.0;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
    set_bc_parms(bc, 1.0, 1.0, 1.0, 1.0, phi, phi_prime, theta);
    print_bc_parms(0x0);
 
    start_ranlux(0, 12345);
    geometry();
 
-   /* -------------------------------------------------------------------------
-    * Warmup: randomise field and call plaq_sum_dble without recording.
-    * ---------------------------------------------------------------------- */
    if (my_rank == 0)
       printf("Running %d warmup iterations...\n", WARMUP_ITERS);
 
    for (int count = 0; count < WARMUP_ITERS; count++)
    {
-      random_ud();
+      random_ud_reproducible();
       (void)plaq_sum_dble(1);
    }
 
    if (my_rank == 0)
       printf("Warmup done. Starting timed benchmark...\n\n");
 
-   /* -------------------------------------------------------------------------
-    * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
-    * ---------------------------------------------------------------------- */
    double result = 0.0;
+   udb = udfld();
 
    prof_reset(&compute);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {  
       prof_begin(&s_prepare);
-      random_ud();
+      random_ud_reproducible();
       prof_end(&s_prepare);
-      udb = udfld();
-
+      
       prof_begin(&s_upload);
       #pragma omp target update to(udb[0:4*VOLUME])
       prof_end(&s_upload);
@@ -134,7 +126,7 @@ int main(int argc, char *argv[])
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
-      printf("Number of repetitions for final time: %i\n", s_kernel.count);
+      printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
       printf("Average time for plaq_sum_dble (sec): %.9f\n", avg_time);
       printf("Flops: %d\n", flops); 
       printf("Total performance for plaq_sum_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
@@ -147,9 +139,6 @@ int main(int argc, char *argv[])
       prof_report(&s_kernel);
       prof_report(&s_total);
    }
-
-   if (my_rank == 0)
-      fclose(flog);
 
    MPI_Finalize();
    exit(0);

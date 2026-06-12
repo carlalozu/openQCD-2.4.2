@@ -80,7 +80,7 @@
 #define VOLUME_TRD (L0_TRD*L1_TRD*L2_TRD*L3_TRD)
 #define NTHREAD (VOLUME/VOLUME_TRD)
 
-#define ALIGN 6
+#define ALIGN 8
 
 #if defined MAIN_PROGRAM
 #pragma omp declare target
@@ -91,6 +91,7 @@ int sbvol[16];
 
 int *ipt=NULL;
 int (*iup)[4]=NULL;
+int (*iupT)[VOLUME]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
 #pragma omp end declare target
@@ -103,6 +104,7 @@ extern int sbvol[16];
 
 extern int *ipt;
 extern int (*iup)[4];
+extern int (*iupT)[VOLUME];
 extern int (*idn)[4];
 extern int *map;
 #pragma omp end declare target

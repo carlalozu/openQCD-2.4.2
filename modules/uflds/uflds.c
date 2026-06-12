@@ -227,17 +227,16 @@ void random_ud_reproducible(void)
 {
    int bc;
    int k,ix,t,ifc;
-   su3_dble *ud;
 
    if (udb==NULL)
       alloc_ud();
 
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,t,ifc,ud)
+#pragma omp parallel private(k,ix,t,ifc)
    {
       k=omp_get_thread_num();
-      for (int iy=0;iy<VOLUME;iy++){
+      for (int iy=k*VOLUME_TRD;iy<(k+1)*VOLUME_TRD;iy++){
          for (int mu = 0; mu < 4; mu++) {
             ix=ipt[iy];
             t=global_time(ix);

@@ -25,9 +25,7 @@ extern su3_dble *bstap(void);
 extern void set_bstap(void);
 
 /* PLAQ_SUM_C */
-#ifndef PLAQ_SUM_C
-extern double plaq_dble(su3_dble *udb, int n,int ix);
-#endif
+extern double local_plaq_dble(int n);
 extern double plaq_sum_dble(int icom);
 extern double plaq_wsum_dble(int icom);
 extern double plaq_action_slices(double *asl);
