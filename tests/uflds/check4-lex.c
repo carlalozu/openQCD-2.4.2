@@ -32,6 +32,8 @@ static int    bc_g;
 static double phi_g[2],phi_prime_g[2];
 static double nplaq1_g,nplaq2_g,d1_g,d2_g;
 
+#define RELTOL 1.0e-14
+#define ABSTOL VOLUME*DBL_EPSILON
 
 static void compute_expected(void)
 {
@@ -87,8 +89,8 @@ TEST(PlaqSum, UnitField)
    exp1=3.0*nplaq1_g+d1_g+d2_g;
    exp2=3.0*nplaq2_g+d1_g+d2_g;
 
-   EXPECT_NEAR(p1, exp1, 1.0e-15*fabs(exp1)+1.0e-14);
-   EXPECT_NEAR(p2, exp2, 1.0e-15*fabs(exp2)+1.0e-14);
+   EXPECT_NEAR(p1, exp1, RELTOL*fabs(exp1)+ABSTOL);
+   EXPECT_NEAR(p2, exp2, RELTOL*fabs(exp2)+ABSTOL);
 }
 
 
@@ -107,7 +109,7 @@ TEST(PlaqSum, ActionSlices)
    act1=plaq_action_slices(asl);
 
    /* act1 must equal 2*(3*nplaq2 - p2) */
-   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), 1.0e-15*fabs(act1)+1.0e-14);
+   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), RELTOL*fabs(act1)+ABSTOL);
 
    /* for bc==0 or bc==3 act1 must equal the sum of slices */
    if ((bc_g==0)||(bc_g==3))
@@ -115,7 +117,7 @@ TEST(PlaqSum, ActionSlices)
       sum=0.0;
       for (t=0;t<N0;t++) sum+=asl[t];
       d=fabs(act1-sum);
-      EXPECT_NEAR(d, 0.0, 1.0e-10*fabs(act1)+1.0e-14);
+      EXPECT_NEAR(d, 0.0, RELTOL*fabs(act1)+ABSTOL);
    }
 }
 
@@ -146,7 +148,7 @@ TEST(PlaqSum, SumVsWsum)
    p2=plaq_wsum_dble(1);
    expected=p1-9.0*(double)(N1*N2*N3);
 
-   EXPECT_NEAR(p2, expected, 1.0e-14);
+   EXPECT_NEAR(p2, expected, RELTOL*fabs(p2)+ABSTOL);
 }
 
 
@@ -166,9 +168,10 @@ int main(int argc,char *argv[])
 
    mpi_init(argc,argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&my_rank);
-
+   
    if (my_rank==0)
    {
+      printf("\nRunning tests UFLDS (check4-lex.c)\n");
       print_lattice_sizes();
 
       bc=find_opt(argc,argv,"-bc");
