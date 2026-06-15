@@ -128,7 +128,7 @@ int main(int argc,char *argv[])
 
    if (my_rank==0)
    {
-      printf("\nRunning tests UFLDS (check5.c)\n");
+      printf("\nRunning tests UFLDS, compare CPU and GPU implementation (check5.c)\n");
       printf("Absolute tolerance: %e\n",ABSTOL);
       print_lattice_sizes();
    }

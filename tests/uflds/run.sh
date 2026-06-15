@@ -30,7 +30,6 @@ make -f Makefile.gpu -j || exit 1
 
 echo "GPU tests" >> test.log
 ./check4 >> test.log
-echo "GPU tests" >> test.log
 ./check5 >> test.log
 
 make -f Makefile.gpu-lex clean
@@ -38,7 +37,7 @@ make -f Makefile.gpu-lex -j || exit 1
 
 echo "GPU tests lex" >> test.log
 ./check4-lex >> test.log
-
+./check5 >> test.log
 
 #  with 4 OpenMP threads
 perl -i -pe "s/#define L0 \\d+/#define L0 4/" $ROOT/include/global.h
@@ -58,7 +57,6 @@ make -f Makefile.gpu -j || exit 1
 
 echo "GPU tests" >> test.log
 ./check4 >> test.log
-echo "GPU tests" >> test.log
 ./check5 >> test.log
 
 make -f Makefile.gpu-lex clean
@@ -66,3 +64,4 @@ make -f Makefile.gpu-lex -j || exit 1
 
 echo "GPU tests lex" >> test.log
 ./check4-lex >> test.log
+./check5 >> test.log
