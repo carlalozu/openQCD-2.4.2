@@ -113,7 +113,7 @@ TEST(PlaqSum, UnitFieldSoA)
 TEST(PlaqSum, ActionSlices)
 {
    int t;
-   double p2,act1,sum;
+   double p2,act1,sum,exp1;
    double asl[N0];
    static su3_dble *udb;
    udb=udfld();
@@ -123,9 +123,10 @@ TEST(PlaqSum, ActionSlices)
 
    p2=plaq_wsum_dble(1);
    act1=plaq_action_slices(asl);
+   exp1=2.0*(3.0*nplaq2_g-p2);
 
    /* act1 must equal 2*(3*nplaq2 - p2) */
-   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), RELTOL*fabs(act1)+ABSTOL);
+   EXPECT_NEAR(act1, exp1, RELTOL*fabs(act1)+ABSTOL);
 
    /* for bc==0 or bc==3 act1 must equal the sum of slices */
    if ((bc_g==0)||(bc_g==3))
@@ -140,7 +141,7 @@ TEST(PlaqSum, ActionSlices)
 TEST(PlaqSum, ActionSlicesSoA)
 {
    int t;
-   double p2,act1,sum,d;
+   double p2,act1,sum,d,exp1;
    double asl[N0];
 
    random_udv();
@@ -148,9 +149,10 @@ TEST(PlaqSum, ActionSlicesSoA)
 
    p2=plaq_wsum_dble(1);
    act1=plaq_action_slices(asl);
+   exp1=2.0*(3.0*nplaq2_g-p2);
 
    /* act1 must equal 2*(3*nplaq2 - p2) */
-   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), RELTOL*fabs(act1)+ABSTOL);
+   EXPECT_NEAR(act1, exp1, RELTOL*fabs(act1)+ABSTOL);
 
    /* for bc==0 or bc==3 act1 must equal the sum of slices */
    if ((bc_g==0)||(bc_g==3))
@@ -292,6 +294,7 @@ int main(int argc,char *argv[])
    if (my_rank==0)
    {
       printf("\nRunning tests UFLDS (check4.c)\n");
+      printf("Absolute tolerance: %e\n",ABSTOL);
       print_lattice_sizes();
 
       bc=find_opt(argc,argv,"-bc");
