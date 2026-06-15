@@ -37,14 +37,14 @@ static int mt_rank_;
 #define EXPECT_TRUE(expr) \
    do { if (!(expr)) { \
       if (mt_rank_==0) \
-         printf("    [FAIL] %s:%d: %s\n", __FILE__, __LINE__, #expr); \
+         printf("[   FAIL   ] %s:%d: %s\n", __FILE__, __LINE__, #expr); \
       mt_failures_++; \
    } } while (0)
 
 #define EXPECT_EQ(a, b) \
    do { if ((a)!=(b)) { \
       if (mt_rank_==0) \
-         printf("    [FAIL] %s:%d: %s != %s\n", __FILE__, __LINE__, #a, #b); \
+         printf("[   FAIL   ] %s:%d: %s != %s\n", __FILE__, __LINE__, #a, #b); \
       mt_failures_++; \
    } } while (0)
 
@@ -63,7 +63,7 @@ static int mt_rank_;
       double _a=(double)(a), _b=(double)(b), _t=(double)(tol); \
       if (fabs(_a-_b)>_t) { \
          if (mt_rank_==0) \
-            printf("    [FAIL] %s:%d: |%.10g - %.10g| = %.2e, tol=%.2e\n", \
+            printf("[   FAIL   ] %s:%d: |%.10g - %.10g| = %.2e, tol=%.2e\n", \
                    __FILE__, __LINE__, _a, _b, fabs(_a-_b), _t); \
          mt_failures_++; \
       } \

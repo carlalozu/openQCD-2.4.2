@@ -18,21 +18,26 @@ perl -i -pe "s/#define L2_TRD \\d+/#define L2_TRD 4/" $ROOT/include/global.h
 perl -i -pe "s/#define L3_TRD \\d+/#define L3_TRD 4/" $ROOT/include/global.h
 
 > test.log
-# CPU tests
-echo "CPU tests" > test.log
+
 make -f Makefile.cpu clean
 make -f Makefile.cpu -j || exit 1
 
+echo "CPU tests" >> test.log
 ./check4 >> test.log
-./check5 >> test.log
 
-# GPU tests
-echo "GPU tests" >> test.log
 make -f Makefile.gpu clean
 make -f Makefile.gpu -j || exit 1
 
+echo "GPU tests" >> test.log
 ./check4 >> test.log
+echo "GPU tests" >> test.log
 ./check5 >> test.log
+
+make -f Makefile.gpu-lex clean
+make -f Makefile.gpu-lex -j || exit 1
+
+echo "GPU tests lex" >> test.log
+./check4-lex >> test.log
 
 
 #  with 4 OpenMP threads
@@ -42,16 +47,22 @@ perl -i -pe "s/#define L2 \\d+/#define L2 8/" $ROOT/include/global.h
 perl -i -pe "s/#define L3 \\d+/#define L3 4/" $ROOT/include/global.h
 
 
-echo "CPU tests" >> test.log
 make -f Makefile.cpu clean
 make -f Makefile.cpu -j || exit 1
 
+echo "CPU tests" >> test.log
 ./check4 >> test.log
-./check5 >> test.log
 
-echo "GPU tests" >> test.log
 make -f Makefile.gpu clean
 make -f Makefile.gpu -j || exit 1
 
+echo "GPU tests" >> test.log
 ./check4 >> test.log
+echo "GPU tests" >> test.log
 ./check5 >> test.log
+
+make -f Makefile.gpu-lex clean
+make -f Makefile.gpu-lex -j || exit 1
+
+echo "GPU tests lex" >> test.log
+./check4-lex >> test.log
