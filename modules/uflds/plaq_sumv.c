@@ -61,7 +61,6 @@ static su3_mat_field *udbv;
 prof_section s_lcl_plq_smv = {.name = "local_plaq_sum_dblev"};
 
 
-#pragma omp declare target
 static double plaq_dblev(su3_mat_field *udbv,int n,int ix)
 {
    double sm;
@@ -77,15 +76,18 @@ static double plaq_dblev(su3_mat_field *udbv,int n,int ix)
 
    return sm;
 }
-#pragma omp end declare target
 
 double local_plaq_dblev(int n){
+   int k,ix;
    udbv=udfldv();
    double pa;
-   #pragma omp target teams distribute parallel for reduction(+:pa)
-   for (int ix=0;ix<VOLUME;ix++)
+   #pragma omp parallel private(k,ix) reduction(+:pa)
    {
-      pa += plaq_dblev(udbv, n, ix);
+      k=omp_get_thread_num();
+      for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
+      {
+         pa += plaq_dblev(udbv, n, ix);
+      }
    }
    return pa;
 }
@@ -93,10 +95,11 @@ double local_plaq_dblev(int n){
 
 static qflt local_plaq_sum_dblev(int iw)
 {
-   double wp,pa=0.0;
+   int bc,k,ix,t,n;
+   double wp,pa;
    qflt rqsm;
 
-   int bc=bc_type();
+   bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -106,45 +109,49 @@ static qflt local_plaq_sum_dblev(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udbv=udfldv();
+
    prof_begin(&s_lcl_plq_smv);
-   // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
-   #pragma omp target teams distribute parallel for reduction(+:pa)
-   for (int ix=0;ix<VOLUME;ix++)
+   #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    {
-      double local_pa=0.0;
-      int t=global_time(ix);
-      if ((t<(N0-1))||(bc!=0))
+      k=omp_get_thread_num();
+      for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
       {
-         for (int n=0;n<3;n++)
-            local_pa+=plaq_dblev(udbv,n,ix);
-      }
-      
-      if (((t>0)&&(t<(N0-1)))||(bc==3))
-      {
-         for (int n=3;n<6;n++)
-            local_pa+=plaq_dblev(udbv,n,ix);
-      }
-      else if ((t==0)||(bc==0))
-      {
-         if (bc==1)
-            local_pa+=wp*9.0;
+         int t=global_time(ix);
+         pa=0.0;
+
+         if ((t<(N0-1))||(bc!=0))
+         {
+            for (int n=0;n<3;n++)
+               pa+=plaq_dblev(udbv,n,ix);
+         }
+         
+         if (((t>0)&&(t<(N0-1)))||(bc==3))
+         {
+            for (int n=3;n<6;n++)
+               pa+=plaq_dblev(udbv,n,ix);
+         }
+         else if ((t==0)||(bc==0))
+         {
+            if (bc==1)
+               pa+=wp*9.0;
+            else
+            {
+               for (int n=3;n<6;n++)
+                  pa+=wp*plaq_dblev(udbv,n,ix);
+            }
+         }
          else
          {
             for (int n=3;n<6;n++)
-               local_pa+=wp*plaq_dblev(udbv,n,ix);
-         }
-      }
-      else
-      {
-         for (int n=3;n<6;n++)
-            local_pa+=plaq_dblev(udbv,n,ix);
+               pa+=plaq_dblev(udbv,n,ix);
 
-         local_pa+=wp*9.0;
+            pa+=wp*9.0;
+         }
+
+         acc_qflt(pa,rqsm.q);
       }
-      pa += local_pa;
    }
    prof_end(&s_lcl_plq_smv);
-   acc_qflt(pa,rqsm.q);
    return rqsm;
 }
 
