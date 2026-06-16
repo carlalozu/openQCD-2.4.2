@@ -32,6 +32,8 @@ static int    bc_g;
 static double phi_g[2],phi_prime_g[2];
 static double nplaq1_g,nplaq2_g,d1_g,d2_g;
 
+#define RELTOL 1.0e-14
+#define ABSTOL VOLUME*DBL_EPSILON
 
 static void compute_expected(void)
 {
@@ -87,15 +89,31 @@ TEST(PlaqSum, UnitField)
    exp1=3.0*nplaq1_g+d1_g+d2_g;
    exp2=3.0*nplaq2_g+d1_g+d2_g;
 
-   EXPECT_NEAR(p1, exp1, 1.0e-15*fabs(exp1)+1.0e-14);
-   EXPECT_NEAR(p2, exp2, 1.0e-15*fabs(exp2)+1.0e-14);
+   MT_PRINT("Expected values: %f, %f", exp1, exp2);
+   EXPECT_NEAR(p1, exp1, RELTOL*fabs(p1)+ABSTOL);
+   EXPECT_NEAR(p2, exp2, RELTOL*fabs(p2)+ABSTOL);
+}
+
+
+TEST(PlaqSum, UnitFieldSoA)
+{
+   double p1,p2,exp1,exp2;
+
+   p1=plaq_sum_dblev(1);
+   p2=plaq_wsum_dblev(1);
+   exp1=3.0*nplaq1_g+d1_g+d2_g;
+   exp2=3.0*nplaq2_g+d1_g+d2_g;
+
+   MT_PRINT("Expected values: %f, %f", exp1, exp2);
+   EXPECT_NEAR(p1, exp1, RELTOL*fabs(p1)+ABSTOL);
+   EXPECT_NEAR(p2, exp2, RELTOL*fabs(p2)+ABSTOL);
 }
 
 
 TEST(PlaqSum, ActionSlices)
 {
    int t;
-   double p2,act1,sum,d;
+   double p2,act1,sum,exp1;
    double asl[N0];
    static su3_dble *udb;
    udb=udfld();
@@ -105,9 +123,36 @@ TEST(PlaqSum, ActionSlices)
 
    p2=plaq_wsum_dble(1);
    act1=plaq_action_slices(asl);
+   exp1=2.0*(3.0*nplaq2_g-p2);
 
    /* act1 must equal 2*(3*nplaq2 - p2) */
-   EXPECT_NEAR(act1, 2.0*(3.0*nplaq2_g-p2), 1.0e-15*fabs(act1)+1.0e-14);
+   EXPECT_NEAR(act1, exp1, RELTOL*fabs(act1)+ABSTOL);
+
+   /* for bc==0 or bc==3 act1 must equal the sum of slices */
+   if ((bc_g==0)||(bc_g==3))
+   {
+      sum=0.0;
+      for (t=0;t<N0;t++) sum+=asl[t];
+      EXPECT_NEAR(act1, sum, RELTOL*fabs(act1)+ABSTOL);
+   }
+}
+
+
+TEST(PlaqSum, ActionSlicesSoA)
+{
+   int t;
+   double p2,act1,sum,d,exp1;
+   double asl[N0];
+
+   random_udv();
+   update_su3_mat_field();
+
+   p2=plaq_wsum_dble(1);
+   act1=plaq_action_slices(asl);
+   exp1=2.0*(3.0*nplaq2_g-p2);
+
+   /* act1 must equal 2*(3*nplaq2 - p2) */
+   EXPECT_NEAR(act1, exp1, RELTOL*fabs(act1)+ABSTOL);
 
    /* for bc==0 or bc==3 act1 must equal the sum of slices */
    if ((bc_g==0)||(bc_g==3))
@@ -115,7 +160,7 @@ TEST(PlaqSum, ActionSlices)
       sum=0.0;
       for (t=0;t<N0;t++) sum+=asl[t];
       d=fabs(act1-sum);
-      EXPECT_NEAR(d, 0.0, 1.0e-10*fabs(act1)+1.0e-14);
+      EXPECT_NEAR(d, 0.0, RELTOL*fabs(act1)+ABSTOL);
    }
 }
 
@@ -139,23 +184,23 @@ TEST(PlaqSum, GaugeInvariance)
    apply_gtrans2ud();
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
 
-   d1=fabs(p1-plaq_sum_dble(1));
-   d2=fabs(p2-plaq_wsum_dble(1));
+   d1=plaq_sum_dble(1);
+   d2=plaq_wsum_dble(1);
    plaq_action_slices(asl2);
    d3=0.0;
    for (t=0;t<N0;t++) d3+=fabs(asl1[t]-asl2[t]);
    d3 = d3/(double)(N0);
 
-   EXPECT_NEAR(d1, 0.0, 1.0e-14*fabs(p1));
-   EXPECT_NEAR(d2, 0.0, 1.0e-14*fabs(p2));
-   EXPECT_NEAR(d3, 0.0, 1.0e-14*fabs(d3));
+   EXPECT_NEAR(d1, p1, RELTOL*fabs(d1)+ABSTOL);
+   EXPECT_NEAR(d2, p2, RELTOL*fabs(d2)+ABSTOL);
+   EXPECT_NEAR(d3, 0.0, RELTOL*fabs(d3)+ABSTOL);
 }
 
 
 TEST(PlaqSum, TranslationInvariance)
 {
    int n,t,s[4];
-   double p1,p2,d1,d2,d3;
+   double p1,p2,e1,e2,d3;
    double asl1[N0],asl2[N0];
    static su3_dble *udb;
    udb=udfld();
@@ -173,8 +218,8 @@ TEST(PlaqSum, TranslationInvariance)
       shift_ud(s);
       #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
 
-      d1=fabs(p1-plaq_sum_dble(1));
-      d2=fabs(p2-plaq_wsum_dble(1));
+      e1=plaq_sum_dble(1);
+      e2=plaq_wsum_dble(1);
       plaq_action_slices(asl2);
       d3=0.0;
       for (t=0;t<N0;t++)
@@ -184,16 +229,16 @@ TEST(PlaqSum, TranslationInvariance)
       for (t=0;t<N0;t++)
          asl1[t]=asl2[t];
 
-      EXPECT_NEAR(d1, 0.0, 1.0e-14*fabs(p1));
-      EXPECT_NEAR(d2, 0.0, 1.0e-14*fabs(p2));
-      EXPECT_NEAR(d3, 0.0, 1.0e-14*fabs(d3));
+      EXPECT_NEAR(e1, p1, RELTOL*fabs(p1)+ABSTOL);
+      EXPECT_NEAR(e2, p2, RELTOL*fabs(p2)+ABSTOL);
+      EXPECT_NEAR(d3, 0.0, RELTOL*fabs(d3)+ABSTOL);
    }
 }
 
 
 TEST(PlaqSum, SumVsWsum)
 {
-   double p1,p2,expected;
+   double p1,p2,e2;
    static su3_dble *udb;
    udb=udfld();
 
@@ -204,18 +249,37 @@ TEST(PlaqSum, SumVsWsum)
 
    p1=plaq_sum_dble(1);
    p2=plaq_wsum_dble(1);
-   expected=p1-9.0*(double)(N1*N2*N3);
+   e2=p1-9.0*(double)(N1*N2*N3);
 
-   EXPECT_NEAR(p2, expected, 1.0e-14);
+   EXPECT_NEAR(p2, e2, RELTOL*fabs(p2)+ABSTOL);
+}
+
+TEST(PlaqSum, SumVsWsumSoA)
+{
+   double p1,p2,e2;
+   
+   if (bc_g!=1) return;
+   
+   random_udv();
+   update_su3_mat_field();
+
+   p1=plaq_sum_dble(1);
+   p2=plaq_wsum_dble(1);
+   e2=p1-9.0*(double)(N1*N2*N3);
+
+   EXPECT_NEAR(p2, e2, RELTOL*fabs(p2)+ABSTOL);
 }
 
 
 static mt_test_t tests[] = {
    MT_TEST(PlaqSum, UnitField),
+   MT_TEST(PlaqSum, UnitFieldSoA),
    MT_TEST(PlaqSum, ActionSlices),
+   MT_TEST(PlaqSum, ActionSlicesSoA),
    MT_TEST(PlaqSum, GaugeInvariance),
    MT_TEST(PlaqSum, TranslationInvariance),
    MT_TEST(PlaqSum, SumVsWsum),
+   MT_TEST(PlaqSum, SumVsWsumSoA),
 };
 
 
@@ -229,6 +293,8 @@ int main(int argc,char *argv[])
 
    if (my_rank==0)
    {
+      printf("\nRunning tests UFLDS, correctness tests (check4.c)\n");
+      printf("Absolute tolerance: %e\n",ABSTOL);
       print_lattice_sizes();
 
       bc=find_opt(argc,argv,"-bc");
