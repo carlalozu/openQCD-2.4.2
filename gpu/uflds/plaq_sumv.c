@@ -22,11 +22,6 @@
 *     boundary conditions of type 0,1 or 2 are chosen. If icom=1 the global
 *     sum of the local sums is returned and otherwise just the local sum.
 *
-*   double plaq_action_slices(double *asl)
-*     Computes the time-slice sums asl[x0] of the tree-level O(a)-improved
-*     plaquette action density of the double-precision gauge field. The
-*     factor 1/g0^2 is omitted and the time x0 runs from 0 to NPROC0*L0-1.
-*     The program returns the total action.
 *
 * The Wilson plaquette action density is defined so that it converges to the
 * Yang-Mills action in the classical continuum limit with a rate proportional
@@ -44,7 +39,7 @@
 *
 *******************************************************************************/
 
-#define PLAQ_SUM_C
+#define PLAQ_SUMV_C
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,45 +57,46 @@
 
 static double *qsm[2*N0];
 static qflt rqsmE[N0],rqsmB[N0];
-static su3_dble *udb;
-prof_section s_lcl_plq_sm = {.name = "local_plaq_sum_dble"};
+static su3_mat_field *udbv;
+prof_section s_lcl_plq_smv = {.name = "local_plaq_sum_dblev"};
 
 
-static double plaq_dble(int n,int ix)
+#pragma omp declare target
+static double plaq_dblev(su3_mat_field *udbv,int n,int ix,int (*iup)[4])
 {
-   int ip[4];
    double sm;
+   int ip[4];
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(n,ix,ip);
+   _plaq_uidx(n,ix,ip,iup);
 
-   su3xsu3(udb+ip[0],udb+ip[1],&wd1);
-   su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
+   fsu3xsu3(udbv, &wd1, ip[0], ip[1]);
+   fsu3dagxsu3dag(udbv, &wd2, ip[3], ip[2]);
    cm3x3_retr(&wd1,&wd2,&sm);
 
    return sm;
 }
+#pragma omp end declare target
 
-double local_plaq_dble(int n){
-   udb=udfld();
+double local_plaq_dblev(int n){
+   udbv=udfldv();
    double pa;
-   #pragma omp parallel reduction(+:pa)
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (int ix=0;ix<VOLUME;ix++)
    {
-      int k=omp_get_thread_num();
-      for (int ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
-         pa += plaq_dble(n, ix);
+      pa += plaq_dblev(udbv,n,ix,iup);
    }
    return pa;
 }
 
-static qflt local_plaq_sum_dble(int iw)
+
+static qflt local_plaq_sum_dblev(int iw)
 {
-   int bc,k,ix,t,n;
    double wp,pa=0.0;
    qflt rqsm;
 
-   bc=bc_type();
+   int bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -109,56 +105,53 @@ static qflt local_plaq_sum_dble(int iw)
 
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
-   udb=udfld();
-
-   prof_begin(&s_lcl_plq_sm);
-#pragma omp parallel private(k,ix,t,n,pa) reduction(+:pa)
+   udbv=udfldv();
+   prof_begin(&s_lcl_plq_smv);
+   // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+   #pragma omp target update to(iup[:VOLUME], idn[:VOLUME])
+   
+   #pragma omp target teams distribute parallel for reduction(+:pa)
+   for (int ix=0;ix<VOLUME;ix++)
    {
-      k=omp_get_thread_num();
-
-      for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
+      double local_pa=0.0;
+      int t=global_time(ix);
+      if ((t<(N0-1))||(bc!=0))
       {
-         t=global_time(ix);
-         double local_pa=0.0;
-
-         if ((t<(N0-1))||(bc!=0))
-         {
-            for (n=0;n<3;n++)
-               local_pa+=plaq_dble(n,ix);
-         }
-
-         if (((t>0)&&(t<(N0-1)))||(bc==3))
-         {
-            for (n=3;n<6;n++)
-               local_pa+=plaq_dble(n,ix);
-         }
-         else if ((t==0)||(bc==0))
-         {
-            if (bc==1)
-               local_pa+=wp*9.0;
-            else
-            {
-               for (n=3;n<6;n++)
-                  local_pa+=wp*plaq_dble(n,ix);
-            }
-         }
+         for (int n=0;n<3;n++)
+            local_pa+=plaq_dblev(udbv,n,ix,iup);
+      }
+      
+      if (((t>0)&&(t<(N0-1)))||(bc==3))
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dblev(udbv,n,ix,iup);
+      }
+      else if ((t==0)||(bc==0))
+      {
+         if (bc==1)
+            local_pa+=wp*9.0;
          else
          {
-            for (n=3;n<6;n++)
-               local_pa+=plaq_dble(n,ix);
-
-            local_pa+=wp*9.0;
+            for (int n=3;n<6;n++)
+               local_pa+=wp*plaq_dblev(udbv,n,ix,iup);
          }
-         pa += local_pa;
       }
+      else
+      {
+         for (int n=3;n<6;n++)
+            local_pa+=plaq_dblev(udbv,n,ix,iup);
+
+         local_pa+=wp*9.0;
+      }
+      pa += local_pa;
    }
+   prof_end(&s_lcl_plq_smv);
    acc_qflt(pa,rqsm.q);
-   prof_end(&s_lcl_plq_sm);
    return rqsm;
 }
 
 
-double plaq_sum_dble(int icom)
+double plaq_sum_dblev(int icom)
 {
    qflt rqsm;
 
@@ -167,7 +160,7 @@ double plaq_sum_dble(int icom)
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
 
-   rqsm=local_plaq_sum_dble(0);
+   rqsm=local_plaq_sum_dblev(0);
 
    if ((icom==1)&&(NPROC>1))
    {
@@ -179,7 +172,7 @@ double plaq_sum_dble(int icom)
 }
 
 
-double plaq_wsum_dble(int icom)
+double plaq_wsum_dblev(int icom)
 {
    qflt rqsm;
 
@@ -188,7 +181,7 @@ double plaq_wsum_dble(int icom)
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
 
-   rqsm=local_plaq_sum_dble(1);
+   rqsm=local_plaq_sum_dblev(1);
 
    if ((icom==1)&&(NPROC>1))
    {
@@ -199,11 +192,10 @@ double plaq_wsum_dble(int icom)
    return rqsm.q[0];
 }
 
-
-double plaq_action_slices(double *asl)
+double plaq_action_slicesv(double *asl)
 {
-   int bc,k,ix,t,n,tl;
-   double smE,smB,pasmE[L0],pasmB[L0];
+   int bc,k,ix,t,n;
+   double smE,smB;
 
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
@@ -211,9 +203,7 @@ double plaq_action_slices(double *asl)
       set_uidx();
 
    bc=bc_type();
-   udb=udfld();
-
-   for (tl=0;tl<L0;tl++) { pasmE[tl]=0.0; pasmB[tl]=0.0; }
+   udbv=udfldv();
 
    for (t=0;t<N0;t++)
    {
@@ -226,7 +216,7 @@ double plaq_action_slices(double *asl)
       rqsmB[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,n,smE,smB) reduction(+:pasmE[0:L0],pasmB[0:L0])
+#pragma omp parallel private(k,ix,t,n,smE,smB)
    {
       k=omp_get_thread_num();
 
@@ -239,23 +229,21 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(n,ix));
+               smE+=(3.0-plaq_dblev(udbv,n,ix,iup));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(n,ix));
+               smB+=(3.0-plaq_dblev(udbv,n,ix,iup));
          }
 
-         pasmE[t-cpr[0]*L0]+=smE;
-         pasmB[t-cpr[0]*L0]+=smB;
+#pragma omp critical
+         {
+            acc_qflt(smE,rqsmE[t].q);
+            acc_qflt(smB,rqsmB[t].q);
+         }
       }
-   }
-   for (tl=0;tl<L0;tl++)
-   {
-      acc_qflt(pasmE[tl],rqsmE[cpr[0]*L0+tl].q);
-      acc_qflt(pasmB[tl],rqsmB[cpr[0]*L0+tl].q);
    }
 
    global_qsum(2*N0,qsm,qsm);

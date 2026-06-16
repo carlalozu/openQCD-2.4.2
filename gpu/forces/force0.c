@@ -729,7 +729,7 @@ static qflt action0_part(int ofs_pt,int vol)
 qflt action0(int icom)
 {
    int k;
-   double *qact[1],pa;
+   double *qact[1];
    qflt act0;
    lat_parms_t lat;
 
@@ -754,16 +754,12 @@ qflt action0(int icom)
 
    act0.q[0]=0.0;
    act0.q[1]=0.0;
-   pa=0.0;
 
-#pragma omp parallel private(k) reduction(+:pa)
+#pragma omp parallel private(k) reduction(sum_qflt : act0)
    {
-      qflt loc_act0;
       k=omp_get_thread_num();
-      loc_act0=action0_part(k*VOLUME_TRD,VOLUME_TRD);
-      pa+=loc_act0.q[0];
+      act0=action0_part(k*VOLUME_TRD,VOLUME_TRD);
    }
-   acc_qflt(pa,act0.q);
 
    if ((NPROC>1)&&(icom&0x1))
    {

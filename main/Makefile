@@ -18,7 +18,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = cvt1 ms1 ms2 ms3 ms4 qcd1 qcd2 xms1 xms2 ym1 ym2 ym1_time
+MAIN = cvt1 ms1 ms2 ms3 ms4 qcd1 qcd2 xms1 xms2 ym1 ym2
 
 ARCHIVE = archive iodat marchive sarchive
 
@@ -112,16 +112,10 @@ LIBPATH = $(MPI_HOME)/lib
 
 # scheduling and optimization options
 
-CFLAGS = -std=c11 -pedantic -fstrict-aliasing  -mp=gpu -gpu=cc90 -fopenmp -O -DFMA3 -DPM  -Wall -Wno-long-long -Wstrict-prototypes -O -DFMA3 -DPM
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
+         -Wno-long-long -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
-
-# CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
-#          -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target $(CFLAGS_M) -Wall -Wno-long-long \
-#          -Wstrict-prototypes -O -DFMA3 -DPM $(CFLAGS_ARCH)
-# 
-# LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
-
+LFLAGS = -fopenmp
 
 
 # These CFLAGS options are recommended if the gcc compiler is used on a
@@ -138,6 +132,7 @@ LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 ############################## do not change ###################################
 
 SHELL=/bin/bash
+CC=mpicc
 CLINKER=$(CC)
 
 PGMS= $(MAIN) $(MODULES)

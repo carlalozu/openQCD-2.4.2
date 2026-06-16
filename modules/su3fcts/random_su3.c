@@ -179,3 +179,21 @@ void random_su3_dble(su3_dble *u)
 
    _vector_cross_prod(v[1],v[2],v[0]);
 }
+
+void random_su3_mat_field(su3_mat_field *uv, int ix)
+{
+   su3_dble u;
+   random_su3_dble(&u);
+
+   uv->c1.c1re[ix]=u.c11.re; uv->c1.c1im[ix]=u.c11.im;
+   uv->c1.c2re[ix]=u.c12.re; uv->c1.c2im[ix]=u.c12.im;
+   uv->c1.c3re[ix]=u.c13.re; uv->c1.c3im[ix]=u.c13.im;
+
+   uv->c2.c1re[ix]=u.c21.re; uv->c2.c1im[ix]=u.c21.im;
+   uv->c2.c2re[ix]=u.c22.re; uv->c2.c2im[ix]=u.c22.im;
+   uv->c2.c3re[ix]=u.c23.re; uv->c2.c3im[ix]=u.c23.im;
+
+   uv->c3.c1re[ix]=u.c31.re; uv->c3.c1im[ix]=u.c31.im;
+   uv->c3.c2re[ix]=u.c32.re; uv->c3.c2im[ix]=u.c32.im;
+   uv->c3.c3re[ix]=u.c33.re; uv->c3.c3im[ix]=u.c33.im;
+}

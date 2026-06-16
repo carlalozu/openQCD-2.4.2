@@ -261,6 +261,7 @@ void mul_qflt(double *qu,double *qv,double *qr)
 
 #else
 
+#pragma omp declare target
 void acc_qflt(double u,double *qr)
 {
    double a,b,qp,up;
@@ -277,6 +278,7 @@ void acc_qflt(double u,double *qr)
    qr[0]=d;
    qr[1]=c-(d-a);
 }
+#pragma omp end declare target
 
 
 void add_qflt(double *qu,double *qv,double *qr)

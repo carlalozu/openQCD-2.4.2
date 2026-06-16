@@ -67,7 +67,7 @@ static char fname[NAME_SIZE+1],fname_loc[NAME_SIZE];
 static char inum[3*sizeof(int)];
 
 
-static void wait(int s)
+static void wait_sec(int s)
 {
    time_t t0,t1;
    double dt;
@@ -162,7 +162,7 @@ void error(int test,int no,char *name,char *format,...)
       }
 
       fflush(NULL);
-      wait(1);
+      wait_sec(1);
 #ifndef IGNORE_ERRORS
       MPI_Abort(MPI_COMM_WORLD,no);
 #endif
@@ -212,7 +212,7 @@ void error_root(int test,int no,char *name,char *format,...)
       }
 
       fflush(NULL);
-      wait(1);
+      wait_sec(1);
 #ifndef IGNORE_ERRORS
       MPI_Abort(MPI_COMM_WORLD,no);
 #endif
@@ -271,7 +271,7 @@ void error_loc(int test,int no,char *name,char *format,...)
       }
 
       fflush(NULL);
-      wait(1);
+      wait_sec(1);
 #ifndef IGNORE_ERRORS
       MPI_Abort(MPI_COMM_WORLD,no);
 #endif

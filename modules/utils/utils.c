@@ -76,7 +76,7 @@
 
 static int pcmn_cnt=-1,cmn_cnt=MAX_TAG;
 
-
+#pragma omp declare target
 int safe_mod(int x,int y)
 {
    if (x>=0)
@@ -84,7 +84,7 @@ int safe_mod(int x,int y)
    else
       return (y-(abs(x)%y))%y;
 }
-
+#pragma omp end declare target
 
 void divide_range(int n,int m,int *a,int *b)
 {

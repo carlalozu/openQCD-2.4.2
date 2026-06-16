@@ -587,7 +587,6 @@ typedef struct
    (r).c7-=(s).c7; \
    (r).c8-=(s).c8
 
-
 /*
 * s*=c, c real
 */
