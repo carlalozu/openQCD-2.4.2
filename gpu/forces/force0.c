@@ -69,7 +69,7 @@
 #define N0 (NPROC0*L0)
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
-int nfc[8],ofs[8],hofs[8],init=0;
+int nfc_fc0[8],ofs_fc0[8],hofs_fc0[8],init_fc0=0;
 #pragma omp end declare target
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
@@ -77,34 +77,34 @@ prof_section force0_part_p = {.name = "force0", .level=2};
 
 static void set_ofs(void)
 {
-   nfc[0]=FACE0/2;
-   nfc[1]=FACE0/2;
-   nfc[2]=FACE1/2;
-   nfc[3]=FACE1/2;
-   nfc[4]=FACE2/2;
-   nfc[5]=FACE2/2;
-   nfc[6]=FACE3/2;
-   nfc[7]=FACE3/2;
+   nfc_fc0[0]=FACE0/2;
+   nfc_fc0[1]=FACE0/2;
+   nfc_fc0[2]=FACE1/2;
+   nfc_fc0[3]=FACE1/2;
+   nfc_fc0[4]=FACE2/2;
+   nfc_fc0[5]=FACE2/2;
+   nfc_fc0[6]=FACE3/2;
+   nfc_fc0[7]=FACE3/2;
 
-   ofs[0]=VOLUME;
-   ofs[1]=ofs[0]+(FACE0/2);
-   ofs[2]=ofs[1]+(FACE0/2);
-   ofs[3]=ofs[2]+(FACE1/2);
-   ofs[4]=ofs[3]+(FACE1/2);
-   ofs[5]=ofs[4]+(FACE2/2);
-   ofs[6]=ofs[5]+(FACE2/2);
-   ofs[7]=ofs[6]+(FACE3/2);
+   ofs_fc0[0]=VOLUME;
+   ofs_fc0[1]=ofs_fc0[0]+(FACE0/2);
+   ofs_fc0[2]=ofs_fc0[1]+(FACE0/2);
+   ofs_fc0[3]=ofs_fc0[2]+(FACE1/2);
+   ofs_fc0[4]=ofs_fc0[3]+(FACE1/2);
+   ofs_fc0[5]=ofs_fc0[4]+(FACE2/2);
+   ofs_fc0[6]=ofs_fc0[5]+(FACE2/2);
+   ofs_fc0[7]=ofs_fc0[6]+(FACE3/2);
 
-   hofs[0]=0;
-   hofs[1]=hofs[0]+3*FACE0;
-   hofs[2]=hofs[1]+3*FACE0;
-   hofs[3]=hofs[2]+3*FACE1;
-   hofs[4]=hofs[3]+3*FACE1;
-   hofs[5]=hofs[4]+3*FACE2;
-   hofs[6]=hofs[5]+3*FACE2;
-   hofs[7]=hofs[6]+3*FACE3;
+   hofs_fc0[0]=0;
+   hofs_fc0[1]=hofs_fc0[0]+3*FACE0;
+   hofs_fc0[2]=hofs_fc0[1]+3*FACE0;
+   hofs_fc0[3]=hofs_fc0[2]+3*FACE1;
+   hofs_fc0[4]=hofs_fc0[3]+3*FACE1;
+   hofs_fc0[5]=hofs_fc0[4]+3*FACE2;
+   hofs_fc0[6]=hofs_fc0[5]+3*FACE2;
+   hofs_fc0[7]=hofs_fc0[6]+3*FACE3;
 
-   init=1;
+   init_fc0=1;
 }
 
 static void set_frc2zero_gpu(void)
@@ -155,11 +155,11 @@ void set_staples(int n,int ix,int ia,su3_dble *vd,int (*idn)[4],int (*iup)[4],su
          ifc=2*nu;
 
          if (iy<(VOLUME+(BNDRY/2)))
-            ib=iy-ofs[ifc];
+            ib=iy-ofs_fc0[ifc];
          else
-            ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+            ib=iy-ofs_fc0[ifc]-(BNDRY/2)+nfc_fc0[ifc];
 
-         vd[0]=hdb[hofs[ifc]+3*ib+mu-(mu>nu)];
+         vd[0]=hdb[hofs_fc0[ifc]+3*ib+mu-(mu>nu)];
       }
    }
 
@@ -177,11 +177,11 @@ void set_staples(int n,int ix,int ia,su3_dble *vd,int (*idn)[4],int (*iup)[4],su
       ifc=2*mu+1;
 
       if (iy<(VOLUME+(BNDRY/2)))
-         ib=iy-ofs[ifc];
+         ib=iy-ofs_fc0[ifc];
       else
-         ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+         ib=iy-ofs_fc0[ifc]-(BNDRY/2)+nfc_fc0[ifc];
 
-      vd[1]=hdb[hofs[ifc]+3*ib+nu-(nu>mu)];
+      vd[1]=hdb[hofs_fc0[ifc]+3*ib+nu-(nu>mu)];
    }
 
    if (!ia)
@@ -200,11 +200,11 @@ void set_staples(int n,int ix,int ia,su3_dble *vd,int (*idn)[4],int (*iup)[4],su
          ifc=2*mu;
 
          if (iy<(VOLUME+(BNDRY/2)))
-            ib=iy-ofs[ifc];
+            ib=iy-ofs_fc0[ifc];
          else
-            ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+            ib=iy-ofs_fc0[ifc]-(BNDRY/2)+nfc_fc0[ifc];
 
-         vd[2]=hdb[hofs[ifc]+3*ib+nu-(nu>mu)];
+         vd[2]=hdb[hofs_fc0[ifc]+3*ib+nu-(nu>mu)];
       }
    }
 
@@ -222,11 +222,11 @@ void set_staples(int n,int ix,int ia,su3_dble *vd,int (*idn)[4],int (*iup)[4],su
       ifc=2*nu+1;
 
       if (iy<(VOLUME+(BNDRY/2)))
-         ib=iy-ofs[ifc];
+         ib=iy-ofs_fc0[ifc];
       else
-         ib=iy-ofs[ifc]-(BNDRY/2)+nfc[ifc];
+         ib=iy-ofs_fc0[ifc]-(BNDRY/2)+nfc_fc0[ifc];
 
-      vd[3]=hdb[hofs[ifc]+3*ib+mu-(mu>nu)];
+      vd[3]=hdb[hofs_fc0[ifc]+3*ib+mu-(mu>nu)];
    }
 }
 #pragma omp end declare target
@@ -316,7 +316,7 @@ void plaq_frc(void)
    set_frc2zero_gpu();
 
    int bc=bc_type();
-   #pragma omp target enter data map(to: iup, nfc, ofs, hofs, init)
+   #pragma omp target enter data map(to: iup, nfc_fc0, ofs_fc0, hofs_fc0, init_fc0)
    #pragma omp target update to(udb[0:4*VOLUME], fdb[0:4*VOLUME])
 
    #pragma omp target teams distribute parallel for
@@ -594,7 +594,7 @@ void force0(double c)
       hdb=NULL;
    else
    {
-      if (init==0)
+      if (init_fc0==0)
          set_ofs();
 
       if (query_flags(BSTAP_UP2DATE)!=1)
@@ -603,7 +603,7 @@ void force0(double c)
    }
    bc_parms_t bc=bc_parms();
 
-   #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc[0:8],ofs[0:8],hofs[0:8],udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
+   #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc_fc0[0:8],ofs_fc0[0:8],hofs_fc0[0:8],udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
    set_frc2zero_gpu();
 
    #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)])
@@ -692,7 +692,7 @@ static qflt action0_part(int ofs_pt,int vol)
    act0.q[1]=0.0;
    double global_act1 = 0.0;
 
-//    #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc[0:8], ofs[0:8], hofs[0:8], init, udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME],c0,c1,bc,cG[:2])
+//    #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc_fc0[0:8], ofs_fc0[0:8], hofs_fc0[0:8], init_fc0, udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME],c0,c1,bc,cG[:2])
 // 
 //    #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],cG[:2],c0,c1,bc)
 //    #pragma omp target teams distribute parallel for reduction(+:global_act1) private(t,n,act1)
@@ -766,7 +766,7 @@ qflt action0(int icom)
       hdb=NULL;
    else
    {
-      if (init==0)
+      if (init_fc0==0)
          set_ofs();
 
       if (query_flags(BSTAP_UP2DATE)!=1)

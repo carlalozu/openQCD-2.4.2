@@ -244,7 +244,7 @@ static void alloc_tms(void)
 
    error(tms==NULL,1,"alloc_tms [geometry.c]",
          "Unable to allocate time array");
-   #pragma omp target enter data map(to : tms[:VOLUME])
+   #pragma omp target enter data map(to: tms[:VOLUME])
 }
 
 
@@ -280,6 +280,8 @@ void geometry(void)
       set_iupdn();
       set_map();
       set_tms();
+      #pragma omp target update to(tms[:VOLUME])
+      #pragma omp target update to(cpr[:4])
    }
 }
 
