@@ -57,6 +57,7 @@
 #include "lattice.h"
 #include "uflds.h"
 #include "global.h"
+#include "profiler.h"
 
 #define N0 (NPROC0*L0)
 
@@ -99,11 +100,10 @@ double local_plaq_dble(int n){
 
 static qflt local_plaq_sum_dble(int iw)
 {
-   int bc,k,ix,t,n;
    double wp,pa=0.0;
    qflt rqsm;
 
-   bc=bc_type();
+   int bc=bc_type();
 
    if (iw==0)
       wp=1.0;
@@ -113,10 +113,7 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udb=udfld();
-
    prof_begin(&s_lcl_plq_sm);
-   #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
-   #pragma omp target enter data map(to: udb[:4*VOLUME+7*(BNDRY/4)])
    // #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
@@ -203,8 +200,8 @@ double plaq_wsum_dble(int icom)
 
 double plaq_action_slices(double *asl)
 {
-   int bc,k,ix,t,n,tl;
-   double smE,smB,pasmE[L0],pasmB[L0];
+   int bc,k,ix,t,n;
+   double smE,smB;
 
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
@@ -213,8 +210,6 @@ double plaq_action_slices(double *asl)
 
    bc=bc_type();
    udb=udfld();
-
-   for (tl=0;tl<L0;tl++) { pasmE[tl]=0.0; pasmB[tl]=0.0; }
 
    for (t=0;t<N0;t++)
    {
@@ -227,7 +222,7 @@ double plaq_action_slices(double *asl)
       rqsmB[t].q[1]=0.0;
    }
 
-#pragma omp parallel private(k,ix,t,n,smE,smB) reduction(+:pasmE[0:L0],pasmB[0:L0])
+#pragma omp parallel private(k,ix,t,n,smE,smB)
    {
       k=omp_get_thread_num();
 
@@ -249,14 +244,12 @@ double plaq_action_slices(double *asl)
                smB+=(3.0-plaq_dble(udb,n,ix,iup));
          }
 
-         pasmE[t-cpr[0]*L0]+=smE;
-         pasmB[t-cpr[0]*L0]+=smB;
+#pragma omp critical
+         {
+            acc_qflt(smE,rqsmE[t].q);
+            acc_qflt(smB,rqsmB[t].q);
+         }
       }
-   }
-   for (tl=0;tl<L0;tl++)
-   {
-      acc_qflt(pasmE[tl],rqsmE[cpr[0]*L0+tl].q);
-      acc_qflt(pasmB[tl],rqsmB[cpr[0]*L0+tl].q);
    }
 
    global_qsum(2*N0,qsm,qsm);
