@@ -674,8 +674,9 @@ static void wloops(int n,int ix,int t,double c0,double *trU,int (*iup)[4],int (*
 
 static qflt action0_part(int ofs_pt,int vol)
 {
-   int bc,t,n;
+   int bc,ix,t,n;
    double act1,c0,c1,*cG;
+   double r0,r1,trU[4];
    qflt act0;
    lat_parms_t lat;
    bc_parms_t bcp;
@@ -690,15 +691,9 @@ static qflt action0_part(int ofs_pt,int vol)
 
    act0.q[0]=0.0;
    act0.q[1]=0.0;
-   double global_act1 = 0.0;
 
-//    #pragma omp target enter data map(to: iup[0:VOLUME], idn[0:VOLUME], nfc_fc0[0:8], ofs_fc0[0:8], hofs_fc0[0:8], init_fc0, udb[0:4*VOLUME+7*(BNDRY/4)], fdb[0:4*VOLUME],c0,c1,bc,cG[:2])
-// 
-//    #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)],cG[:2],c0,c1,bc)
-//    #pragma omp target teams distribute parallel for reduction(+:global_act1) private(t,n,act1)
-   for (int ix=ofs_pt;ix<(vol+ofs_pt);ix++)
+   for (ix=ofs_pt;ix<(vol+ofs_pt);ix++)
    {
-      double r0,r1,trU[4];
       t=global_time(ix);
       act1=0.0;
 
@@ -740,10 +735,10 @@ static qflt action0_part(int ofs_pt,int vol)
             act1+=(r0*trU[0]+r1*(trU[1]+trU[2]));
          }
       }
-      global_act1+=act1;
+
+      acc_qflt(act1,act0.q);
    }
-   // #pragma omp target update from(global_act1)
-   acc_qflt(global_act1,act0.q);
+
    return act0;
 }
 
