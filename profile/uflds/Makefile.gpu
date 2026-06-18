@@ -26,7 +26,7 @@ LATTICE = bcnds geogen geometry uidx
 
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
-SU3FCTS = su3prod su3ren cm3x3 random_su3 su3prodv
+SU3FCTS = su3prod su3ren cm3x3 random_su3
 
 UFLDS = bstap plaq_sum shift udcom uflds uinit plaq_sumv ufldsv
 
@@ -65,11 +65,11 @@ LIBPATH = $(MPI_HOME)/lib
 # scheduling and optimization options
 
 
-CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -fopenmp-cuda-mode \
-         -fopenmp-targets=nvptx64-nvidia-cuda --offload-arch=sm_90 -Wall -Wno-long-long \
-         -Wstrict-prototypes -O -DFMA3 -DPM
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
+         -Wno-long-long  -Wstrict-prototypes \
+         -O -DFMA3 -DPM -mp=gpu -gpu=cc90 -fopenmp
 
-LFLAGS = -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -lmpi_gtl_cuda
+LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 
 
 ############################## do not change ###################################
