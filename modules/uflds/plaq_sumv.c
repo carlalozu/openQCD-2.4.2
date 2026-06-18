@@ -80,7 +80,7 @@ static double plaq_dblev(su3_mat_field *udbv,int n,int ix)
 double local_plaq_dblev(int n){
    int k,ix;
    udbv=udfldv();
-   double pa;
+   double pa=0.0;
    #pragma omp parallel private(k,ix) reduction(+:pa)
    {
       k=omp_get_thread_num();

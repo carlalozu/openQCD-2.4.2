@@ -223,21 +223,17 @@ void random_ud(void)
 
 void random_ud_reproducible(void)
 {
-   int bc;
-   int k,ix,t,ifc;
+   int k,ix,ifc;
 
    if (udb==NULL)
       alloc_ud();
 
-   bc=bc_type();
-
-#pragma omp parallel private(k,ix,t,ifc)
+#pragma omp parallel private(k,ix,ifc)
    {
       k=omp_get_thread_num();
       for (int iy=k*VOLUME_TRD;iy<(k+1)*VOLUME_TRD;iy++){
          for (int mu = 0; mu < 4; mu++) {
             ix=ipt[iy];
-            t=global_time(ix);
             ifc=offset(ix,mu);
             random_su3_dble(udb+ifc);
          }

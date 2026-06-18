@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
    double result = 0.0;
    udb = udfld();
 
-   prof_reset(&s_lcl_plq_smv);
+   prof_reset(&s_lcl_plq_sm);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {  
       prof_begin(&s_prepare);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
       prof_report(&s_prepare);
       prof_report(&s_upload);
-      prof_report(&s_lcl_plq_smv);
+      prof_report(&s_lcl_plq_sm);
       prof_report(&s_kernel);
       prof_report(&s_total);
    }
