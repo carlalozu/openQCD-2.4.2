@@ -84,7 +84,7 @@ static double plaq_dble(int n,int ix)
 
 double local_plaq_dble(int n){
    udb=udfld();
-   double pa;
+   double pa=0.0;
    #pragma omp parallel reduction(+:pa)
    {
       int k=omp_get_thread_num();

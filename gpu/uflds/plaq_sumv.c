@@ -81,7 +81,7 @@ static double plaq_dblev(su3_mat_field *udbv,int n,int ix,int (*iup)[4])
 
 double local_plaq_dblev(int n){
    udbv=udfldv();
-   double pa;
+   double pa=0.0;
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
    {
