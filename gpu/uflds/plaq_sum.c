@@ -88,7 +88,7 @@ static double plaq_dble(su3_dble *udb, int n,int ix, int (*iup)[4])
 
 double local_plaq_dble(int n){
    udb=udfld();
-   double pa;
+   double pa=0.0;
    #pragma omp target teams distribute parallel for reduction(+:pa)
    for (int ix=0;ix<VOLUME;ix++)
    {

@@ -1,0 +1,128 @@
+################################################################################
+#
+# Makefile to compile and profile uflds routines within OpenQCD using original
+# CPU implementation
+#
+#
+# "make -f Makefile.cpu-gcc"       compiles and links profile programs
+# "make -f Makefile.cpu-gcc clean" removes all generated files
+#
+#
+################################################################################
+
+all: rmxeq mkdep mkxeq
+.PHONY: all
+
+
+# main programs and modules to be compiled
+
+MAIN = time_plaq_sum time_plaq_dble
+
+DEVFCTS = dutils gtrans
+
+FLAGS = flags lat_parms dfl_parms
+
+LATTICE = bcnds geogen geometry uidx
+
+RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
+
+SU3FCTS = su3prod su3ren cm3x3 random_su3
+
+UFLDS = bstap plaq_sum shift udcom uflds uinit
+
+UTILS = endian error mutils qsum utils wspace
+
+MODULES = $(DEVFCTS) $(FLAGS) $(LATTICE) $(RANDOM) $(UFLDS) \
+          $(SU3FCTS) $(UTILS)
+
+
+# Logging option (-mpilog or -mpitrace or -mpianim)
+
+LOGOPTION =
+
+
+# search path for modules
+
+MDIR = ../../modules
+
+VPATH = .:$(MDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/lattice:$(MDIR)/random:\
+          $(MDIR)/su3fcts:$(MDIR)/utils
+
+
+# additional include directories
+
+INCPATH = $(MPI_INCLUDE) ../../include
+
+
+# additional libraries
+
+LIBS = m
+
+LIBPATH = $(MPI_HOME)/lib
+
+
+# scheduling and optimization options
+
+
+CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
+         -Wno-long-long -Wno-format-overflow -Wstrict-prototypes -Werror \
+         -O -DFMA3 -DPM
+
+LFLAGS = -fopenmp
+
+
+############################## do not change ###################################
+
+SHELL=/bin/bash
+CC=mpicc
+CLINKER=$(CC)
+
+PGMS= $(MAIN) $(MODULES)
+
+-include $(addsuffix .d,$(PGMS))
+
+
+# rule to make dependencies
+
+$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.cpu
+	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
+
+
+# rule to compile source programs
+
+$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.cpu-gcc
+	$(CC) $< -c $(CFLAGS) $(LOGOPTION) $(addprefix -I,$(INCPATH))
+
+
+# rule to link object files
+
+$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.cpu-gcc
+	$(CLINKER) $< $(addsuffix .o,$(MODULES)) $(LFLAGS) $(LOGOPTION) \
+        $(addprefix -L,$(LIBPATH)) $(addprefix -l,$(LIBS)) -o $@
+
+
+# produce executables
+
+mkxeq: $(MAIN)
+
+
+# remove old executables
+
+rmxeq:
+	@ -rm -f $(MAIN); \
+        echo "delete old executables"
+
+
+# make dependencies
+
+mkdep:  $(addsuffix .d,$(PGMS))
+	@ echo "generate tables of dependencies"
+
+
+# clean directory
+
+clean:
+	@ -rm -rf *.d *.o $(MAIN)
+.PHONY: clean
+
+################################################################################
