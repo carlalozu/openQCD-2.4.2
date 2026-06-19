@@ -108,28 +108,6 @@ static void set_ofs(void)
    init_fc0=1;
 }
 
-static void set_frc2zero_gpu(void)
-{
-   su3_alg_dble *frc;
-   mdflds_t *mdfs;
-   mdfs=mdflds();
-   frc=(*mdfs).frc;
-
-   #pragma omp target teams distribute parallel for
-   for (int i=0; i<4*VOLUME; i++)
-   {
-      frc[i].c1 = 0.0;
-      frc[i].c2 = 0.0;
-      frc[i].c3 = 0.0;
-      frc[i].c4 = 0.0;
-      frc[i].c5 = 0.0;
-      frc[i].c6 = 0.0;
-      frc[i].c7 = 0.0;
-      frc[i].c8 = 0.0;
-   }
-
-}
-
 
 static void set_frc2zero_gpu(void)
 {
