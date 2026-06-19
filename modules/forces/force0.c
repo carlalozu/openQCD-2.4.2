@@ -73,6 +73,7 @@ static int nfc[8],ofs[8],hofs[8],init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
+prof_section update_force0_p = {.name = "update_force0", .level=2};
 
 static void set_ofs(void)
 {
