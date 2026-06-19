@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
     * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
     * ---------------------------------------------------------------------- */
    prof_reset(&force0_part_p);
+   prof_reset(&update_force0_p);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {
       prof_begin(&s_prepare);
@@ -126,7 +127,7 @@ int main(int argc, char *argv[])
    {
       /* 6 planes × (3 su3prod@198 + 3 prod2su3alg@216 + 4 alg_mul@16) per site, c0=1.0 bulk */
       long long flops = 7836LL * VOLUME;
-      double avg_time = s_kernel.total / (double)s_kernel.count;
+      double avg_time = force0_part_p.total / (double)force0_part_p.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / 1024));
       printf("Local size of the force field  (KB): %d\n", (int)((64 * VOLUME * sizeof(double)) / 1024));
@@ -138,11 +139,12 @@ int main(int argc, char *argv[])
       printf("Total performance for force0 (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
       printf("Time per lattice point & thread for force0 (sec): %.9f\n",
              avg_time / (double)VOLUME_TRD);
-      printf("Result: %f\n\n", rqsm.q[0]);
+      printf("Result: %f\n\n", rqsm.q[0]/(4*VOLUME_TRD));
 
       prof_report(&s_prepare);
       prof_report(&s_kernel);
       prof_report(&force0_part_p);
+      prof_report(&update_force0_p);
       prof_report(&s_total);
    }
 
