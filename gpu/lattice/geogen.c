@@ -212,18 +212,6 @@ static int index(int x0,int x1,int x2,int x3)
    return ipt[y3+y2*L3+y1*L2*L3+y0*L1*L2*L3];
 }
 
-static int cart_index(int x0,int x1,int x2,int x3)
-{
-   int y0,y1,y2,y3;
-
-   y0=safe_mod(x0,L0);
-   y1=safe_mod(x1,L1);
-   y2=safe_mod(x2,L2);
-   y3=safe_mod(x3,L3);
-
-   return y3+y2*L3+y1*L2*L3+y0*L1*L2*L3;
-}
-
 
 void set_iupdn(void)
 {
