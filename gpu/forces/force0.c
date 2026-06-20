@@ -69,12 +69,15 @@
 #define N0 (NPROC0*L0)
 #pragma omp declare target
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
-int nfc_fc0[8],ofs_fc0[8],hofs_fc0[8],init_fc0=0;
+int nfc_fc0[8],ofs_fc0[8],hofs_fc0[8];
 #pragma omp end declare target
+static int init=0;
+static int init_gpu=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
-prof_section update_force0_p = {.name = "update_force0", .level=2};
+prof_section updload_force0_p = {.name = "updload_force0", .level=2};
+prof_section download_force0_p = {.name = "download_force0", .level=2};
 
 static void set_ofs(void)
 {
@@ -105,7 +108,7 @@ static void set_ofs(void)
    hofs_fc0[6]=hofs_fc0[5]+3*FACE2;
    hofs_fc0[7]=hofs_fc0[6]+3*FACE3;
 
-   init_fc0=1;
+   init=1;
 }
 
 
@@ -319,7 +322,7 @@ void plaq_frc(void)
    set_frc2zero_gpu();
 
    int bc=bc_type();
-   #pragma omp target enter data map(to: iup, nfc_fc0, ofs_fc0, hofs_fc0, init_fc0)
+   #pragma omp target enter data map(to: iup, nfc_fc0[0:8],ofs_fc0[0:8],hofs_fc0[0:8])
    #pragma omp target update to(udb[0:4*VOLUME], fdb[0:4*VOLUME])
 
    #pragma omp target teams distribute parallel for
@@ -597,7 +600,7 @@ void force0(double c)
       hdb=NULL;
    else
    {
-      if (init_fc0==0)
+      if (init==0)
          set_ofs();
 
       if (query_flags(BSTAP_UP2DATE)!=1)
@@ -606,13 +609,17 @@ void force0(double c)
    }
    bc_parms_t bc=bc_parms();
 
-   prof_begin(&update_force0_p);
-   #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME],nfc_fc0[0:8],ofs_fc0[0:8],hofs_fc0[0:8],udb[0:4*VOLUME+7*(BNDRY/4)],fdb[0:4*VOLUME],lat,bc,c)
-   set_frc2zero_gpu();
-
+   prof_begin(&updload_force0_p);
+   if (!init_gpu)
+   {
+      #pragma omp target enter data map(to: iup[0:VOLUME],idn[0:VOLUME])
+      #pragma omp target enter data map(to: udb[0:4*VOLUME+7*(BNDRY/4)])
+      init_gpu=1;
+   }
    #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&update_force0_p);
-
+   prof_end(&updload_force0_p);
+   
+   set_frc2zero_gpu();
 
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
@@ -622,9 +629,9 @@ void force0(double c)
    }
    prof_end(&force0_part_p);
 
-   prof_begin(&update_force0_p);
+   prof_begin(&download_force0_p);
    #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&update_force0_p);
+   prof_end(&download_force0_p);
    add_bnd_frc();
 }
 
@@ -768,7 +775,7 @@ qflt action0(int icom)
       hdb=NULL;
    else
    {
-      if (init_fc0==0)
+      if (init==0)
          set_ofs();
 
       if (query_flags(BSTAP_UP2DATE)!=1)

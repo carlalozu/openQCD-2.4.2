@@ -107,7 +107,8 @@ int main(int argc, char *argv[])
     * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
     * ---------------------------------------------------------------------- */
    prof_reset(&force0_part_p);
-   prof_reset(&update_force0_p);
+   prof_reset(&updload_force0_p);
+   prof_reset(&download_force0_p);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {
       prof_begin(&s_prepare);
@@ -143,8 +144,9 @@ int main(int argc, char *argv[])
 
       prof_report(&s_prepare);
       prof_report(&s_kernel);
+      prof_report(&updload_force0_p);
       prof_report(&force0_part_p);
-      prof_report(&update_force0_p);
+      prof_report(&download_force0_p);
       prof_report(&s_total);
    }
 
