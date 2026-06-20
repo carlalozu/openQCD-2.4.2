@@ -608,7 +608,7 @@ void force0(double c)
    bc_parms_t bc=bc_parms();
 
    prof_begin(&updload_force0_p);
-   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)])
    prof_end(&updload_force0_p);
    
    set_frc2zero_gpu();
@@ -622,7 +622,7 @@ void force0(double c)
    prof_end(&force0_part_p);
 
    prof_begin(&download_force0_p);
-   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
    prof_end(&download_force0_p);
    add_bnd_frc();
 }

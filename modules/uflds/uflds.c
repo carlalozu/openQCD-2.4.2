@@ -71,6 +71,8 @@
 #include "lattice.h"
 #include "uflds.h"
 #include "global.h"
+#include <cuda_runtime_api.h>
+#include <cuda_runtime.h>
 
 #define N0 (NPROC0*L0)
 #define N1 (NPROC1*L1)
@@ -143,7 +145,10 @@ static void alloc_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
-   #pragma omp target enter data map(to: udb[:n])
+
+   int dev;
+   cudaGetDevice(&dev);
+   cudaMemAdvise(udb, n*sizeof(*udb), cudaMemAdviseSetAccessedBy, dev);
 }
 
 

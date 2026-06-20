@@ -94,6 +94,8 @@
 #include "linalg.h"
 #include "mdflds.h"
 #include "global.h"
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 static int (*ofs_lks)[2],(*ofs_odd_pts)[2];
 static int (*ofs_frc)[2],(*ofs_bnd)[2];
@@ -262,7 +264,10 @@ static void alloc_mdflds(void)
       (*mdfs).eo=NULL;
       (*mdfs).pf=NULL;
    }
-   #pragma omp target enter data map(to: mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
+
+   int dev;
+   cudaGetDevice(&dev);
+   cudaMemAdvise(mdfs->frc, (4*VOLUME+7*(BNDRY/4))*sizeof(*mdfs), cudaMemAdviseSetAccessedBy, dev);
 }
 
 
