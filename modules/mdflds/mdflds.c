@@ -266,8 +266,12 @@ static void alloc_mdflds(void)
    }
 
    int dev;
+   su3_alg_dble *frc;
+   frc=(*mdfs).frc;
+   int size_frc = 4*VOLUME+7*(BNDRY/4);
    cudaGetDevice(&dev);
-   cudaMemAdvise(mdfs->frc, (4*VOLUME+7*(BNDRY/4))*sizeof(*mdfs), cudaMemAdviseSetAccessedBy, dev);
+   cudaMemAdvise(frc, size_frc*sizeof(*frc), cudaMemAdviseSetPreferredLocation, dev);
+   cudaMemAdvise(frc, size_frc*sizeof(*frc), cudaMemAdviseSetAccessedBy, dev);
 }
 
 
