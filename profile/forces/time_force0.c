@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
       double avg_time = force0_part_p.total / (double)force0_part_p.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / 1024));
-      printf("Local size of the force field  (KB): %d\n", (int)((64 * VOLUME * sizeof(double)) / 1024));
+      printf("Local size of the force field  (KB): %d\n", (int)((32 * VOLUME * sizeof(double)) / 1024));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
