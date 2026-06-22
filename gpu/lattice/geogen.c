@@ -61,6 +61,8 @@
 #include "lattice.h"
 #include "global.h"
 
+#pragma omp requires unified_shared_memory
+
 #define NPROC_BLK (NPROC0_BLK*NPROC1_BLK*NPROC2_BLK*NPROC3_BLK)
 #define NBLK0 (NPROC0/NPROC0_BLK)
 #define NBLK1 (NPROC1/NPROC1_BLK)

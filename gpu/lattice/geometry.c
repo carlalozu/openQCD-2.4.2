@@ -60,6 +60,9 @@
 #include "lattice.h"
 #include "global.h"
 
+#pragma omp requires unified_shared_memory
+
+
 int *tms=NULL;
 
 

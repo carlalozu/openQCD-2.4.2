@@ -172,9 +172,11 @@ static void alloc_mdflds(void)
 
    set_ofs();
 
+   cudaError_t cuerr;
+
    mdfs=malloc(sizeof(*mdfs));
-   mom=amalloc((8*VOLUME+7*(BNDRY/4))*sizeof(*mom),ALIGN);
-   error((mdfs==NULL)||(mom==NULL),1,"alloc_mdflds [mdflds.c]",
+   cuerr=cudaMallocManaged((void**)(&mom),(8*VOLUME+7*(BNDRY/4))*sizeof(*mom),cudaMemAttachGlobal);
+   error((mdfs==NULL)||(cuerr!=cudaSuccess),1,"alloc_mdflds [mdflds.c]",
          "Unable to allocate momentum and force fields");
 
    (*mdfs).mom=mom;

@@ -137,8 +137,9 @@ static void alloc_ud(void)
    if ((cpr[0]==(NPROC0-1))&&((bc==1)||(bc==2)))
       n+=3;
 
-   udb=amalloc(n*sizeof(*udb),ALIGN);
-   error(udb==NULL,1,"alloc_ud [uflds.c]",
+   cudaError_t cuerr;
+   cuerr=cudaMallocManaged((void**)(&udb),n*sizeof(*udb),cudaMemAttachGlobal);
+   error(cuerr!=cudaSuccess,1,"alloc_ud [uflds.c]",
          "Unable to allocate memory space for the gauge field");
    set_ud2unity(4*VOLUME_TRD,2,udb);
 
@@ -149,6 +150,7 @@ static void alloc_ud(void)
    int dev;
    cudaGetDevice(&dev);
    cudaMemAdvise(udb, n*sizeof(*udb), cudaMemAdviseSetAccessedBy, dev);
+   cudaMemAdvise(udb, n*sizeof(*udb), cudaMemAdviseSetPreferredLocation, dev);
 }
 
 

@@ -53,7 +53,7 @@ VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(GDIR)/lattice:$(MDIR)/flags:$(MDIR)/for
 
 # additional include directories
 
-INCPATH = $(MPI_INCLUDE) ../../include ..
+INCPATH = $(MPI_INCLUDE) ../../include .. $(CUDA_HOME)/targets/sbsa-linux/include
 
 
 # additional libraries
@@ -65,11 +65,10 @@ LIBPATH = $(MPI_HOME)/lib
 
 # compiler and flags (GPU offload via OpenMP target)
 
-CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
-         -Wno-long-long  -Wstrict-prototypes \
-         -O -DFMA3 -DPM -mp=gpu -gpu=cc90 -fopenmp
+CFLAGS   = -O -mp=gpu -gpu=cc90,mem:unified -cuda -DFMA3 -DPM -fno-omit-frame-pointer 
 
-LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
+LFLAGS = -mp=gpu -gpu=cc90,mem:unified -cuda -lcudart
+
 
 
 ############################## do not change ###################################

@@ -65,8 +65,9 @@ LIBPATH = $(MPI_HOME)/lib
 
 # compiler and flags (GPU offload via OpenMP target)
 
-CFLAGS   = -O -mp=gpu -gpu=cc90 -cuda -DFMA3 -DPM
-LFLAGS = -mp=gpu -gpu=cc90 -cuda -lcudart
+CFLAGS   = -O -mp=gpu -gpu=cc90,mem:unified -cuda -DFMA3 -DPM -fno-omit-frame-pointer
+
+LFLAGS = -mp=gpu -gpu=cc90,mem:unified -cuda -lcudart
 
 
 ############################## do not change ###################################

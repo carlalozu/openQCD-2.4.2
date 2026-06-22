@@ -60,6 +60,9 @@
 #include "uflds.h"
 #include "global.h"
 
+#pragma omp requires unified_shared_memory
+
+
 static const int plns[6][2]={{0,1},{0,2},{0,3},{2,3},{3,1},{1,2}};
 static int bc,np,nfc[8],nmu[8],sflg[8],tags[8];
 static int pofs[8],sofs[8],(*ofs_stap)[8][2];

@@ -65,6 +65,8 @@
 #include "forces.h"
 #include "global.h"
 #include "profiler.h"
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 
 #define N0 (NPROC0*L0)
 #pragma omp declare target
@@ -321,14 +323,14 @@ void plaq_frc(void)
    set_frc2zero_gpu();
 
    int bc=bc_type();
-   #pragma omp target update to(udb[0:4*VOLUME], fdb[0:4*VOLUME])
+   // #pragma omp target update to(udb[0:4*VOLUME], fdb[0:4*VOLUME])
 
    #pragma omp target teams distribute parallel for
    for (int ix=0; ix<VOLUME; ix++)
    {
       plaq_frc_part(ix,bc,iup,udb,fdb);
    }
-   #pragma omp target update from(fdb[0:4*VOLUME])
+   // #pragma omp target update from(fdb[0:4*VOLUME])
 
    add_bnd_frc();
 }
