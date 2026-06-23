@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
       printf("Flops: %lld\n", flops);
       printf("Total performance for force0 (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
       printf("Time per lattice point & thread for force0 (sec): %.9f\n",
-             avg_time / (double)VOLUME_TRD);
+             avg_time / (double)VOLUME);
       printf("Result: %f\n\n", rqsm.q[0]/(4*VOLUME_TRD));
 
       prof_report(&s_prepare);
