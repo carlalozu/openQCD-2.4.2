@@ -103,7 +103,6 @@ int main(int argc, char *argv[])
 
 
    double pa = 0.0;
-   udbv = udfld();
 
    for (count = 0; count < PROFILE_ITERS; count++)
    {
