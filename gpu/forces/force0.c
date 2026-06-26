@@ -77,6 +77,7 @@ static int nfc[8],ofs[8],hofs[8],init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
+prof_section update_force0_p = {.name = "update_force0", .level=2};
 
 static void set_ofs(void)
 {
@@ -111,6 +112,30 @@ static void set_ofs(void)
    #pragma omp target enter data map(to : nfc[:8], ofs[:8], hofs[:8], init)
 
 }
+
+
+static void set_frc2zero_gpu(void)
+{
+   su3_alg_dble *frc;
+   mdflds_t *mdfs;
+   mdfs=mdflds();
+   frc=(*mdfs).frc;
+
+   #pragma omp target teams distribute parallel for
+   for (int i=0; i<4*VOLUME; i++)
+   {
+      frc[i].c1 = 0.0;
+      frc[i].c2 = 0.0;
+      frc[i].c3 = 0.0;
+      frc[i].c4 = 0.0;
+      frc[i].c5 = 0.0;
+      frc[i].c6 = 0.0;
+      frc[i].c7 = 0.0;
+      frc[i].c8 = 0.0;
+   }
+
+}
+
 
 #pragma omp declare target
 static void set_staples(su3_dble *udb,su3_dble *hdb,int n,int ix,int ia,su3_dble *vd)
@@ -572,7 +597,8 @@ void force0(double c)
    udb=udfld();
    mdfs=mdflds();
    fdb=(*mdfs).frc;
-   set_frc2zero();
+
+   set_frc2zero_gpu();
 
    lat=lat_parms();
 
@@ -589,9 +615,10 @@ void force0(double c)
    }
    bcp=bc_parms();
 
+   prof_begin(&update_force0_p);
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target update to(fdb[:4*VOLUME+7*(BNDRY/4)])
-   
+   prof_end(&update_force0_p);
+
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
    for (int ix=0;ix<VOLUME/2;ix++)
@@ -601,7 +628,9 @@ void force0(double c)
    }
    prof_end(&force0_part_p);
 
+   prof_begin(&update_force0_p);
    #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
+   prof_end(&update_force0_p);
    add_bnd_frc();
 }
 
