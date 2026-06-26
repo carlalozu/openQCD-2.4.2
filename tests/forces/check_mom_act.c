@@ -64,7 +64,7 @@ TEST(UnitGauge, MomentumActionZero)
 
    mdfs = mdflds();
    set_alg2zero(4*VOLUME_TRD, 2, (*mdfs).mom);
-
+   update_mom(); /* Accumulate frc into mom. */
    act = momentum_action(1);
 
    if (mt_rank_ == 0)
@@ -83,6 +83,7 @@ TEST(RandomGauge, MomentumActionNotZero)
    random_ud();
 
    force0(c_g);
+   update_mom();
 
    nrm_sq = norm_square_alg(4*VOLUME_TRD, 3, (*mdfs).frc);
    act = momentum_action(1);
