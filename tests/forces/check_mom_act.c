@@ -2,11 +2,8 @@
 *
 * File check4.c
 *
-* Computes force0 and momentum_action on a unit gauge field.
-*
-* The global lattice geometry must be set at compile time via the Makefile:
-*   -DL0=16 -DL1=36 -DL2=36 -DL3=32  (with NPROC0=NPROC1=NPROC2=NPROC3=1
-*   for a single-process run), giving a 36x36x32x16 lattice in (x,y,z,t).
+* Computes force0 and momentum_action on a unit gauge field with zero momentum
+* and in a random gauge and momentum fields.
 *
 * Usage: check4 [-bc <type>]
 *   bc=0 open, bc=1 SF, bc=2 open-SF, bc=3 periodic (default: 3)
@@ -37,23 +34,12 @@
 static double c_g = 1.0;
 
 
-/*
-* Set the double-precision gauge field to the identity on every link,
-* then communicate the boundary values so force0 sees a consistent field.
-*/
-static void set_unit_gauge(void)
-{
-   set_ud2unity(4*VOLUME_TRD, 2, udfld());
-   set_flags(UPDATED_UD);
-}
-
-
 TEST(UnitGauge, Force0NormIsZero)
 {
    qflt nrm_sq;
    mdflds_t *mdfs;
 
-   set_unit_gauge();
+   set_ud2unity(4*VOLUME_TRD, 2, udfld());
 
    mdfs = mdflds();
    force0(c_g);
