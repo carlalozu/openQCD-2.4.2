@@ -1,0 +1,141 @@
+/*******************************************************************************
+*
+* File check4.c
+*
+* Computes force0 and momentum_action on a unit gauge field.
+*
+* The global lattice geometry must be set at compile time via the Makefile:
+*   -DL0=16 -DL1=36 -DL2=36 -DL3=32  (with NPROC0=NPROC1=NPROC2=NPROC3=1
+*   for a single-process run), giving a 36x36x32x16 lattice in (x,y,z,t).
+*
+* Usage: check4 [-bc <type>]
+*   bc=0 open, bc=1 SF, bc=2 open-SF, bc=3 periodic (default: 3)
+*
+*******************************************************************************/
+
+#define MAIN_PROGRAM
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "mpi.h"
+#include "su3.h"
+#include "random.h"
+#include "su3fcts.h"
+#include "flags.h"
+#include "utils.h"
+#include "lattice.h"
+#include "uflds.h"
+#include "mdflds.h"
+#include "linalg.h"
+#include "forces.h"
+#include "global.h"
+#include "minitest.h"
+
+#define N0 (NPROC0*L0)
+
+static double c_g = 1.0;
+
+
+/*
+* Set the double-precision gauge field to the identity on every link,
+* then communicate the boundary values so force0 sees a consistent field.
+*/
+static void set_unit_gauge(void)
+{
+   set_ud2unity(4*VOLUME_TRD, 2, udfld());
+   set_flags(UPDATED_UD);
+}
+
+
+TEST(UnitGauge, Force0NormIsZero)
+{
+   qflt nrm_sq;
+   mdflds_t *mdfs;
+
+   set_unit_gauge();
+
+   mdfs = mdflds();
+   force0(c_g);
+
+   nrm_sq = norm_square_alg(4*VOLUME_TRD, 3, (*mdfs).frc);
+
+   if (mt_rank_ == 0)
+      MT_PRINT("||force0||^2 on unit gauge field = %.6e", nrm_sq.q[0]);
+
+   /* For periodic BC the unit gauge is the trivial minimum of the Wilson
+      action, so the force must vanish exactly. For open/SF boundary
+      conditions a small non-zero boundary contribution is expected. */
+   EXPECT_NEAR(nrm_sq.q[0], 0.0, 1.0e-10);
+}
+
+
+TEST(UnitGauge, MomentumAction)
+{
+   qflt act;
+
+   /* Momenta are independent of the gauge field — draw them from the
+      Gaussian distribution exp(tr{X^2}) that defines the HMC kinetic term. */
+   random_mom();
+
+   act = momentum_action(1);
+
+   if (mt_rank_ == 0)
+      MT_PRINT("momentum_action (global sum) = %.15e", act.q[0]);
+
+   /* The momentum action is a sum of squared norms, so it must be positive. */
+   EXPECT_TRUE(act.q[0] > 0.0);
+}
+
+
+static mt_test_t tests[] = {
+   MT_TEST(UnitGauge, Force0NormIsZero),
+   MT_TEST(UnitGauge, MomentumAction),
+};
+
+
+int main(int argc, char *argv[])
+{
+   int my_rank, bc, iact;
+   double phi[2], phi_prime[2], theta[3];
+
+   mpi_init(argc, argv);
+   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+   if (my_rank == 0)
+   {
+      print_lattice_sizes();
+
+      bc = find_opt(argc, argv, "-bc");
+      if (bc != 0)
+         error_root(sscanf(argv[bc+1], "%d", &bc) != 1, 1,
+                    "main [check4.c]", "Syntax: check4 [-bc <type>]");
+      else
+         bc = 3; /* default: periodic */
+   }
+
+   check_machine();
+
+   /* beta=6.0, c0=1.0 (pure Wilson), no csw, no twisted mass */
+   set_lat_parms(6.0, 1.0, 0, NULL, 0, 1.0);
+   print_lat_parms(0x1);
+
+   MPI_Bcast(&bc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+   phi[0]      =  0.0;   phi[1]       = 0.0;
+   phi_prime[0]=  0.0;   phi_prime[1] = 0.0;
+   theta[0]    =  0.0;   theta[1]     = 0.0;   theta[2] = 0.0;
+
+   iact = 0;
+   set_hmc_parms(1, &iact, 0, 0, NULL, 1, 1.0);
+   set_bc_parms(bc, 1.0, 1.0, 1.0, 1.0, phi, phi_prime, theta);
+   print_bc_parms(0x3);
+
+   start_ranlux(0, 1234);
+   geometry();
+
+   int result = RUN_ALL_TESTS(my_rank, tests);
+
+   MPI_Finalize();
+   return result;
+}

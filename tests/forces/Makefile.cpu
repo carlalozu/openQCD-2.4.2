@@ -15,7 +15,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = check3
+MAIN = check3 check4
 
 DEVFCTS = rotud
 
