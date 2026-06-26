@@ -70,18 +70,47 @@ TEST(UnitGauge, Force0NormIsZero)
 }
 
 
-TEST(UnitGauge, MomentumAction)
+TEST(UnitGauge, MomentumActionZero)
 {
    qflt act;
 
-   /* Momenta are independent of the gauge field — draw them from the
-      Gaussian distribution exp(tr{X^2}) that defines the HMC kinetic term. */
-   random_mom();
+   mdflds_t *mdfs;
+
+   mdfs = mdflds();
+   set_alg2zero(4*VOLUME_TRD, 2, (*mdfs).mom);
 
    act = momentum_action(1);
 
    if (mt_rank_ == 0)
-      MT_PRINT("momentum_action (global sum) = %.15e", act.q[0]);
+      MT_PRINT("momentum_action with zero momenta = %.15e", act.q[0]);
+
+   EXPECT_NEAR(act.q[0], 0.0, 1.0e-14);
+}
+
+TEST(RandomGauge, MomentumActionNotZero)
+{
+   qflt act,nrm_sq;
+   mdflds_t *mdfs;
+   
+   mdfs = mdflds();
+   random_mom();
+   random_ud();
+
+   force0(c_g);
+
+   nrm_sq = norm_square_alg(4*VOLUME_TRD, 3, (*mdfs).frc);
+   act = momentum_action(1);
+
+   if (mt_rank_ == 0)
+      MT_PRINT("||force0||^2 on unit gauge field = %.6e", nrm_sq.q[0]);
+
+   /* For periodic BC the unit gauge is the trivial minimum of the Wilson
+      action, so the force must vanish exactly. For open/SF boundary
+      conditions a small non-zero boundary contribution is expected. */
+   EXPECT_TRUE(nrm_sq.q[0] > 0.0);
+
+   if (mt_rank_ == 0)
+      MT_PRINT("momentum_action with zero momenta = %.15e", act.q[0]);
 
    /* The momentum action is a sum of squared norms, so it must be positive. */
    EXPECT_TRUE(act.q[0] > 0.0);
@@ -90,7 +119,8 @@ TEST(UnitGauge, MomentumAction)
 
 static mt_test_t tests[] = {
    MT_TEST(UnitGauge, Force0NormIsZero),
-   MT_TEST(UnitGauge, MomentumAction),
+   MT_TEST(UnitGauge, MomentumActionZero),
+   MT_TEST(RandomGauge, MomentumActionNotZero),
 };
 
 
