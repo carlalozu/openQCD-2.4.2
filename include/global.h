@@ -15,28 +15,27 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#define NPROC0 1
+#define NPROC0 2
 #define NPROC1 1
 #define NPROC2 1
-#define NPROC3 1
+#define NPROC3 2
 
 #define NPROC0_BLK 1
 #define NPROC1_BLK 1
 #define NPROC2_BLK 1
 #define NPROC3_BLK 1
 
-#define L0 4
-#define L1 4
-#define L2 4
-#define L3 4
+#define L0 8
+#define L1 16
+#define L2 16
+#define L3 8
 
-#define L0_TRD 4
-#define L1_TRD 4
-#define L2_TRD 4
-#define L3_TRD 4
+#define L0_TRD 8
+#define L1_TRD 16
+#define L2_TRD 8
+#define L3_TRD 8
 
 #define NAME_SIZE 128
-#define N_TEAMS ((VOLUME+128-1)/128)
 
 
 /****************************** do not change *********************************/
@@ -81,7 +80,7 @@
 #define VOLUME_TRD (L0_TRD*L1_TRD*L2_TRD*L3_TRD)
 #define NTHREAD (VOLUME/VOLUME_TRD)
 
-#define ALIGN 6
+#define ALIGN 8
 
 #if defined MAIN_PROGRAM
 #pragma omp declare target
@@ -92,6 +91,7 @@ int sbvol[16];
 
 int *ipt=NULL;
 int (*iup)[4]=NULL;
+int (*iupT)[VOLUME]=NULL;
 int (*idn)[4]=NULL;
 int *map=NULL;
 #pragma omp end declare target
@@ -104,6 +104,7 @@ extern int sbvol[16];
 
 extern int *ipt;
 extern int (*iup)[4];
+extern int (*iupT)[VOLUME];
 extern int (*idn)[4];
 extern int *map;
 #pragma omp end declare target

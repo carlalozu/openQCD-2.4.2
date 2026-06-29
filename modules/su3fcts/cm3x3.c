@@ -1534,6 +1534,33 @@ void cm3x3_unity(int vol,su3_dble *u)
    }
 }
 
+void cm3x3_unityv(int vol,su3_mat_field *u,int i0)
+{
+   for (int i=i0;i<i0+vol;i++)
+   {
+      (*u).c1.c1re[i]=1.0;
+      (*u).c1.c1im[i]=0.0;
+      (*u).c1.c2re[i]=0.0;
+      (*u).c1.c2im[i]=0.0;
+      (*u).c1.c3re[i]=0.0;
+      (*u).c1.c3im[i]=0.0;
+
+      (*u).c2.c1re[i]=0.0;
+      (*u).c2.c1im[i]=0.0;
+      (*u).c2.c2re[i]=1.0;
+      (*u).c2.c2im[i]=0.0;
+      (*u).c2.c3re[i]=0.0;
+      (*u).c2.c3im[i]=0.0;
+
+      (*u).c3.c1re[i]=0.0;
+      (*u).c3.c1im[i]=0.0;
+      (*u).c3.c2re[i]=0.0;
+      (*u).c3.c2im[i]=0.0;
+      (*u).c3.c3re[i]=1.0;
+      (*u).c3.c3im[i]=0.0;
+   }
+}
+
 
 void cm3x3_assign(int vol,su3_dble *u,su3_dble *v)
 {
@@ -1707,26 +1734,6 @@ void cm3x3_tr(su3_dble *u,su3_dble *v,complex_dble *tr)
 
    (*tr).re=z.re;
    (*tr).im=z.im;
-}
-
-
-void cm3x3_retr(su3_dble *u,su3_dble *v,double *tr)
-{
-   double r;
-
-   r =(*u).c11.re*(*v).c11.re-(*u).c11.im*(*v).c11.im;
-   r+=(*u).c12.re*(*v).c21.re-(*u).c12.im*(*v).c21.im;
-   r+=(*u).c13.re*(*v).c31.re-(*u).c13.im*(*v).c31.im;
-
-   r+=(*u).c21.re*(*v).c12.re-(*u).c21.im*(*v).c12.im;
-   r+=(*u).c22.re*(*v).c22.re-(*u).c22.im*(*v).c22.im;
-   r+=(*u).c23.re*(*v).c32.re-(*u).c23.im*(*v).c32.im;
-
-   r+=(*u).c31.re*(*v).c13.re-(*u).c31.im*(*v).c13.im;
-   r+=(*u).c32.re*(*v).c23.re-(*u).c32.im*(*v).c23.im;
-   r+=(*u).c33.re*(*v).c33.re-(*u).c33.im*(*v).c33.im;
-
-   (*tr)=r;
 }
 
 

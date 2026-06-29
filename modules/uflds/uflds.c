@@ -143,6 +143,7 @@ static void alloc_ud(void)
    set_flags(UPDATED_UD);
    set_flags(UNSET_UD_PHASE);
    set_bc();
+   #pragma omp target enter data map(to: udb[:n])
 }
 
 
@@ -158,29 +159,83 @@ su3_dble *udfld(void)
 void random_ud(void)
 {
    int bc;
-   int k,t,ifc,mu,ix;
-   su3_dble *ub;
+   int k,ix,t,ifc;
+   su3_dble *ud;
 
-   ub=udfld();
+   if (udb==NULL)
+      alloc_ud();
+
    bc=bc_type();
 
-#pragma omp parallel private(k,ix,t,ifc,mu)
+#pragma omp parallel private(k,ix,t,ifc,ud)
    {
       k=omp_get_thread_num();
-      for (ix=k*VOLUME_TRD;ix<(k+1)*VOLUME_TRD;ix++)
+      ud=udb+k*4*VOLUME_TRD;
+
+      for (ix=(k*(VOLUME_TRD/2));ix<((k+1)*(VOLUME_TRD/2));ix++)
       {
-         t=global_time(ix);
+         t=global_time(ix+(VOLUME/2));
 
-         if ((t==(N0-1))&&(bc!=0))
+         if (t==0)
          {
-            ifc=offset(ix,0);
-            random_su3_dble(ub+ifc);
+            random_su3_dble(ud);
+            ud+=1;
+
+            if (bc!=0)
+               random_su3_dble(ud);
+            ud+=1;
+
+            for (ifc=2;ifc<8;ifc++)
+            {
+               if (bc!=1)
+                  random_su3_dble(ud);
+               ud+=1;
+            }
          }
-
-         for (mu=1;mu<4;mu++)
+         else if (t==(N0-1))
          {
+            if (bc!=0)
+               random_su3_dble(ud);
+            ud+=1;
+
+            for (ifc=1;ifc<8;ifc++)
+            {
+               random_su3_dble(ud);
+               ud+=1;
+            }
+         }
+         else
+         {
+            for (ifc=0;ifc<8;ifc++)
+            {
+               random_su3_dble(ud);
+               ud+=1;
+            }
+         }
+      }
+   }
+
+   set_flags(UPDATED_UD);
+   set_flags(UNSET_UD_PHASE);
+   set_bc();
+}
+
+
+void random_ud_reproducible(void)
+{
+   int k,ix,ifc;
+
+   if (udb==NULL)
+      alloc_ud();
+
+#pragma omp parallel private(k,ix,ifc)
+   {
+      k=omp_get_thread_num();
+      for (int iy=k*VOLUME_TRD;iy<(k+1)*VOLUME_TRD;iy++){
+         for (int mu = 0; mu < 4; mu++) {
+            ix=ipt[iy];
             ifc=offset(ix,mu);
-            random_su3_dble(ub+ifc);
+            random_su3_dble(udb+ifc);
          }
       }
    }
