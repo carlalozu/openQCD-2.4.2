@@ -52,7 +52,7 @@ GDIR = ../../gpu
 
 VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils:$(MDIR)/update
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils:$(GDIR)/update
 
 
 # additional include directories

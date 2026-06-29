@@ -1,5 +1,7 @@
 #include "update.h"
 #include "global.h"
+#include "mdflds.h"
+#include "uflds.h"
 
 
 void update_flds_to(void)
