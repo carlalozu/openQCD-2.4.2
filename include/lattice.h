@@ -73,7 +73,6 @@ extern uidx_t *uidx(void);
 #pragma omp declare target
 extern int offset(int ix,int mu);
 extern void plaq_uidx(int n,int ix,int *ip);
-extern int offset(int ix,int mu);
 #pragma omp end declare target
 
 #endif

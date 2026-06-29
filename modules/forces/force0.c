@@ -568,21 +568,9 @@ void force0(double c)
    udb=udfld();
    mdfs=mdflds();
    fdb=(*mdfs).frc;
-   lat=lat_parms();
+   set_frc2zero();
 
-   // set_frc2zero();
-   #pragma omp target teams distribute parallel for
-   for (int i=0; i<(4*VOLUME+7*(BNDRY/4)); i++)
-   {
-      fdb[i].c1=0.0;
-      fdb[i].c2=0.0;
-      fdb[i].c3=0.0;
-      fdb[i].c4=0.0;
-      fdb[i].c5=0.0;
-      fdb[i].c6=0.0;
-      fdb[i].c7=0.0;
-      fdb[i].c8=0.0;
-   }
+   lat=lat_parms();
 
    if (lat.c0==1.0)
       hdb=NULL;
@@ -610,6 +598,7 @@ void force0(double c)
          force0_part(ofs_pt+(VOLUME/2),vol,c);
       }
    }
+
    add_bnd_frc();
    prof_end(&force0_part_p);
 }
