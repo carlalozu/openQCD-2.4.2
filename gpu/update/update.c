@@ -66,161 +66,152 @@
 static int nsm=0;
 static double dtau=1.0,rtau=0.0;
 
+prof_section update_mom_p = {.name = "update_mom", .level=2};
+prof_section update_ud_p = {.name = "update_ud", .level=2};
 
 void update_mom(void)
 {
+   prof_begin(&update_mom_p);
    int bc;
-   int k,ofs,vol,ix,t,ifc;
+   // int k,ofs,vol,ix,t,ifc;
    su3_alg_dble *mom,*frc;
    mdflds_t *mdfs;
 
    bc=bc_type();
    mdfs=mdflds();
 
-#pragma omp parallel private(k,ofs,vol,ix,t,ifc,mom,frc)
+   mom=(*mdfs).mom;
+   frc=(*mdfs).frc;
+
+
+   #pragma omp target teams distribute parallel for
+   for (int ix=0;ix<VOLUME/2;ix++)
    {
-      k=omp_get_thread_num();
+      int off=8*ix;
+      int t=global_time(ix+(VOLUME/2));
 
-      vol=VOLUME_TRD/2;
-      ofs=(VOLUME/2)+k*vol;
-
-      mom=(*mdfs).mom+8*k*vol;
-      frc=(*mdfs).frc+8*k*vol;
-
-      for (ix=ofs;ix<(ofs+vol);ix++)
+      if (t==0)
       {
-         t=global_time(ix);
+         _su3_alg_sub_assign(mom[off],frc[off]);
+         off+=1;
 
-         if (t==0)
+         if (bc!=0)
          {
-            _su3_alg_sub_assign(mom[0],frc[0]);
-            mom+=1;
-            frc+=1;
-
-            if (bc!=0)
-            {
-               _su3_alg_sub_assign(mom[0],frc[0]);
-            }
-
-            mom+=1;
-            frc+=1;
-
-            for (ifc=2;ifc<8;ifc++)
-            {
-               if (bc!=1)
-               {
-                  _su3_alg_sub_assign(mom[0],frc[0]);
-               }
-
-               mom+=1;
-               frc+=1;
-            }
+            _su3_alg_sub_assign(mom[off],frc[off]);
          }
-         else if (t==(N0-1))
-         {
-            if (bc!=0)
-            {
-               _su3_alg_sub_assign(mom[0],frc[0]);
-            }
+         off+=1;
 
-            mom+=1;
-            frc+=1;
-
-            for (ifc=1;ifc<8;ifc++)
-            {
-               _su3_alg_sub_assign(mom[0],frc[0]);
-               mom+=1;
-               frc+=1;
-            }
-         }
-         else
+         for (int ifc=2;ifc<8;ifc++)
          {
-            for (ifc=0;ifc<8;ifc++)
+            if (bc!=1)
             {
-               _su3_alg_sub_assign(mom[0],frc[0]);
-               mom+=1;
-               frc+=1;
+               _su3_alg_sub_assign(mom[off],frc[off]);
             }
+            off+=1;
          }
       }
+      else if (t==(N0-1))
+      {
+         if (bc!=0)
+         {
+            _su3_alg_sub_assign(mom[off],frc[off]);
+         }
+         off+=1;
+
+         for (int ifc=1;ifc<8;ifc++)
+         {
+            _su3_alg_sub_assign(mom[off],frc[off]);
+            off+=1;
+         }
+      }
+      else
+      {
+         for (int ifc=0;ifc<8;ifc++)
+         {
+            _su3_alg_sub_assign(mom[off],frc[off]);
+            off+=1;
+         }
+      }
+
    }
+   // #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   // #pragma omp target update from((*mdfs).mom[:4*VOLUME])
+   prof_end(&update_mom_p);
 }
 
 
 void update_ud(double eps)
 {
+   prof_begin(&update_ud_p);
    int bc;
-   int k,ofs,vol,ix,t,ifc;
+   // int k,ofs,vol,ix,t,ifc;
    su3_dble *ud;
    su3_alg_dble *mom;
    mdflds_t *mdfs;
 
    bc=bc_type();
-   (void)(udfld());
    mdfs=mdflds();
+   mom=(*mdfs).mom;
+   
+   ud=udfld();
    chexp_init();
 
-#pragma omp parallel private(k,ofs,vol,ix,t,ifc,ud,mom)
+   // #pragma omp target update to((*mdfs).mom[:4*VOLUME])
+   // #pragma omp target update to(ud[:4*VOLUME+7*(BNDRY/4)])
+// #pragma omp parallel private(k,ofs,vol,ix,t,ifc,ud,mom)
+//       int k=omp_get_thread_num();
+// 
+//       int vol=VOLUME_TRD/2;
+//       int ofs=(VOLUME/2)+k*vol;
+
+   
+   #pragma omp target teams distribute parallel for
+   for (int ix=0;ix<VOLUME/2;ix++)
    {
-      k=omp_get_thread_num();
+      int off=8*ix;
+      int t=global_time(ix+(VOLUME/2));
 
-      vol=VOLUME_TRD/2;
-      ofs=(VOLUME/2)+k*vol;
-
-      ud=udfld()+8*k*vol;
-      mom=(*mdfs).mom+8*k*vol;
-
-      for (ix=ofs;ix<(ofs+vol);ix++)
+      if (t==0)
       {
-         t=global_time(ix);
+         expXsu3(eps,mom+off,ud+off);
+         off+=1;
 
-         if (t==0)
+         if (bc!=0)
+            expXsu3(eps,mom+off,ud+off);
+         off+=1;
+
+         for (int ifc=2;ifc<8;ifc++)
          {
-            expXsu3(eps,mom,ud);
-            ud+=1;
-            mom+=1;
-
-            if (bc!=0)
-               expXsu3(eps,mom,ud);
-            ud+=1;
-            mom+=1;
-
-            for (ifc=2;ifc<8;ifc++)
-            {
-               if (bc!=1)
-                  expXsu3(eps,mom,ud);
-               ud+=1;
-               mom+=1;
-            }
+            if (bc!=1)
+               expXsu3(eps,mom+off,ud+off);
+            off+=1;
          }
-         else if (t==(N0-1))
-         {
-            if (bc!=0)
-               expXsu3(eps,mom,ud);
-            ud+=1;
-            mom+=1;
+      }
+      else if (t==(N0-1))
+      {
+         if (bc!=0)
+            expXsu3(eps,mom+off,ud+off);
+         off+=1;
 
-            for (ifc=1;ifc<8;ifc++)
-            {
-               expXsu3(eps,mom,ud);
-               ud+=1;
-               mom+=1;
-            }
-         }
-         else
+         for (int ifc=1;ifc<8;ifc++)
          {
-            for (ifc=0;ifc<8;ifc++)
-            {
-               expXsu3(eps,mom,ud);
-               ud+=1;
-               mom+=1;
-            }
+            expXsu3(eps,mom+off,ud+off);
+            off+=1;
+         }
+      }
+      else
+      {
+         for (int ifc=0;ifc<8;ifc++)
+         {
+            expXsu3(eps,mom+off,ud+off);
+            off+=1;
          }
       }
    }
 
    step_mdtime(eps);
    set_flags(UPDATED_UD);
+   prof_end(&update_ud_p);
 }
 
 
