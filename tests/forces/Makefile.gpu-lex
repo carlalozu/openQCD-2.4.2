@@ -29,6 +29,8 @@ LINALG = liealg salg_dble
 
 MDFLDS = mdflds fcom
 
+UPDATE = upload
+
 RANDOM = ranlux ranlux_common ranlxs ranlxd gauss
 
 SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
@@ -40,7 +42,7 @@ UFLDS = bstap udcom uflds uinit
 UTILS = endian error mutils qsum utils wspace
 
 MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
-          $(RANDOM) $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
+          $(RANDOM) $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS) $(UPDATE)
 
 
 # search path for modules
@@ -48,9 +50,9 @@ MODULES = $(DEVFCTS) $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) \
 MDIR = ../../modules
 GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(GDIR)/lattice:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/devfcts:$(MDIR)/flags:$(MDIR)/forces:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils:$(MDIR)/update
 
 
 # additional include directories

@@ -25,6 +25,7 @@
 #include "devfcts.h"
 #include "global.h"
 #include "minitest.h"
+#include "update.h"
 
 #define N0 (NPROC0*L0)
 
@@ -106,6 +107,7 @@ int main(int argc,char *argv[])
    start_ranlux(0,1234);
    geometry();
    alloc_wfd(1);
+   init_data_to_device();
 
    int result=RUN_ALL_TESTS(my_rank,tests);
 
