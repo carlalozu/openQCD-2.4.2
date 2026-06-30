@@ -73,7 +73,6 @@ void update_mom(void)
 {
    prof_begin(&update_mom_p);
    int bc;
-   // int k,ofs,vol,ix,t,ifc;
    su3_alg_dble *mom,*frc;
    mdflds_t *mdfs;
 
@@ -82,7 +81,6 @@ void update_mom(void)
 
    mom=(*mdfs).mom;
    frc=(*mdfs).frc;
-
 
    #pragma omp target teams distribute parallel for
    for (int ix=0;ix<VOLUME/2;ix++)
@@ -132,10 +130,7 @@ void update_mom(void)
             off+=1;
          }
       }
-
    }
-   // #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
-   // #pragma omp target update from((*mdfs).mom[:4*VOLUME])
    prof_end(&update_mom_p);
 }
 
@@ -144,7 +139,6 @@ void update_ud(double eps)
 {
    prof_begin(&update_ud_p);
    int bc;
-   // int k,ofs,vol,ix,t,ifc;
    su3_dble *ud;
    su3_alg_dble *mom;
    mdflds_t *mdfs;
@@ -156,15 +150,6 @@ void update_ud(double eps)
    ud=udfld();
    chexp_init();
 
-   // #pragma omp target update to((*mdfs).mom[:4*VOLUME])
-   // #pragma omp target update to(ud[:4*VOLUME+7*(BNDRY/4)])
-// #pragma omp parallel private(k,ofs,vol,ix,t,ifc,ud,mom)
-//       int k=omp_get_thread_num();
-// 
-//       int vol=VOLUME_TRD/2;
-//       int ofs=(VOLUME/2)+k*vol;
-
-   
    #pragma omp target teams distribute parallel for
    for (int ix=0;ix<VOLUME/2;ix++)
    {
@@ -208,7 +193,6 @@ void update_ud(double eps)
          }
       }
    }
-
    step_mdtime(eps);
    set_flags(UPDATED_UD);
    prof_end(&update_ud_p);
