@@ -1356,7 +1356,6 @@ int main(int argc,char *argv[])
       prof_report(&start_hmc_p);
       prof_report(&run_mdint_p);
       prof_report(&force0_part_p);
-      prof_report(&update_force0_p);
       prof_report(&update_mom_p);
       prof_report(&update_ud_p);
       prof_report(&end_hmc_p);

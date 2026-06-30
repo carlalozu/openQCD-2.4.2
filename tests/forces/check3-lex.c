@@ -30,7 +30,7 @@
 #define N0 (NPROC0*L0)
 
 static double c_g=0.789;
-
+static su3_dble *udb;
 
 
 TEST(Force0, NormSquareForce)
@@ -41,7 +41,9 @@ TEST(Force0, NormSquareForce)
    mdfs=mdflds();
    
    random_ud_reproducible();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c_g);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
    nrm_sq = norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
 
@@ -107,6 +109,8 @@ int main(int argc,char *argv[])
    start_ranlux(0,1234);
    geometry();
    alloc_wfd(1);
+   udb=udfld();
+
    init_data_to_device();
 
    int result=RUN_ALL_TESTS(my_rank,tests);
