@@ -1305,29 +1305,6 @@ int main(int argc,char *argv[])
          prof_end(&extra_functions_p);
       }
 
-      if (((n+1)>=nth)&&(((ntr-n-1)%dtr_cnfg)==0))
-      {
-         prof_begin(&extra_functions_p);
-         save_flds(icnfg,nbase,iodat+1,0x1);
-         export_ranlux(icnfg,rng_file);
-         check_endflag(&iend);
-
-         if (my_rank==0)
-         {
-            fflush(flog);
-            copy_file(log_file,log_save);
-            copy_file(dat_file,dat_save);
-            if (noms==0)
-               copy_file(msdat_file,msdat_save);
-            copy_file(rng_file,rng_save);
-         }
-
-         if ((rmold)&&(icnfg>1))
-            remove_flds(icnfg-1,nbase,iodat+1,0x1);
-
-         icnfg+=1;
-         prof_end(&extra_functions_p);
-      }
    }
 
    prof_end(&total_p);

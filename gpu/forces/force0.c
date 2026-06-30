@@ -616,7 +616,7 @@ void force0(double c)
    }
    prof_end(&force0_part_p);
 
-   add_bnd_frc();
+   // add_bnd_frc();
 }
 
 #pragma omp declare target
