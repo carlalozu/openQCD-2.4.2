@@ -186,6 +186,8 @@ void run_mdint(void)
    hmc=hmc_parms();
    smd=smd_parms();
 
+   init_data_to_device();
+   update_flds_to();
    if (hmc.nlv!=0)
       mdint(hmc.mu);
    else if (smd.nlv!=0)
@@ -193,4 +195,5 @@ void run_mdint(void)
    else
       error_root(1,1,"run_mdint [mdint.c]",
                  "Simulation parameters are not set");
+   update_flds_from();
 }

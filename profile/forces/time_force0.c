@@ -25,6 +25,7 @@
 #include "linalg.h"
 #include "global.h"
 #include "profiler.h"
+#include "update.h"
 
 #define N0 (NPROC0 * L0)
 #define N1 (NPROC1 * L1)
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
    double phi[2], phi_prime[2], theta[3];
    qflt rqsm;
    mdflds_t *mdfs;
+   su3_dble *udb;
 
    mpi_init(argc, argv);
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
@@ -87,6 +89,9 @@ int main(int argc, char *argv[])
    start_ranlux(0, 12345);
    geometry();
    mdfs=mdflds();
+   udb=udfld();
+
+   init_data_to_device();
 
    /* -------------------------------------------------------------------------
     * Warmup: randomise field and call force0 without recording.
@@ -97,6 +102,7 @@ int main(int argc, char *argv[])
    for (int count = 0; count < WARMUP_ITERS; count++)
    {
       random_ud_reproducible();
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
       force0(1.0);
    }
 
@@ -107,20 +113,19 @@ int main(int argc, char *argv[])
     * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
     * ---------------------------------------------------------------------- */
    prof_reset(&force0_part_p);
-   prof_reset(&updload_force0_p);
-   prof_reset(&download_force0_p);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {
       prof_begin(&s_prepare);
       random_ud_reproducible();
       prof_end(&s_prepare);
 
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
       prof_begin(&s_kernel);
       force0(1.0);
       prof_end(&s_kernel);
 
    }
-   
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
    prof_end(&s_total);
 
@@ -146,7 +151,6 @@ int main(int argc, char *argv[])
       prof_report(&s_kernel);
       prof_report(&updload_force0_p);
       prof_report(&force0_part_p);
-      prof_report(&download_force0_p);
       prof_report(&s_total);
    }
 
