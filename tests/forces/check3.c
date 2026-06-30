@@ -42,7 +42,7 @@ static qflt dSdt(double c)
    // force0 runs on the GPU
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
 
    return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
@@ -62,13 +62,13 @@ static double chk_chs(double c)
    random_ud_reproducible();
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
 
    set_ud_phase();
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
 
    muladd_assign_alg(4*VOLUME_TRD,2,-1.0,(*mdfs).frc,wfd[0]);
    rqsm=norm_square_alg(4*VOLUME_TRD,3,wfd[0]);
@@ -90,7 +90,7 @@ TEST(Force0, NormSquareForce)
    random_ud_reproducible();
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c_g);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
    nrm_sq = norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
 

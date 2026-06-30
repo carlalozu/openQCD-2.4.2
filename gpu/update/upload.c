@@ -12,8 +12,8 @@ void update_flds_to(void)
    mdfs=mdflds();
    ud=udfld();
    #pragma omp target update to(ud[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target update to((*mdfs).mom[:4*VOLUME])
-   #pragma omp target update to((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update to(mdfs->mom[:4*VOLUME])
+   #pragma omp target update to(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
 }
 
 void init_data_to_device(void)
@@ -24,8 +24,8 @@ void init_data_to_device(void)
    mdfs=mdflds();
    ud=udfld();
    #pragma omp target enter data map(to: ud[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target enter data map(to: (*mdfs).mom[:4*VOLUME])
-   #pragma omp target enter data map(to: (*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target enter data map(to: mdfs->mom[:4*VOLUME])
+   #pragma omp target enter data map(to: mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
 }
 
 void update_flds_from(void)
@@ -36,6 +36,6 @@ void update_flds_from(void)
    mdfs=mdflds();
    ud=udfld();
    #pragma omp target update from(ud[:4*VOLUME+7*(BNDRY/4)])
-   #pragma omp target update from((*mdfs).mom[:4*VOLUME])
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->mom[:4*VOLUME])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
 }

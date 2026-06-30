@@ -43,7 +43,7 @@ TEST(Force0, NormSquareForce)
    random_ud_reproducible();
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c_g);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
    nrm_sq = norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
 
