@@ -615,9 +615,6 @@ void force0(double c)
    }
    bcp=bc_parms();
 
-   prof_begin(&update_force0_p);
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&update_force0_p);
 
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
@@ -628,9 +625,6 @@ void force0(double c)
    }
    prof_end(&force0_part_p);
 
-   prof_begin(&update_force0_p);
-   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&update_force0_p);
    add_bnd_frc();
 }
 
