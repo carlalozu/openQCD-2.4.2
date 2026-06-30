@@ -280,7 +280,7 @@ void acc_qflt(double u,double *qr)
 }
 #pragma omp end declare target
 
-#pragma omp declare target
+
 void add_qflt(double *qu,double *qv,double *qr)
 {
    double a,b,up,vp;
@@ -308,7 +308,7 @@ void add_qflt(double *qu,double *qv,double *qr)
    qr[0]=w;
    qr[1]=f-(w-e);
 }
-#pragma omp end declare target
+
 
 static void exact_prod(double u,double v,double *qr)
 {

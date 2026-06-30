@@ -112,7 +112,7 @@ static qflt local_plaq_sum_dble(int iw)
    udb=udfld();
 
    prof_begin(&s_lcl_plq_sm);
-#pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k,ix,t,n,pa)
    {
       k=omp_get_thread_num();
 
@@ -150,6 +150,7 @@ static qflt local_plaq_sum_dble(int iw)
             pa+=wp*9.0;
          }
 
+         #pragma omp critical
          acc_qflt(pa,rqsm.q);
       }
    }

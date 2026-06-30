@@ -68,14 +68,14 @@ prof_section s_lcl_plq_sm = {.name = "local_plaq_sum_dble"};
 
 
 #pragma omp declare target
-static double plaq_dble(su3_dble *udb, int n,int ix)
+static double plaq_dble(su3_dble *udb, int n,int ix, int (*iup)[4])
 {
    int ip[4];
    double sm;
    su3_dble wd1 ALIGNED16;
    su3_dble wd2 ALIGNED16;
 
-   plaq_uidx(n,ix,ip);
+   _plaq_uidx(n,ix,ip,iup);
 
    su3xsu3(udb+ip[0],udb+ip[1],&wd1);
    su3dagxsu3dag(udb+ip[3],udb+ip[2],&wd2);
@@ -90,8 +90,10 @@ double local_plaq_dble(int n){
    udb=udfld();
    double pa=0.0;
    #pragma omp target teams distribute parallel for reduction(+:pa)
-   for (int ix = 0; ix < VOLUME; ix++){
-         pa += plaq_dble(udb, n, ix);}
+   for (int ix=0;ix<VOLUME;ix++)
+   {
+         pa += plaq_dble(udb,n,ix,iup);
+   }
    return pa;
 }
 
@@ -121,13 +123,13 @@ static qflt local_plaq_sum_dble(int iw)
       if ((t<(N0-1))||(bc!=0))
       {
          for (int n=0;n<3;n++)
-            local_pa+=plaq_dble(udb,n,ix);
+            local_pa+=plaq_dble(udb,n,ix,iup);
       }
       
       if (((t>0)&&(t<(N0-1)))||(bc==3))
       {
          for (int n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
+            local_pa+=plaq_dble(udb,n,ix,iup);
       }
       else if ((t==0)||(bc==0))
       {
@@ -136,20 +138,20 @@ static qflt local_plaq_sum_dble(int iw)
          else
          {
             for (int n=3;n<6;n++)
-               local_pa+=wp*plaq_dble(udb,n,ix);
+               local_pa+=wp*plaq_dble(udb,n,ix,iup);
          }
       }
       else
       {
          for (int n=3;n<6;n++)
-            local_pa+=plaq_dble(udb,n,ix);
+            local_pa+=plaq_dble(udb,n,ix,iup);
 
          local_pa+=wp*9.0;
       }
       pa += local_pa;
    }
-   prof_end(&s_lcl_plq_sm);
    acc_qflt(pa,rqsm.q);
+   prof_end(&s_lcl_plq_sm);
    return rqsm;
 }
 
@@ -233,13 +235,13 @@ double plaq_action_slices(double *asl)
          if ((t<(N0-1))||(bc!=0))
          {
             for (n=0;n<3;n++)
-               smE+=(3.0-plaq_dble(udb,n,ix));
+               smE+=(3.0-plaq_dble(udb,n,ix,iup));
          }
 
          if ((t>0)||(bc!=1))
          {
             for (n=3;n<6;n++)
-               smB+=(3.0-plaq_dble(udb,n,ix));
+               smB+=(3.0-plaq_dble(udb,n,ix,iup));
          }
 
 #pragma omp critical

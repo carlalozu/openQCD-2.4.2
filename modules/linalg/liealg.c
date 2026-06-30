@@ -306,7 +306,7 @@ void random_alg(int vol,int icom,su3_alg_dble *X)
 qflt norm_square_alg(int vol,int icom,su3_alg_dble *X)
 {
    int k;
-   double *qsm[1];
+   double *qsm[1],pa;
    qflt rqsm;
 
    if ((icom&0x2)==0)
@@ -315,12 +315,16 @@ qflt norm_square_alg(int vol,int icom,su3_alg_dble *X)
    {
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
+      pa=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k) reduction(+:pa)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_norm_square_alg(vol,X+k*vol);
+         loc_rqsm=loc_norm_square_alg(vol,X+k*vol);
+         pa+=loc_rqsm.q[0];
       }
+      acc_qflt(pa,rqsm.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))
@@ -339,7 +343,7 @@ qflt norm_square_alg(int vol,int icom,su3_alg_dble *X)
 qflt scalar_prod_alg(int vol,int icom,su3_alg_dble *X,su3_alg_dble *Y)
 {
    int k;
-   double *qsm[1];
+   double *qsm[1],pa;
    qflt rqsm;
 
    if ((icom&0x2)==0)
@@ -348,12 +352,16 @@ qflt scalar_prod_alg(int vol,int icom,su3_alg_dble *X,su3_alg_dble *Y)
    {
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
+      pa=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k) reduction(+:pa)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_scalar_prod_alg(vol,X+k*vol,Y+k*vol);
+         loc_rqsm=loc_scalar_prod_alg(vol,X+k*vol,Y+k*vol);
+         pa+=loc_rqsm.q[0];
       }
+      acc_qflt(pa,rqsm.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))

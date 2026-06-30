@@ -199,7 +199,7 @@ static void alloc_iupdn(void)
 }
 
 
-static int index(int x0,int x1,int x2,int x3)
+static int _index(int x0,int x1,int x2,int x3)
 {
    int y0,y1,y2,y3;
 
@@ -238,19 +238,19 @@ void set_iupdn(void)
             iz/=L1;
             x0=iz;
 
-            ix=index(x0,x1,x2,x3);
+            ix=_index(x0,x1,x2,x3);
 
-            iup[ix][0]=index(x0+1,x1,x2,x3);
-            idn[ix][0]=index(x0-1,x1,x2,x3);
+            iup[ix][0]=_index(x0+1,x1,x2,x3);
+            idn[ix][0]=_index(x0-1,x1,x2,x3);
 
-            iup[ix][1]=index(x0,x1+1,x2,x3);
-            idn[ix][1]=index(x0,x1-1,x2,x3);
+            iup[ix][1]=_index(x0,x1+1,x2,x3);
+            idn[ix][1]=_index(x0,x1-1,x2,x3);
 
-            iup[ix][2]=index(x0,x1,x2+1,x3);
-            idn[ix][2]=index(x0,x1,x2-1,x3);
+            iup[ix][2]=_index(x0,x1,x2+1,x3);
+            idn[ix][2]=_index(x0,x1,x2-1,x3);
 
-            iup[ix][3]=index(x0,x1,x2,x3+1);
-            idn[ix][3]=index(x0,x1,x2,x3-1);
+            iup[ix][3]=_index(x0,x1,x2,x3+1);
+            idn[ix][3]=_index(x0,x1,x2,x3-1);
 
             if ((x0==(L0-1))&&(NPROC0>1))
                iup[ix][0]=VOLUME;
@@ -273,8 +273,8 @@ void set_iupdn(void)
                idn[ix][3]=VOLUME;
          }
       }
-      #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME])
    }
+   #pragma omp target enter data map(to: iup[:VOLUME], idn[:VOLUME], iupT[:4])
 }
 
 

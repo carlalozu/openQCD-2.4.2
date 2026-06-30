@@ -73,6 +73,8 @@ static int nfc[8],ofs[8],hofs[8],init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
+prof_section updload_force0_p = {.name = "updload_force0", .level=2};
+prof_section download_force0_p = {.name = "download_force0", .level=2};
 
 static void set_ofs(void)
 {
@@ -729,7 +731,7 @@ static qflt action0_part(int ofs_pt,int vol)
 qflt action0(int icom)
 {
    int k;
-   double *qact[1];
+   double *qact[1],pa;
    qflt act0;
    lat_parms_t lat;
 
@@ -754,12 +756,16 @@ qflt action0(int icom)
 
    act0.q[0]=0.0;
    act0.q[1]=0.0;
+   pa=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : act0)
+#pragma omp parallel private(k) reduction(+:pa)
    {
+      qflt loc_act0;
       k=omp_get_thread_num();
-      act0=action0_part(k*VOLUME_TRD,VOLUME_TRD);
+      loc_act0=action0_part(k*VOLUME_TRD,VOLUME_TRD);
+      pa+=loc_act0.q[0];
    }
+   acc_qflt(pa,act0.q);
 
    if ((NPROC>1)&&(icom&0x1))
    {

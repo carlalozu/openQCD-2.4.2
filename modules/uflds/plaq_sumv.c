@@ -96,7 +96,7 @@ double local_plaq_dblev(int n){
 static qflt local_plaq_sum_dblev(int iw)
 {
    int bc,k,ix,t,n;
-   double wp,pa;
+   double wp,pa=0.0;
    qflt rqsm;
 
    bc=bc_type();
@@ -111,46 +111,47 @@ static qflt local_plaq_sum_dblev(int iw)
    udbv=udfldv();
 
    prof_begin(&s_lcl_plq_smv);
-   #pragma omp parallel private(k,ix,t,n,pa) reduction(sum_qflt : rqsm)
+   #pragma omp parallel private(k,ix,t,n,pa) reduction(+:pa)
    {
       k=omp_get_thread_num();
       for (ix=(k*VOLUME_TRD);ix<((k+1)*VOLUME_TRD);ix++)
       {
          int t=global_time(ix);
-         pa=0.0;
+         double local_pa=0.0;
 
          if ((t<(N0-1))||(bc!=0))
          {
             for (int n=0;n<3;n++)
-               pa+=plaq_dblev(udbv,n,ix);
+               local_pa+=plaq_dblev(udbv,n,ix);
          }
          
          if (((t>0)&&(t<(N0-1)))||(bc==3))
          {
             for (int n=3;n<6;n++)
-               pa+=plaq_dblev(udbv,n,ix);
+               local_pa+=plaq_dblev(udbv,n,ix);
          }
          else if ((t==0)||(bc==0))
          {
             if (bc==1)
-               pa+=wp*9.0;
+               local_pa+=wp*9.0;
             else
             {
                for (int n=3;n<6;n++)
-                  pa+=wp*plaq_dblev(udbv,n,ix);
+                  local_pa+=wp*plaq_dblev(udbv,n,ix);
             }
          }
          else
          {
             for (int n=3;n<6;n++)
-               pa+=plaq_dblev(udbv,n,ix);
+               local_pa+=plaq_dblev(udbv,n,ix);
 
-            pa+=wp*9.0;
+            local_pa+=wp*9.0;
          }
 
-         acc_qflt(pa,rqsm.q);
+         pa+=local_pa;
       }
    }
+   acc_qflt(pa,rqsm.q);
    prof_end(&s_lcl_plq_smv);
    return rqsm;
 }

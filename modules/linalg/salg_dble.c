@@ -2611,7 +2611,7 @@ static void loc_mulmg5_dble(int vol,spinor_dble *s)
 complex_qflt spinor_prod_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
 {
    int k;
-   double *qsm[2];
+   double *qsm[2],pre,pim;
    qflt reqsm,imqsm;
    complex_qflt cqsm;
 
@@ -2623,17 +2623,19 @@ complex_qflt spinor_prod_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
       reqsm.q[1]=0.0;
       imqsm.q[0]=0.0;
       imqsm.q[1]=0.0;
+      pre=0.0;
+      pim=0.0;
 
-#pragma omp parallel private(k,cqsm) reduction(sum_qflt : reqsm,imqsm)
+#pragma omp parallel private(k,cqsm) reduction(+:pre,pim)
       {
+         qflt loc_reqsm,loc_imqsm;
          k=omp_get_thread_num();
          cqsm=loc_spinor_prod_dble(vol,s+k*vol,r+k*vol);
-
-         reqsm.q[0]=cqsm.re.q[0];
-         reqsm.q[1]=cqsm.re.q[1];
-         imqsm.q[0]=cqsm.im.q[0];
-         imqsm.q[1]=cqsm.im.q[1];
+         pre+=cqsm.re.q[0];
+         pim+=cqsm.im.q[0];
       }
+      acc_qflt(pre,reqsm.q);
+      acc_qflt(pim,imqsm.q);
 
       cqsm.re.q[0]=reqsm.q[0];
       cqsm.re.q[1]=reqsm.q[1];
@@ -2655,7 +2657,7 @@ complex_qflt spinor_prod_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
 qflt spinor_prod_re_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
 {
    int k;
-   double *qsm[1];
+   double *qsm[1],pa;
    qflt rqsm;
 
    if ((icom&0x2)==0)
@@ -2664,12 +2666,16 @@ qflt spinor_prod_re_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
    {
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
+      pa=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k) reduction(+:pa)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_spinor_prod_re_dble(vol,s+k*vol,r+k*vol);
+         loc_rqsm=loc_spinor_prod_re_dble(vol,s+k*vol,r+k*vol);
+         pa+=loc_rqsm.q[0];
       }
+      acc_qflt(pa,rqsm.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))
@@ -2685,7 +2691,7 @@ qflt spinor_prod_re_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
 complex_qflt spinor_prod5_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
 {
    int k;
-   double *qsm[2];
+   double *qsm[2],pre,pim;
    qflt reqsm,imqsm;
    complex_qflt cqsm;
 
@@ -2697,17 +2703,19 @@ complex_qflt spinor_prod5_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
       reqsm.q[1]=0.0;
       imqsm.q[0]=0.0;
       imqsm.q[1]=0.0;
+      pre=0.0;
+      pim=0.0;
 
-#pragma omp parallel private(k,cqsm) reduction(sum_qflt : reqsm,imqsm)
+#pragma omp parallel private(k,cqsm) reduction(+:pre,pim)
       {
+         qflt loc_reqsm,loc_imqsm;
          k=omp_get_thread_num();
          cqsm=loc_spinor_prod5_dble(vol,s+k*vol,r+k*vol);
-
-         reqsm.q[0]=cqsm.re.q[0];
-         reqsm.q[1]=cqsm.re.q[1];
-         imqsm.q[0]=cqsm.im.q[0];
-         imqsm.q[1]=cqsm.im.q[1];
+         pre+=cqsm.re.q[0];
+         pim+=cqsm.im.q[0];
       }
+      acc_qflt(pre,reqsm.q);
+      acc_qflt(pim,imqsm.q);
 
       cqsm.re.q[0]=reqsm.q[0];
       cqsm.re.q[1]=reqsm.q[1];
@@ -2729,7 +2737,7 @@ complex_qflt spinor_prod5_dble(int vol,int icom,spinor_dble *s,spinor_dble *r)
 qflt norm_square_dble(int vol,int icom,spinor_dble *s)
 {
    int k;
-   double *qsm[1];
+   double *qsm[1],pa;
    qflt rqsm;
 
    if ((icom&0x2)==0)
@@ -2738,12 +2746,16 @@ qflt norm_square_dble(int vol,int icom,spinor_dble *s)
    {
       rqsm.q[0]=0.0;
       rqsm.q[1]=0.0;
+      pa=0.0;
 
-#pragma omp parallel private(k) reduction(sum_qflt : rqsm)
+#pragma omp parallel private(k) reduction(+:pa)
       {
+         qflt loc_rqsm;
          k=omp_get_thread_num();
-         rqsm=loc_norm_square_dble(vol,s+k*vol);
+         loc_rqsm=loc_norm_square_dble(vol,s+k*vol);
+         pa+=loc_rqsm.q[0];
       }
+      acc_qflt(pa,rqsm.q);
    }
 
    if ((NPROC>1)&&(icom&0x1))

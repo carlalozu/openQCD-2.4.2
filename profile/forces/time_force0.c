@@ -107,7 +107,8 @@ int main(int argc, char *argv[])
     * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
     * ---------------------------------------------------------------------- */
    prof_reset(&force0_part_p);
-   prof_reset(&update_force0_p);
+   prof_reset(&updload_force0_p);
+   prof_reset(&download_force0_p);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {
       prof_begin(&s_prepare);
@@ -130,7 +131,7 @@ int main(int argc, char *argv[])
       double avg_time = force0_part_p.total / (double)force0_part_p.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / 1024));
-      printf("Local size of the force field  (KB): %d\n", (int)((64 * VOLUME * sizeof(double)) / 1024));
+      printf("Local size of the force field  (KB): %d\n", (int)((32 * VOLUME * sizeof(double)) / 1024));
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
@@ -143,8 +144,9 @@ int main(int argc, char *argv[])
 
       prof_report(&s_prepare);
       prof_report(&s_kernel);
+      prof_report(&updload_force0_p);
       prof_report(&force0_part_p);
-      prof_report(&update_force0_p);
+      prof_report(&download_force0_p);
       prof_report(&s_total);
    }
 
