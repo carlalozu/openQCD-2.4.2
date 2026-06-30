@@ -85,7 +85,7 @@ MODULES = $(ARCHIVE) $(BLOCK) $(DFL) $(DFT) $(DIRAC) $(FLAGS) $(FORCES) \
 MDIR = ../../modules
 GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(GDIR)/update:$(MDIR)/archive:$(MDIR)/block:$(MDIR)/dirac:$(MDIR)/dfl:\
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(GDIR)/update:$(GDIR)/lattice:$(MDIR)/archive:$(MDIR)/block:$(MDIR)/dirac:$(MDIR)/dfl:\
           $(MDIR)/dft:$(MDIR)/flags:$(MDIR)/forces:$(MDIR)/lattice:\
           $(MDIR)/linalg:$(MDIR)/linsolv:$(MDIR)/little:$(MDIR)/mdflds:\
           $(MDIR)/msfcts:$(MDIR)/random:$(MDIR)/ratfcts:$(MDIR)/sap:\
@@ -128,19 +128,19 @@ PGMS= $(MAIN) $(MODULES)
 
 # rule to make dependencies
 
-$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.gpu
+$(addsuffix .d,$(PGMS)): %.d: %.c Makefile.gpu-lex
 	@ $(CC) $< -MM $(addprefix -I,$(INCPATH)) -o $@
 
 
 # rule to compile source programs
 
-$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.gpu
+$(addsuffix .o,$(PGMS)): %.o: %.c Makefile.gpu-lex
 	$(CC) $< -c $(CFLAGS) $(addprefix -I,$(INCPATH))
 
 
 # rule to link object files
 
-$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.gpu
+$(MAIN): %: %.o $(addsuffix .o,$(MODULES)) Makefile.gpu-lex
 	$(CLINKER) $< $(addsuffix .o,$(MODULES)) $(LFLAGS) \
         $(addprefix -L,$(LIBPATH)) $(addprefix -l,$(LIBS)) -o $@
 
