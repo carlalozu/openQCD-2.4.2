@@ -35,10 +35,12 @@ SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
 UFLDS = bstap udcom uflds uinit
 
+UPDATE = upload
+
 UTILS = endian error mutils qsum utils wspace
 
 MODULES = $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) $(RANDOM) \
-          $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
+          $(SFLDS) $(SU3FCTS) $(UFLDS) $(UPDATE) $(UTILS)
 
 
 # search path for modules
@@ -47,7 +49,7 @@ MDIR = ../../modules
 
 VPATH = .:$(MDIR)/forces:$(MDIR)/uflds:$(MDIR)/flags:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
-          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/utils
+          $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/update:$(MDIR)/utils
 
 
 # additional include directories

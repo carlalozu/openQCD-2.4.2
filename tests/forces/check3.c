@@ -25,11 +25,12 @@
 #include "devfcts.h"
 #include "global.h"
 #include "minitest.h"
+#include "update.h"
 
 #define N0 (NPROC0*L0)
 
 static double c_g=0.789;
-
+static su3_dble *udb;
 
 static qflt dSdt(double c)
 {
@@ -39,7 +40,9 @@ static qflt dSdt(double c)
    check_active((*mdfs).mom);
 
    // force0 runs on the GPU
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
 
    return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
@@ -57,11 +60,16 @@ static double chk_chs(double c)
    mdfs=mdflds();
 
    random_ud_reproducible();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
 
    set_ud_phase();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+
    muladd_assign_alg(4*VOLUME_TRD,2,-1.0,(*mdfs).frc,wfd[0]);
    rqsm=norm_square_alg(4*VOLUME_TRD,3,wfd[0]);
    dev=rqsm.q[0];
@@ -80,7 +88,9 @@ TEST(Force0, NormSquareForce)
    mdfs=mdflds();
    
    random_ud_reproducible();
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c_g);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
    nrm_sq = norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
 
@@ -201,6 +211,9 @@ int main(int argc,char *argv[])
    start_ranlux(0,1234);
    geometry();
    alloc_wfd(1);
+   udb=udfld();
+
+   init_data_to_device();
 
    int result=RUN_ALL_TESTS(my_rank,tests);
 

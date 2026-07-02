@@ -13,16 +13,16 @@
 ################################################################################
 
 [Run name]
-name         4x4v3_threads
+name         hmc_scale_clang
 
 [Log and data directories]
-log_dir      ../data/ym1/log
-dat_dir      ../data/ym1/dat
+log_dir      ../../data/ym1/log
+dat_dir      ../../data/ym1/dat
 
 [Configurations]
 types        b
-block_dir    ../data/ym1/blk
-bs           4 4 4 4
+block_dir    ../../data/ym1/blk
+bs 36 36 32 16
 nio_nodes    1
 nio_streams  1
 
