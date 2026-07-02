@@ -75,8 +75,6 @@ static int init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
-prof_section updload_force0_p = {.name = "updload_force0", .level=2};
-prof_section download_force0_p = {.name = "download_force0", .level=2};
 
 static void set_ofs(void)
 {
@@ -330,7 +328,8 @@ void plaq_frc(void)
    }
    #pragma omp target update from(fdb[0:4*VOLUME])
 
-   add_bnd_frc();
+   // this function is not implemented at the moment
+   // add_bnd_frc();
 }
 
 
@@ -607,10 +606,6 @@ void force0(double c)
    }
    bc_parms_t bc=bc_parms();
 
-   prof_begin(&updload_force0_p);
-   #pragma omp target update to(udb[0:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&updload_force0_p);
-   
    set_frc2zero_gpu();
 
    prof_begin(&force0_part_p);
@@ -621,10 +616,7 @@ void force0(double c)
    }
    prof_end(&force0_part_p);
 
-   prof_begin(&download_force0_p);
-   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&download_force0_p);
-   add_bnd_frc();
+   // add_bnd_frc();
 }
 
 #pragma omp declare target

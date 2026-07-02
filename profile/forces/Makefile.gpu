@@ -35,10 +35,12 @@ SU3FCTS = chexp su3prod su3ren cm3x3 random_su3
 
 UFLDS = bstap udcom uflds uinit
 
+UPDATE = upload
+
 UTILS = endian error mutils qsum utils wspace
 
 MODULES = $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) $(RANDOM) \
-          $(SFLDS) $(SU3FCTS) $(UFLDS) $(UTILS)
+          $(SFLDS) $(SU3FCTS) $(UFLDS) $(UPDATE) $(UTILS)
 
 
 # search path for modules
@@ -46,7 +48,7 @@ MODULES = $(FLAGS) $(FORCES) $(LATTICE) $(LINALG) $(MDFLDS) $(RANDOM) \
 MDIR = ../../modules
 GDIR = ../../gpu
 
-VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(MDIR)/flags:$(MDIR)/forces:\
+VPATH = .:$(GDIR)/forces:$(GDIR)/uflds:$(GDIR)/update:$(MDIR)/flags:$(MDIR)/forces:\
           $(MDIR)/lattice:$(MDIR)/linalg:$(MDIR)/mdflds:$(MDIR)/random:\
           $(MDIR)/sflds:$(MDIR)/su3fcts:$(MDIR)/uflds:$(MDIR)/utils
 
