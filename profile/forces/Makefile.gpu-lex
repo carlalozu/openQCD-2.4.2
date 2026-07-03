@@ -15,7 +15,7 @@ all: rmxeq mkdep mkxeq
 
 # main programs and modules to be compiled
 
-MAIN = time_force0
+MAIN = time_force0 time_force0_gather
 
 FLAGS = action_parms dfl_parms flags hmc_parms lat_parms rat_parms smd_parms
 
