@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
       prof_end(&s_kernel);
 
    }
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
    prof_end(&s_total);
 
