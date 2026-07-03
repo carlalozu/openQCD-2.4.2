@@ -3,8 +3,8 @@
  *
  * File time_force0_gather.c
  *
- * Profiling of plaq_frc_gather() - the gather formulation of the plaquette
- * gauge force computation (see the comment above plaq_frc_gather() in
+ * Profiling of force0_gather() - the gather formulation of the plaquette
+ * gauge force computation (see the comment above force0_gather() in
  * gpu/forces/force0.c). Instead of looping over plaquettes and scattering
  * their contribution to the 4 corner links (with atomics), this loops over
  * links and gathers the contributions of the (at most) 6 staples that touch
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
    if (my_rank == 0)
    {
       printf("\n");
-      printf("Gauge force (plaq_frc_gather) of the double-precision gauge field\n");
+      printf("Gauge force (force0_gather) of the double-precision gauge field\n");
       printf("-------------------------------------------------------------------\n\n");
 
       print_lattice_sizes();
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
    check_machine();
    MPI_Bcast(&bc, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-   /* plaq_frc_gather() only implements the pure Wilson plaquette action
+   /* force0_gather() only implements the pure Wilson plaquette action
       (c0=1) with tree-level boundary improvement coefficients (cG=cG'=1) */
    set_lat_parms(5.5, 1.0, 0, NULL, 0, 1.0);
    print_lat_parms(0x2);
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
    init_data_to_device();
 
    /* -------------------------------------------------------------------------
-    * Warmup: randomise field and call plaq_frc_gather without recording.
+    * Warmup: randomise field and call force0_gather without recording.
     * ---------------------------------------------------------------------- */
    if (my_rank == 0)
       printf("Running %d warmup iterations...\n", WARMUP_ITERS);
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
    {
       random_ud_reproducible();
       #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-      plaq_frc_gather();
+      force0_gather(1.0);
    }
 
    if (my_rank == 0)
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 
       #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
       prof_begin(&s_kernel);
-      plaq_frc_gather();
+      force0_gather(1.0);
       prof_end(&s_kernel);
 
    }
@@ -154,10 +154,10 @@ int main(int argc, char *argv[])
       printf("Volume: %i\n", VOLUME);
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
-      printf("Average time for plaq_frc_gather (sec): %.9f\n", avg_time);
+      printf("Average time for force0_gather (sec): %.9f\n", avg_time);
       printf("Flops (effective, scatter-equivalent): %lld\n", flops);
-      printf("Effective performance for plaq_frc_gather (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
-      printf("Time per lattice point & thread for plaq_frc_gather (sec): %.9f\n",
+      printf("Effective performance for force0_gather (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
+      printf("Time per lattice point & thread for force0_gather (sec): %.9f\n",
              avg_time / (double)VOLUME_TRD);
       printf("Result: %f\n\n", rqsm.q[0]/(4*VOLUME));
 

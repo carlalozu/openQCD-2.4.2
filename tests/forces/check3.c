@@ -53,25 +53,19 @@ static qflt dSdt(double c)
 static qflt dSdt_gather(double c)
 {
    mdflds_t *mdfs;
-   lat_parms_t lat;
-   qflt dsdt;
 
    mdfs=mdflds();
    check_active((*mdfs).mom);
 
-   // plaq_frc_gather runs on the GPU and only implements the pure Wilson
+   // force0_gather runs on the GPU and only implements the pure Wilson
    // plaquette action (c0=1) with tree-level boundary improvement
    // coefficients; the caller must set the parameter data base accordingly
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   plaq_frc_gather();
+   force0_gather(c);
    #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
 
-   lat=lat_parms();
-   dsdt=scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
-   scl_qflt(c*lat.beta/6.0,dsdt.q);
-
-   return dsdt;
+   return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
 }
 #endif
 
@@ -180,14 +174,11 @@ TEST(Force0, GatherMatchesForce0)
    qflt rqsm;
    su3_alg_dble **wfd;
    mdflds_t *mdfs;
-   lat_parms_t lat;
 
-   /* plaq_frc_gather() only implements the pure Wilson plaquette action
+   /* force0_gather() only implements the pure Wilson plaquette action
       (c0=1) with tree-level boundary improvement coefficients (cG=cG'=1);
       main() sets up exactly that configuration, so no override is needed
       here */
-   lat=lat_parms();
-
    wfd=reserve_wfd(1);
    mdfs=mdflds();
 
@@ -200,23 +191,22 @@ TEST(Force0, GatherMatchesForce0)
    assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
 
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   plaq_frc_gather();
+   force0_gather(c_g);
    #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
 
-   /* force0(c) with c0=1 and tree-level cG equals c*(beta/6)*plaq_frc_gather() */
-   muladd_assign_alg(4*VOLUME_TRD,2,-(c_g*lat.beta/6.0),(*mdfs).frc,wfd[0]);
+   muladd_assign_alg(4*VOLUME_TRD,2,-1.0,(*mdfs).frc,wfd[0]);
    rqsm=norm_square_alg(4*VOLUME_TRD,3,wfd[0]);
    dev=rqsm.q[0];
    rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
-   dev/=(rqsm.q[0]*(c_g*lat.beta/6.0)*(c_g*lat.beta/6.0));
+   dev/=rqsm.q[0];
    release_wfd();
 
    dev=sqrt(dev);
    MT_PRINT("relative deviation gather vs force0: %.2e", dev);
    EXPECT_NEAR(dev, 0.0, 1.0e-12);
 #else
-   SKIP_TEST("plaq_frc_gather() is only implemented for the GPU-offloaded build");
+   SKIP_TEST("force0_gather() is only implemented for the GPU-offloaded build");
 #endif
 }
 
@@ -228,7 +218,7 @@ TEST(Force0, GatherVsActionDerivative)
    double dev_frc,sig_loss;
    qflt dsdt,act;
 
-   // action0 runs on the CPU, plaq_frc_gather runs on the GPU
+   // action0 runs on the CPU, force0_gather runs on the GPU
    for (k=0;k<4;k++)
    {
       random_ud_reproducible();
@@ -250,7 +240,7 @@ TEST(Force0, GatherVsActionDerivative)
       EXPECT_NEAR(fabs(dev_frc), 0.0, pow(10.0, -(15.0-sig_loss)));
    }
 #else
-   SKIP_TEST("plaq_frc_gather() is only implemented for the GPU-offloaded build");
+   SKIP_TEST("force0_gather() is only implemented for the GPU-offloaded build");
 #endif
 }
 

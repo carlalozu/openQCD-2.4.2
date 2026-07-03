@@ -429,7 +429,7 @@ static void plaq_corner_algs(int n,int x,su3_dble *udb,
 }
 
 
-static void link_frc_gather(int y,int rho,int bc,
+static void link_frc_gather(int y,int rho,int bc,double r0,
                              su3_dble *udb,su3_alg_dble *fdb)
 {
    int s,sigma,n,role,x2,t,tx2;
@@ -544,15 +544,17 @@ static void link_frc_gather(int y,int rho,int bc,
       }
    }
 
+   _su3_alg_mul_assign(F,r0);
    fdb[offset(y,rho)]=F;
 }
 #pragma omp end declare target
 
 
-void plaq_frc_gather(void)
+void force0_gather(double c)
 {
    int bc;
    mdflds_t *mdfs;
+   lat_parms_t lat;
 
    if (query_flags(UDBUF_UP2DATE)!=1)
       copy_bnd_ud();
@@ -562,6 +564,12 @@ void plaq_frc_gather(void)
    mdfs=mdflds();
    fdb=(*mdfs).frc;
 
+   lat=lat_parms();
+   error_root(lat.c0!=1.0,1,"force0_gather [force0.c]",
+              "This restricted GPU implementation only supports the pure "
+              "Wilson plaquette action (c0=1)");
+   c*=(lat.beta/6.0);
+
    bc=bc_type();
 
    prof_begin(&force0_gather_part_p);
@@ -570,7 +578,7 @@ void plaq_frc_gather(void)
    {
       for (int rho=0; rho<4; rho++)
       {
-         link_frc_gather(ix,rho,bc,udb,fdb);
+         link_frc_gather(ix,rho,bc,c,udb,fdb);
       }
    }
    prof_end(&force0_gather_part_p);
