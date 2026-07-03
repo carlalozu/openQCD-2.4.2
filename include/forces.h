@@ -25,9 +25,11 @@
 
 /* FORCE0_C */
 extern void plaq_frc(void);
+extern void force0_gather(double c);
 extern void force0(double c);
 extern qflt action0(int icom);
 extern prof_section force0_part_p;
+extern prof_section force0_gather_part_p;
 
 /* FORCE1_C */
 extern qflt setpf1(double mu,int ipf,int icom);

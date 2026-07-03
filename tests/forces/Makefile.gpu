@@ -71,7 +71,7 @@ LIBPATH = $(MPI_HOME)/lib
 
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall \
          -Wno-long-long  -Wstrict-prototypes \
-         -O -DFMA3 -DPM -mp=gpu -gpu=cc90 -fopenmp
+         -O -DFMA3 -DPM -mp=gpu -gpu=cc90 -fopenmp -DGPU
 
 LFLAGS = -mp=gpu -gpu=cc90 -fopenmp
 

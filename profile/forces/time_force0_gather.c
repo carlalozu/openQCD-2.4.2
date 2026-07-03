@@ -1,0 +1,172 @@
+
+/*******************************************************************************
+ *
+ * File time_force0_gather.c
+ *
+ * Profiling of force0_gather() - the gather formulation of the plaquette
+ * gauge force computation (see the comment above force0_gather() in
+ * gpu/forces/force0.c). Instead of looping over plaquettes and scattering
+ * their contribution to the 4 corner links (with atomics), this loops over
+ * links and gathers the contributions of the (at most) 6 staples that touch
+ * each of them, so every thread owns exactly one entry of the force field.
+ *
+ *******************************************************************************/
+
+#define MAIN_PROGRAM
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include "mpi.h"
+#include "su3.h"
+#include "random.h"
+#include "su3fcts.h"
+#include "flags.h"
+#include "utils.h"
+#include "lattice.h"
+#include "uflds.h"
+#include "mdflds.h"
+#include "forces.h"
+#include "linalg.h"
+#include "global.h"
+#include "profiler.h"
+#include "update.h"
+
+#define N0 (NPROC0 * L0)
+#define N1 (NPROC1 * L1)
+#define N2 (NPROC2 * L2)
+#define N3 (NPROC3 * L3)
+
+#define WARMUP_ITERS  3
+#define PROFILE_ITERS 120
+
+int main(int argc, char *argv[])
+{
+   prof_section s_prepare = {.name = "prepare_data"};
+   prof_section s_kernel  = {.name = "force0_gather"};
+   prof_section s_total   = {.name = "total"};
+
+   int my_rank, bc, iact;
+   double phi[2], phi_prime[2], theta[3];
+   qflt rqsm;
+   mdflds_t *mdfs;
+   su3_dble *udb;
+
+   mpi_init(argc, argv);
+   MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+
+   prof_begin(&s_total);
+
+   if (my_rank == 0)
+   {
+      printf("\n");
+      printf("Gauge force (force0_gather) of the double-precision gauge field\n");
+      printf("-------------------------------------------------------------------\n\n");
+
+      print_lattice_sizes();
+
+      bc = find_opt(argc, argv, "-bc");
+
+      if (bc != 0)
+         error_root(sscanf(argv[bc + 1], "%d", &bc) != 1, 1, "main [time_force0_gather.c]",
+                    "Syntax: time_force0_gather [-bc <type>]");
+   }
+
+   check_machine();
+   MPI_Bcast(&bc, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+   /* force0_gather() only implements the pure Wilson plaquette action
+      (c0=1) with tree-level boundary improvement coefficients (cG=cG'=1) */
+   set_lat_parms(5.5, 1.0, 0, NULL, 0, 1.0);
+   print_lat_parms(0x2);
+
+   phi[0] = 0.123;
+   phi[1] = -0.534;
+   phi_prime[0] = 0.912;
+   phi_prime[1] = 0.078;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
+
+   iact = 0;
+   set_hmc_parms(1, &iact, 0, 0, NULL, 1, 1.0);
+   set_bc_parms(bc, 1.0, 1.0, 1.0, 1.0, phi, phi_prime, theta);
+   print_bc_parms(0x3);
+
+   start_ranlux(0, 12345);
+   geometry();
+   mdfs=mdflds();
+   udb=udfld();
+
+   init_data_to_device();
+
+   /* -------------------------------------------------------------------------
+    * Warmup: randomise field and call force0_gather without recording.
+    * ---------------------------------------------------------------------- */
+   if (my_rank == 0)
+      printf("Running %d warmup iterations...\n", WARMUP_ITERS);
+
+   for (int count = 0; count < WARMUP_ITERS; count++)
+   {
+      random_ud_reproducible();
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+      force0_gather(1.0);
+   }
+
+   if (my_rank == 0)
+      printf("Warmup done. Starting timed benchmark...\n\n");
+
+   /* -------------------------------------------------------------------------
+    * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
+    * ---------------------------------------------------------------------- */
+   prof_reset(&force0_gather_part_p);
+   for (int count = 0; count < PROFILE_ITERS; count++)
+   {
+      prof_begin(&s_prepare);
+      random_ud_reproducible();
+      prof_end(&s_prepare);
+
+      #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+      prof_begin(&s_kernel);
+      force0_gather(1.0);
+      prof_end(&s_kernel);
+
+   }
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
+   prof_end(&s_total);
+
+   if (my_rank == 0)
+   {
+      /* Same physical output as plaq_frc()/force0() with c0=1 (6 planes ×
+         (3 su3prod@198 + 3 prod2su3alg@216 + 4 alg_mul@16) per site), but the
+         gather formulation recomputes each plaquette independently at every
+         one of its 4 corner links instead of once per plaquette, so the raw
+         flop count is roughly 4x higher; the GFlops/s figure below is based
+         on the useful (scatter-equivalent) flop count so it is directly
+         comparable to time_force0's, i.e. it reports effective throughput,
+         not raw compute rate */
+      long long flops = 7836LL * VOLUME;
+      double avg_time = force0_gather_part_p.total / (double)force0_gather_part_p.count;
+
+      printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / 1024));
+      printf("Local size of the force field  (KB): %d\n", (int)((32 * VOLUME * sizeof(double)) / 1024));
+      printf("Volume: %i\n", VOLUME);
+      printf("Volume per thread: %i\n", VOLUME_TRD);
+      printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
+      printf("Average time for force0_gather (sec): %.9f\n", avg_time);
+      printf("Flops (effective, scatter-equivalent): %lld\n", flops);
+      printf("Effective performance for force0_gather (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time));
+      printf("Time per lattice point & thread for force0_gather (sec): %.9f\n",
+             avg_time / (double)VOLUME_TRD);
+      printf("Result: %f\n\n", rqsm.q[0]/(4*VOLUME));
+
+      prof_report(&s_prepare);
+      prof_report(&s_kernel);
+      prof_report(&force0_gather_part_p);
+      prof_report(&s_total);
+   }
+
+   MPI_Finalize();
+   exit(0);
+}

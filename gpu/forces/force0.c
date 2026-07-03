@@ -75,6 +75,7 @@ static int init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
+prof_section force0_gather_part_p = {.name = "force0_gather_part", .level=2};
 
 static void set_ofs(void)
 {
@@ -327,6 +328,250 @@ void plaq_frc(void)
       plaq_frc_part(ix,bc,iup,udb,fdb);
    }
    #pragma omp target update from(fdb[0:4*VOLUME])
+
+   // this function is not implemented at the moment
+   // add_bnd_frc();
+}
+
+
+/*******************************************************************************
+*
+* Gather formulation of plaq_frc(), following the approach used in QUDA's
+* gauge_force.cu: instead of looping over plaquettes and scattering (with
+* atomics) their contribution to the 4 links on their boundary, we loop over
+* links and, for each of them, gather the contributions of the (at most) 6
+* staples that touch it. Every thread then owns exactly one entry of fdb and
+* writes it exactly once, so no atomics are needed.
+*
+* plaq_frc_part() computes, for the plaquette in the (mu,nu)=plns[n] plane
+* based at site x, the three su3_alg_dble pieces that the scatter code adds
+* to its four corners:
+*
+*   XA = Proj(wd0*wd1)                     -> added   to the ip[1] corner
+*   XB = Proj(wd1*wd0)                     -> subtracted from the ip[3] corner
+*   XC = Proj(U(ip0)*wd0*U(ip2)^dag)       -> added   to ip[0], subtracted from ip[2]
+*
+* where wd0=U(ip1)*U(ip3)^dag and wd1=U(ip2)^dag*U(ip0) (same definitions as
+* in plaq_frc_part() above).
+*
+* For a target link L=(y,rho), plaq_uidx() shows that, for each of the 3
+* directions sigma!=rho, L appears as a corner of exactly 2 plaquettes: one
+* based at x=y and one based at x=idn[y][sigma]. Which corner (and hence
+* which of XA,XB,XC, and with which sign/guard) depends only on whether rho
+* is the mu or the nu direction of the plaquette plane - this is what
+* plane_role() below determines by scanning the (fixed) plns table.
+*
+*******************************************************************************/
+
+#pragma omp declare target
+static int plane_role(int rho,int sigma,int *role)
+{
+   int n;
+
+   for (n=0;n<6;n++)
+   {
+      if ((plns[n][0]==rho)&&(plns[n][1]==sigma))
+      {
+         *role=0;    /* rho is "mu" (first direction) of this plane */
+         return n;
+      }
+
+      if ((plns[n][0]==sigma)&&(plns[n][1]==rho))
+      {
+         *role=1;    /* rho is "nu" (second direction) of this plane */
+         return n;
+      }
+   }
+
+   return -1;
+}
+
+
+static double plaq_weight(int t,int bc)
+{
+   double r;
+
+   r=1.0;
+
+   if (((t==0)&&(bc!=3))||((t==(N0-1))&&(bc==0)))
+      r=0.5;
+
+   return r;
+}
+
+
+static void plaq_corner_algs(int n,int x,su3_dble *udb,
+                              su3_alg_dble *XA,su3_alg_dble *XB,su3_alg_dble *XC)
+{
+   int ip[4];
+   su3_dble wd[2] ALIGNED16;
+
+   plaq_uidx(n,x,ip);
+
+   su3xsu3dag(udb+ip[1],udb+ip[3],wd);
+   su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
+
+   prod2su3alg(wd,wd+1,XA);
+   prod2su3alg(wd+1,wd,XB);
+
+   su3xsu3dag(wd,udb+ip[2],wd+1);
+   prod2su3alg(udb+ip[0],wd+1,XC);
+}
+
+
+static void link_frc_gather(int y,int rho,int bc,double r0,
+                             su3_dble *udb,su3_alg_dble *fdb)
+{
+   int s,sigma,n,role,x2,t,tx2;
+   double r;
+   su3_alg_dble F,XA,XB,XC;
+
+   F.c1=0.0;
+   F.c2=0.0;
+   F.c3=0.0;
+   F.c4=0.0;
+   F.c5=0.0;
+   F.c6=0.0;
+   F.c7=0.0;
+   F.c8=0.0;
+
+   t=global_time(y);
+
+   for (s=0;s<3;s++)
+   {
+      sigma=(rho+1+s)&3;
+      n=plane_role(rho,sigma,&role);
+
+      if (role==0)
+      {
+         /* rho is the "mu" direction: L is the ip[0] corner of the plaquette
+            based at y, and the ip[3] corner of the plaquette based at
+            x2=idn[y][sigma] */
+
+         if (n<3)
+         {
+            if ((t<(N0-1))||(bc!=0))
+            {
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
+               _su3_alg_add_assign(F,XC);
+            }
+         }
+         else
+         {
+            if ((t>0)||(bc!=1))
+            {
+               r=plaq_weight(t,bc);
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
+               _su3_alg_mul_add_assign(F,r,XC);
+            }
+         }
+
+         x2=idn[y][sigma];
+         tx2=global_time(x2);
+
+         if (n<3)
+         {
+            if ((tx2<(N0-1))||(bc!=0))
+            {
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
+               _su3_alg_sub_assign(F,XB);
+            }
+         }
+         else
+         {
+            if ((tx2>0)||(bc!=1))
+            {
+               r=plaq_weight(tx2,bc);
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
+               _su3_alg_mul_sub_assign(F,r,XB);
+            }
+         }
+      }
+      else
+      {
+         /* rho is the "nu" direction: L is the ip[2] corner of the
+            plaquette based at y, and the ip[1] corner of the plaquette
+            based at x2=idn[y][sigma] */
+
+         if (n<3)
+         {
+            if (((t<(N0-1))||(bc!=0))&&((t>0)||(bc!=1)))
+            {
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
+               _su3_alg_sub_assign(F,XC);
+            }
+         }
+         else
+         {
+            if ((t>0)||(bc!=1))
+            {
+               r=plaq_weight(t,bc);
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
+               _su3_alg_mul_sub_assign(F,r,XC);
+            }
+         }
+
+         x2=idn[y][sigma];
+         tx2=global_time(x2);
+
+         if (n<3)
+         {
+            if ((tx2<(N0-1))||(bc==3))
+            {
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
+               _su3_alg_add_assign(F,XA);
+            }
+         }
+         else
+         {
+            if ((tx2>0)||(bc!=1))
+            {
+               r=plaq_weight(tx2,bc);
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
+               _su3_alg_mul_add_assign(F,r,XA);
+            }
+         }
+      }
+   }
+
+   _su3_alg_mul_assign(F,r0);
+   fdb[offset(y,rho)]=F;
+}
+#pragma omp end declare target
+
+
+void force0_gather(double c)
+{
+   int bc;
+   mdflds_t *mdfs;
+   lat_parms_t lat;
+
+   if (query_flags(UDBUF_UP2DATE)!=1)
+      copy_bnd_ud();
+
+   set_uidx();
+   udb=udfld();
+   mdfs=mdflds();
+   fdb=(*mdfs).frc;
+
+   lat=lat_parms();
+   error_root(lat.c0!=1.0,1,"force0_gather [force0.c]",
+              "This restricted GPU implementation only supports the pure "
+              "Wilson plaquette action (c0=1)");
+   c*=(lat.beta/6.0);
+
+   bc=bc_type();
+
+   prof_begin(&force0_gather_part_p);
+   #pragma omp target teams distribute parallel for collapse(2)
+   for (int ix=0; ix<VOLUME; ix++)
+   {
+      for (int rho=0; rho<4; rho++)
+      {
+         link_frc_gather(ix,rho,bc,c,udb,fdb);
+      }
+   }
+   prof_end(&force0_gather_part_p);
 
    // this function is not implemented at the moment
    // add_bnd_frc();

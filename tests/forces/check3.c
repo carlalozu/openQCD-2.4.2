@@ -49,6 +49,27 @@ static qflt dSdt(double c)
 }
 
 
+#ifdef GPU
+static qflt dSdt_gather(double c)
+{
+   mdflds_t *mdfs;
+
+   mdfs=mdflds();
+   check_active((*mdfs).mom);
+
+   // force0_gather runs on the GPU and only implements the pure Wilson
+   // plaquette action (c0=1) with tree-level boundary improvement
+   // coefficients; the caller must set the parameter data base accordingly
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   force0_gather(c);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   check_active((*mdfs).frc);
+
+   return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
+}
+#endif
+
+
 static double chk_chs(double c)
 {
    double dev;
@@ -80,6 +101,46 @@ static double chk_chs(double c)
    return sqrt(dev);
 }
 
+
+static qflt dSdt_fd(double c,double *sig_loss)
+{
+   double eps;
+   qflt act,act0,act1;
+
+   eps=2.0e-4;
+   rot_ud(eps);
+   act0=action0(1);
+   scl_qflt(2.0/3.0,act0.q);
+   rot_ud(-eps);
+
+   rot_ud(-eps);
+   act1=action0(1);
+   scl_qflt(-2.0/3.0,act1.q);
+   rot_ud(eps);
+
+   rot_ud(2.0*eps);
+   act=action0(1);
+   scl_qflt(-1.0/12.0,act.q);
+   add_qflt(act0.q,act.q,act0.q);
+   rot_ud(-2.0*eps);
+
+   rot_ud(-2.0*eps);
+   act=action0(1);
+   scl_qflt(1.0/12.0,act.q);
+   add_qflt(act1.q,act.q,act1.q);
+   rot_ud(2.0*eps);
+
+   scl_qflt(c,act0.q);
+   scl_qflt(c,act1.q);
+
+   add_qflt(act0.q,act1.q,act.q);
+   *sig_loss=-log10(fabs(act.q[0]/act0.q[0]));
+
+   scl_qflt(-1.0/eps,act.q);
+
+   return act;
+}
+
 TEST(Force0, NormSquareForce)
 {
    qflt nrm_sq;
@@ -106,11 +167,89 @@ TEST(Force0, PhaseInvariance)
 }
 
 
+TEST(Force0, GatherMatchesForce0)
+{
+#ifdef GPU
+   double dev;
+   qflt rqsm;
+   su3_alg_dble **wfd;
+   mdflds_t *mdfs;
+
+   /* force0_gather() only implements the pure Wilson plaquette action
+      (c0=1) with tree-level boundary improvement coefficients (cG=cG'=1);
+      main() sets up exactly that configuration, so no override is needed
+      here */
+   wfd=reserve_wfd(1);
+   mdfs=mdflds();
+
+   random_ud_reproducible();
+
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   force0(c_g);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   check_active((*mdfs).frc);
+   assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
+
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   force0_gather(c_g);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   check_active((*mdfs).frc);
+
+   muladd_assign_alg(4*VOLUME_TRD,2,-1.0,(*mdfs).frc,wfd[0]);
+   rqsm=norm_square_alg(4*VOLUME_TRD,3,wfd[0]);
+   dev=rqsm.q[0];
+   rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
+   dev/=rqsm.q[0];
+   release_wfd();
+
+   dev=sqrt(dev);
+   MT_PRINT("relative deviation gather vs force0: %.2e", dev);
+   EXPECT_NEAR(dev, 0.0, 1.0e-12);
+#else
+   SKIP_TEST("force0_gather() is only implemented for the GPU-offloaded build");
+#endif
+}
+
+
+TEST(Force0, GatherVsActionDerivative)
+{
+#ifdef GPU
+   int k,ie;
+   double dev_frc,sig_loss;
+   qflt dsdt,act;
+
+   // action0 runs on the CPU, force0_gather runs on the GPU
+   for (k=0;k<4;k++)
+   {
+      random_ud_reproducible();
+      set_ud_phase();
+      random_mom();
+      dsdt=dSdt_gather(c_g);
+      act=dSdt_fd(c_g,&sig_loss);
+
+      MT_PRINT("dsdt.q: %f, act.q: %f", dsdt.q[0], act.q[0]);
+      add_qflt(dsdt.q,act.q,act.q);
+      dev_frc=act.q[0]/dsdt.q[0];
+
+      unset_ud_phase();
+      ie=check_bc(0.0);
+
+      EXPECT_EQ(ie, 1);
+      // machine precission minus significant loss as an approximate of finite
+      // differences and volume
+      EXPECT_NEAR(fabs(dev_frc), 0.0, pow(10.0, -(15.0-sig_loss)));
+   }
+#else
+   SKIP_TEST("force0_gather() is only implemented for the GPU-offloaded build");
+#endif
+}
+
+
 TEST(Force0, ForceVsActionDerivative)
 {
    int k,ie;
-   double eps,dev_frc,sig_loss;
-   qflt dsdt,act,act0,act1;
+   double dev_frc,sig_loss;
+   qflt dsdt,act;
 
    // action0 runs on the CPU
    for (k=0;k<4;k++)
@@ -119,37 +258,8 @@ TEST(Force0, ForceVsActionDerivative)
       set_ud_phase();
       random_mom();
       dsdt=dSdt(c_g);
+      act=dSdt_fd(c_g,&sig_loss);
 
-      eps=2.0e-4;
-      rot_ud(eps);
-      act0=action0(1);
-      scl_qflt(2.0/3.0,act0.q);
-      rot_ud(-eps);
-
-      rot_ud(-eps);
-      act1=action0(1);
-      scl_qflt(-2.0/3.0,act1.q);
-      rot_ud(eps);
-
-      rot_ud(2.0*eps);
-      act=action0(1);
-      scl_qflt(-1.0/12.0,act.q);
-      add_qflt(act0.q,act.q,act0.q);
-      rot_ud(-2.0*eps);
-
-      rot_ud(-2.0*eps);
-      act=action0(1);
-      scl_qflt(1.0/12.0,act.q);
-      add_qflt(act1.q,act.q,act1.q);
-      rot_ud(2.0*eps);
-
-      scl_qflt(c_g,act0.q);
-      scl_qflt(c_g,act1.q);
-
-      add_qflt(act0.q,act1.q,act.q);
-      sig_loss=-log10(fabs(act.q[0]/act0.q[0]));
-
-      scl_qflt(-1.0/eps,act.q);
       MT_PRINT("dsdt.q: %f, act.q: %f", dsdt.q[0], act.q[0]);
       add_qflt(dsdt.q,act.q,act.q);
       dev_frc=act.q[0]/dsdt.q[0];
@@ -168,6 +278,8 @@ TEST(Force0, ForceVsActionDerivative)
 static mt_test_t tests[] = {
    MT_TEST(Force0, NormSquareForce),
    MT_TEST(Force0, PhaseInvariance),
+   MT_TEST(Force0, GatherMatchesForce0),
+   MT_TEST(Force0, GatherVsActionDerivative),
    MT_TEST(Force0, ForceVsActionDerivative),
 };
 
@@ -191,7 +303,7 @@ int main(int argc,char *argv[])
    }
 
    check_machine();
-   set_lat_parms(3.5,0.33,0,NULL,0,1.0);
+   set_lat_parms(3.5,1.0,0,NULL,0,1.0);
    print_lat_parms(0x1);
 
    MPI_Bcast(&bc,1,MPI_INT,0,MPI_COMM_WORLD);
@@ -205,7 +317,7 @@ int main(int argc,char *argv[])
 
    iact=0;
    set_hmc_parms(1,&iact,0,0,NULL,1,1.0);
-   set_bc_parms(bc,0.9012,1.2034,1.0,1.0,phi,phi_prime,theta);
+   set_bc_parms(bc,1.0,1.0,1.0,1.0,phi,phi_prime,theta);
    print_bc_parms(0x3);
 
    start_ranlux(0,1234);
