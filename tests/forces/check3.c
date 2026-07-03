@@ -106,6 +106,65 @@ TEST(Force0, PhaseInvariance)
 }
 
 
+TEST(Force0, GatherMatchesForce0)
+{
+#ifdef GPU
+   double dev,c,beta;
+   qflt rqsm;
+   su3_alg_dble **wfd;
+   mdflds_t *mdfs;
+   bc_parms_t bcp;
+   double phi[2],phi_prime[2],theta[3];
+
+   /* plaq_frc_gather() only implements the pure Wilson plaquette action
+      (c0=1) with tree-level boundary improvement coefficients (cG=cG'=1),
+      so force0() is reconfigured to that special case for this comparison
+      and restored to its original parameters afterwards */
+   bcp=bc_parms();
+   phi[0]=0.123;
+   phi[1]=-0.534;
+   phi_prime[0]=0.912;
+   phi_prime[1]=0.078;
+   theta[0]=0.38;
+   theta[1]=-1.25;
+   theta[2]=0.54;
+
+   beta=3.5;
+   c=1.0;
+
+   wfd=reserve_wfd(1);
+   mdfs=mdflds();
+
+   random_ud_reproducible();
+
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   force0(c);
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   check_active((*mdfs).frc);
+   assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
+
+   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
+   plaq_frc_gather();
+   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   check_active((*mdfs).frc);
+
+   /* force0(c) with c0=1 and tree-level cG equals c*(beta/6)*plaq_frc_gather() */
+   muladd_assign_alg(4*VOLUME_TRD,2,-(c*beta/6.0),(*mdfs).frc,wfd[0]);
+   rqsm=norm_square_alg(4*VOLUME_TRD,3,wfd[0]);
+   dev=rqsm.q[0];
+   rqsm=norm_square_alg(4*VOLUME_TRD,3,(*mdfs).frc);
+   dev/=(rqsm.q[0]*(c*beta/6.0)*(c*beta/6.0));
+   release_wfd();
+
+   dev=sqrt(dev);
+   MT_PRINT("relative deviation gather vs force0: %.2e", dev);
+   EXPECT_NEAR(dev, 0.0, 1.0e-12);
+#else
+   SKIP_TEST("plaq_frc_gather() is only implemented for the GPU-offloaded build");
+#endif
+}
+
+
 TEST(Force0, ForceVsActionDerivative)
 {
    int k,ie;
@@ -168,6 +227,7 @@ TEST(Force0, ForceVsActionDerivative)
 static mt_test_t tests[] = {
    MT_TEST(Force0, NormSquareForce),
    MT_TEST(Force0, PhaseInvariance),
+   MT_TEST(Force0, GatherMatchesForce0),
    MT_TEST(Force0, ForceVsActionDerivative),
 };
 
@@ -191,7 +251,7 @@ int main(int argc,char *argv[])
    }
 
    check_machine();
-   set_lat_parms(3.5,0.33,0,NULL,0,1.0);
+   set_lat_parms(beta,1.0,0,NULL,0,1.0);
    print_lat_parms(0x1);
 
    MPI_Bcast(&bc,1,MPI_INT,0,MPI_COMM_WORLD);
@@ -205,7 +265,7 @@ int main(int argc,char *argv[])
 
    iact=0;
    set_hmc_parms(1,&iact,0,0,NULL,1,1.0);
-   set_bc_parms(bc,0.9012,1.2034,1.0,1.0,phi,phi_prime,theta);
+   set_bc_parms(bcp.type,1.0,1.0,1.0,1.0,phi,phi_prime,theta);
    print_bc_parms(0x3);
 
    start_ranlux(0,1234);
