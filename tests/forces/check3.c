@@ -251,7 +251,7 @@ int main(int argc,char *argv[])
    }
 
    check_machine();
-   set_lat_parms(beta,1.0,0,NULL,0,1.0);
+   set_lat_parms(3.5,1.0,0,NULL,0,1.0);
    print_lat_parms(0x1);
 
    MPI_Bcast(&bc,1,MPI_INT,0,MPI_COMM_WORLD);
@@ -265,7 +265,7 @@ int main(int argc,char *argv[])
 
    iact=0;
    set_hmc_parms(1,&iact,0,0,NULL,1,1.0);
-   set_bc_parms(bcp.type,1.0,1.0,1.0,1.0,phi,phi_prime,theta);
+   set_bc_parms(bc,1.0,1.0,1.0,1.0,phi,phi_prime,theta);
    print_bc_parms(0x3);
 
    start_ranlux(0,1234);

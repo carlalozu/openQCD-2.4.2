@@ -363,7 +363,7 @@ void plaq_frc(void)
 * where wd0=U(ip1)*U(ip3)^dag and wd1=U(ip2)^dag*U(ip0) (same definitions as
 * in plaq_frc_part() above).
 *
-* For a target link L=(y,rho), _plaq_uidx() shows that, for each of the 3
+* For a target link L=(y,rho), plaq_uidx() shows that, for each of the 3
 * directions sigma!=rho, L appears as a corner of exactly 2 plaquettes: one
 * based at x=y and one based at x=idn[y][sigma]. Which corner (and hence
 * which of XA,XB,XC, and with which sign/guard) depends only on whether rho
@@ -409,13 +409,13 @@ static double plaq_weight(int t,int bc)
 }
 
 
-static void plaq_corner_algs(int n,int x,int (*iup)[4],su3_dble *udb,
+static void plaq_corner_algs(int n,int x,su3_dble *udb,
                               su3_alg_dble *XA,su3_alg_dble *XB,su3_alg_dble *XC)
 {
    int ip[4];
    su3_dble wd[2] ALIGNED16;
 
-   _plaq_uidx(n,x,ip,iup);
+   plaq_uidx(n,x,ip);
 
    su3xsu3dag(udb+ip[1],udb+ip[3],wd);
    su3dagxsu3(udb+ip[2],udb+ip[0],wd+1);
@@ -428,7 +428,7 @@ static void plaq_corner_algs(int n,int x,int (*iup)[4],su3_dble *udb,
 }
 
 
-static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
+static void link_frc_gather(int y,int rho,int bc,
                              su3_dble *udb,su3_alg_dble *fdb)
 {
    int s,sigma,n,role,x2,t,tx2;
@@ -461,7 +461,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
          {
             if ((t<(N0-1))||(bc!=0))
             {
-               plaq_corner_algs(n,y,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
                _su3_alg_add_assign(F,XC);
             }
          }
@@ -470,7 +470,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
             if ((t>0)||(bc!=1))
             {
                r=plaq_weight(t,bc);
-               plaq_corner_algs(n,y,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
                _su3_alg_mul_add_assign(F,r,XC);
             }
          }
@@ -482,7 +482,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
          {
             if ((tx2<(N0-1))||(bc!=0))
             {
-               plaq_corner_algs(n,x2,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
                _su3_alg_sub_assign(F,XB);
             }
          }
@@ -491,7 +491,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
             if ((tx2>0)||(bc!=1))
             {
                r=plaq_weight(tx2,bc);
-               plaq_corner_algs(n,x2,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
                _su3_alg_mul_sub_assign(F,r,XB);
             }
          }
@@ -506,7 +506,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
          {
             if (((t<(N0-1))||(bc!=0))&&((t>0)||(bc!=1)))
             {
-               plaq_corner_algs(n,y,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
                _su3_alg_sub_assign(F,XC);
             }
          }
@@ -515,7 +515,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
             if ((t>0)||(bc!=1))
             {
                r=plaq_weight(t,bc);
-               plaq_corner_algs(n,y,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,y,udb,&XA,&XB,&XC);
                _su3_alg_mul_sub_assign(F,r,XC);
             }
          }
@@ -527,7 +527,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
          {
             if ((tx2<(N0-1))||(bc==3))
             {
-               plaq_corner_algs(n,x2,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
                _su3_alg_add_assign(F,XA);
             }
          }
@@ -536,7 +536,7 @@ static void link_frc_gather(int y,int rho,int bc,int (*iup)[4],int (*idn)[4],
             if ((tx2>0)||(bc!=1))
             {
                r=plaq_weight(tx2,bc);
-               plaq_corner_algs(n,x2,iup,udb,&XA,&XB,&XC);
+               plaq_corner_algs(n,x2,udb,&XA,&XB,&XC);
                _su3_alg_mul_add_assign(F,r,XA);
             }
          }
@@ -568,7 +568,7 @@ void plaq_frc_gather(void)
    {
       for (int rho=0; rho<4; rho++)
       {
-         link_frc_gather(ix,rho,bc,iup,idn,udb,fdb);
+         link_frc_gather(ix,rho,bc,udb,fdb);
       }
    }
 
