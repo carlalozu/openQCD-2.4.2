@@ -77,6 +77,7 @@ static int nfc[8],ofs[8],hofs[8],init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
+prof_section force0_gather_part_p = {.name = "force0_gather_part", .level=2};
 
 static void set_ofs(void)
 {
@@ -563,6 +564,7 @@ void plaq_frc_gather(void)
 
    bc=bc_type();
 
+   prof_begin(&force0_gather_part_p);
    #pragma omp target teams distribute parallel for collapse(2)
    for (int ix=0; ix<VOLUME; ix++)
    {
@@ -571,6 +573,7 @@ void plaq_frc_gather(void)
          link_frc_gather(ix,rho,bc,udb,fdb);
       }
    }
+   prof_end(&force0_gather_part_p);
 
    // this function is not implemented at the moment
    // add_bnd_frc();

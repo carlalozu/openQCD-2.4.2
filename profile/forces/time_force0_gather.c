@@ -43,7 +43,7 @@
 int main(int argc, char *argv[])
 {
    prof_section s_prepare = {.name = "prepare_data"};
-   prof_section s_kernel  = {.name = "plaq_frc_gather"};
+   prof_section s_kernel  = {.name = "force0_gather"};
    prof_section s_total   = {.name = "total"};
 
    int my_rank, bc, iact;
@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
    /* -------------------------------------------------------------------------
     * Timed benchmark: PROFILE_ITERS iterations, each with a fresh random field.
     * ---------------------------------------------------------------------- */
+   prof_reset(&force0_gather_part_p);
    for (int count = 0; count < PROFILE_ITERS; count++)
    {
       prof_begin(&s_prepare);
@@ -146,7 +147,7 @@ int main(int argc, char *argv[])
          comparable to time_force0's, i.e. it reports effective throughput,
          not raw compute rate */
       long long flops = 7836LL * VOLUME;
-      double avg_time = s_kernel.total / (double)s_kernel.count;
+      double avg_time = force0_gather_part_p.total / (double)force0_gather_part_p.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / 1024));
       printf("Local size of the force field  (KB): %d\n", (int)((64 * VOLUME * sizeof(double)) / 1024));
@@ -162,6 +163,7 @@ int main(int argc, char *argv[])
 
       prof_report(&s_prepare);
       prof_report(&s_kernel);
+      prof_report(&force0_gather_part_p);
       prof_report(&s_total);
    }
 
