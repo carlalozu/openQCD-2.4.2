@@ -20,7 +20,7 @@ perl -i -pe "s/#define L1_TRD \\d+/#define L1_TRD 8/" $ROOT/include/global.h
 perl -i -pe "s/#define L2_TRD \\d+/#define L2_TRD 8/" $ROOT/include/global.h
 perl -i -pe "s/#define L3_TRD \\d+/#define L3_TRD 4/" $ROOT/include/global.h
 
-name = "test_nvc"
+name="test_nvc"
 > $name.log
 # CPU tests
 echo "CPU tests" > $name.log

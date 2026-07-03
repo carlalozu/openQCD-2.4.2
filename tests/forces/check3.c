@@ -62,7 +62,7 @@ static qflt dSdt_gather(double c)
    // coefficients; the caller must set the parameter data base accordingly
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0_gather(c);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
 
    return scalar_prod_alg(4*VOLUME_TRD,3,(*mdfs).mom,(*mdfs).frc);
@@ -186,13 +186,13 @@ TEST(Force0, GatherMatchesForce0)
 
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0(c_g);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
    assign_alg2alg(4*VOLUME_TRD,2,(*mdfs).frc,wfd[0]);
 
    #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
    force0_gather(c_g);
-   #pragma omp target update from((*mdfs).frc[:4*VOLUME+7*(BNDRY/4)])
+   #pragma omp target update from(mdfs->frc[:4*VOLUME+7*(BNDRY/4)])
    check_active((*mdfs).frc);
 
    muladd_assign_alg(4*VOLUME_TRD,2,-1.0,(*mdfs).frc,wfd[0]);
