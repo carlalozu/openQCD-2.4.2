@@ -97,7 +97,7 @@ double local_plaq_dble(int n){
 static qflt local_plaq_sum_dble(int iw)
 {
    int bc,k,ix,t,n;
-   double wp,pa;
+   double wp,pa,global_pa;
    qflt rqsm;
 
    bc=bc_type();
@@ -110,9 +110,10 @@ static qflt local_plaq_sum_dble(int iw)
    rqsm.q[0]=0.0;
    rqsm.q[1]=0.0;
    udb=udfld();
+   global_pa=0.0;
 
    prof_begin(&s_lcl_plq_sm);
-#pragma omp parallel private(k,ix,t,n,pa)
+#pragma omp parallel private(k,ix,t,n,pa) reduction(+:global_pa)
    {
       k=omp_get_thread_num();
 
@@ -150,10 +151,11 @@ static qflt local_plaq_sum_dble(int iw)
             pa+=wp*9.0;
          }
 
-         #pragma omp critical
-         acc_qflt(pa,rqsm.q);
+         // acc_qflt(pa,rqsm.q);
+         global_pa+=pa;
       }
    }
+   acc_qflt(global_pa,rqsm.q);
    prof_end(&s_lcl_plq_sm);
    return rqsm;
 }

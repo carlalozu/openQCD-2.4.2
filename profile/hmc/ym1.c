@@ -913,23 +913,6 @@ static void init_rng(int icnfg)
 }
 
 
-static void init_ud(void)
-{
-   if (scnfg)
-   {
-      if (append)
-         read_flds(iodat,cnfg,0x0,0x1);
-      else
-         read_flds(iodat,cnfg,mask,0x1);
-
-      if (my_rank==0)
-         printf("\n");
-   }
-   else
-      random_ud();
-}
-
-
 static void store_ud(su3_dble *usv)
 {
    su3_dble *udb;
@@ -1246,7 +1229,7 @@ int main(int argc,char *argv[])
    if (!append)
       print_msize(0x1);
    init_rng(icnfg);
-   init_ud();
+   random_ud();
 
    if (bc_type()==0)
       npl=(double)(6*(N0-1)*N1)*(double)(N2*N3);
@@ -1322,29 +1305,6 @@ int main(int argc,char *argv[])
          prof_end(&extra_functions_p);
       }
 
-      if (((n+1)>=nth)&&(((ntr-n-1)%dtr_cnfg)==0))
-      {
-         prof_begin(&extra_functions_p);
-         save_flds(icnfg,nbase,iodat+1,0x1);
-         export_ranlux(icnfg,rng_file);
-         check_endflag(&iend);
-
-         if (my_rank==0)
-         {
-            fflush(flog);
-            copy_file(log_file,log_save);
-            copy_file(dat_file,dat_save);
-            if (noms==0)
-               copy_file(msdat_file,msdat_save);
-            copy_file(rng_file,rng_save);
-         }
-
-         if ((rmold)&&(icnfg>1))
-            remove_flds(icnfg-1,nbase,iodat+1,0x1);
-
-         icnfg+=1;
-         prof_end(&extra_functions_p);
-      }
    }
 
    prof_end(&total_p);
