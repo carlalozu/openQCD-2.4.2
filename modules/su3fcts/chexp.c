@@ -95,10 +95,13 @@
 #include <float.h>
 #include "utils.h"
 #include "su3fcts.h"
+#include "global.h"
+#include <omp.h>
 
-static int N=0;
-static double *c=NULL;
-
+#pragma omp declare target
+int N=0;
+double c[200]; // this is a placeholder to store enough values of c
+#pragma omp end declare target
 
 void chexp_init(void)
 {
@@ -117,13 +120,15 @@ void chexp_init(void)
       }
 
       N+=(N%2);
-      c=amalloc((N+1)*sizeof(*c),4);
-      error_loc(c==NULL,1,"chexp_init [chexp.c]",
-                "Unable to allocate auxiliary array");
+      // *c=amalloc((N+1)*sizeof(*c),4);
+      // error_loc(c==NULL,1,"chexp_init [chexp.c]",
+      //           "Unable to allocate auxiliary array");
       c[0]=1.0;
 
       for (k=0;k<N;k++)
          c[k+1]=c[k]/(double)(k+1);
+
+      #pragma omp target update to(N, c[:N-1])
    }
 }
 
@@ -694,6 +699,7 @@ void chexp_drv2(su3_alg_dble *X,ch_drv2_t *s)
 
 #else
 
+#pragma omp declare target
 void chexp_drv0(su3_alg_dble *X,ch_drv0_t *s)
 {
    int n;
@@ -726,6 +732,7 @@ void chexp_drv0(su3_alg_dble *X,ch_drv0_t *s)
       (*s).p[2].im=q1.im;
    }
 }
+#pragma omp end declare target
 
 
 void chexp_drv1(su3_alg_dble *X,ch_drv1_t *s)
@@ -875,6 +882,7 @@ void chexp_drv2(su3_alg_dble *X,ch_drv2_t *s)
 
 #endif
 
+#pragma omp declare target
 void expXsu3(double eps,su3_alg_dble *X,su3_dble *u)
 {
    int k,n;
@@ -923,3 +931,4 @@ void expXsu3(double eps,su3_alg_dble *X,su3_dble *u)
 
    su3xsu3(u2,u,u);
 }
+#pragma omp end declare target

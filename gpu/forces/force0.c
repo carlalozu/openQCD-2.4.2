@@ -77,7 +77,6 @@ static int nfc[8],ofs[8],hofs[8],init=0;
 static su3_alg_dble *fdb;
 static su3_dble *udb,*hdb;
 prof_section force0_part_p = {.name = "force0_part", .level=2};
-prof_section update_force0_p = {.name = "update_force0", .level=2};
 
 static void set_ofs(void)
 {
@@ -339,7 +338,8 @@ void plaq_frc(void)
       }
    }
 
-   add_bnd_frc();
+   // this function is not implemented at the moment
+   // add_bnd_frc();
 }
 
 
@@ -615,9 +615,6 @@ void force0(double c)
    }
    bcp=bc_parms();
 
-   prof_begin(&update_force0_p);
-   #pragma omp target update to(udb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&update_force0_p);
 
    prof_begin(&force0_part_p);
    #pragma omp target teams distribute parallel for
@@ -628,9 +625,6 @@ void force0(double c)
    }
    prof_end(&force0_part_p);
 
-   prof_begin(&update_force0_p);
-   #pragma omp target update from(fdb[:4*VOLUME+7*(BNDRY/4)])
-   prof_end(&update_force0_p);
    add_bnd_frc();
 }
 

@@ -92,6 +92,11 @@ extern void dfl_upd(void);
 extern prof_section update_mom_p;
 extern prof_section update_ud_p;
 
+/* UPLOAD */
+extern void update_flds_to(void);
+extern void init_data_to_device(void);
+extern void update_flds_from(void);
+
 /* WSIZE_C */
 extern void hmc_wsize(int *nwud,int *nws,int *nwv,int *nwvd);
 extern void smd_wsize(int *nwud,int *nwfd,int *nws,int *nwv,int *nwvd);
