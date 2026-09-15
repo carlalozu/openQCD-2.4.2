@@ -265,3 +265,4 @@ void plaq_uidx(int n,int ix,int *ip)
       ip[3]=4*VOLUME+(BNDRY/4)+3*ic+mu-(mu>nu);
    }
 }
+#pragma omp end declare target
