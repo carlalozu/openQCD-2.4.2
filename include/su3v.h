@@ -92,40 +92,43 @@ static inline void su3_mat_field_init(su3_mat_field *m_field, size_t volume)
 
 static inline void enter_double_field(doublev *d_field)
 {
-#pragma omp target enter data \
-map(to : d_field[0], d_field->base[0 : d_field->volume])
+    double *base = d_field->base;
+    size_t  vol  = (size_t)d_field->volume;
+
+#pragma omp target enter data map(to : d_field[0:1], base[0:vol])
 }
 
 static inline void enter_su3_mat_field(su3_mat_field *m_field)
 {
-#pragma omp target enter data map(to : m_field[0])           \
-    map(to : m_field->c1.base[0 : 6 * m_field->c1.volume])   \
-    map(to : m_field->c2.base[0 : 6 * m_field->c2.volume])   \
-    map(to : m_field->c3.base[0 : 6 * m_field->c3.volume])
+double *b1 = m_field->c1.base;  size_t n1 = 6 * (size_t)m_field->c1.volume;
+double *b2 = m_field->c2.base;  size_t n2 = 6 * (size_t)m_field->c2.volume;
+double *b3 = m_field->c3.base;  size_t n3 = 6 * (size_t)m_field->c3.volume;
+
+#pragma omp target enter data map(to : b1[0:n1], b2[0:n2], b3[0:n3])
 
 #pragma omp target
     {
         size_t volume = m_field->c1.volume;
-        m_field->c1.c1re = m_field->c1.base + 0 * volume;
-        m_field->c1.c1im = m_field->c1.base + 1 * volume;
-        m_field->c1.c2re = m_field->c1.base + 2 * volume;
-        m_field->c1.c2im = m_field->c1.base + 3 * volume;
-        m_field->c1.c3re = m_field->c1.base + 4 * volume;
-        m_field->c1.c3im = m_field->c1.base + 5 * volume;
+        m_field->c1.c1re = b1 + 0 * volume;
+        m_field->c1.c1im = b1 + 1 * volume;
+        m_field->c1.c2re = b1 + 2 * volume;
+        m_field->c1.c2im = b1 + 3 * volume;
+        m_field->c1.c3re = b1 + 4 * volume;
+        m_field->c1.c3im = b1 + 5 * volume;
 
-        m_field->c2.c1re = m_field->c2.base + 0 * volume;
-        m_field->c2.c1im = m_field->c2.base + 1 * volume;
-        m_field->c2.c2re = m_field->c2.base + 2 * volume;
-        m_field->c2.c2im = m_field->c2.base + 3 * volume;
-        m_field->c2.c3re = m_field->c2.base + 4 * volume;
-        m_field->c2.c3im = m_field->c2.base + 5 * volume;
+        m_field->c2.c1re = b2 + 0 * volume;
+        m_field->c2.c1im = b2 + 1 * volume;
+        m_field->c2.c2re = b2 + 2 * volume;
+        m_field->c2.c2im = b2 + 3 * volume;
+        m_field->c2.c3re = b2 + 4 * volume;
+        m_field->c2.c3im = b2 + 5 * volume;
 
-        m_field->c3.c1re = m_field->c3.base + 0 * volume;
-        m_field->c3.c1im = m_field->c3.base + 1 * volume;
-        m_field->c3.c2re = m_field->c3.base + 2 * volume;
-        m_field->c3.c2im = m_field->c3.base + 3 * volume;
-        m_field->c3.c3re = m_field->c3.base + 4 * volume;
-        m_field->c3.c3im = m_field->c3.base + 5 * volume;
+        m_field->c3.c1re = b3 + 0 * volume;
+        m_field->c3.c1im = b3 + 1 * volume;
+        m_field->c3.c2re = b3 + 2 * volume;
+        m_field->c3.c2im = b3 + 3 * volume;
+        m_field->c3.c3re = b3 + 4 * volume;
+        m_field->c3.c3im = b3 + 5 * volume;
     }
 }
 
