@@ -71,7 +71,7 @@ LIBPATH = $(MPI_HOME)/lib
 CFLAGS = -std=c11 -pedantic -fstrict-aliasing -fopenmp -Wall -Wno-long-long \
          -Wstrict-prototypes -O -DFMA3 -DPM
 
-LFLAGS = -fopenmp  -lmpi_gtl_cuda
+LFLAGS = -fopenmp
 
 
 ############################## do not change ###################################
