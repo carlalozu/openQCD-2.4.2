@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
    
    if (my_rank == 0)
    {
-      int flops = 432 * VOLUME;
+      long long flops = 432LL * VOLUME;
       double avg_time = s_kernel.total / (double)s_kernel.count;
 
       printf("\nLocal size of the gauge field (KB): %d\n", (int)((72 * VOLUME * sizeof(double)) / (1024)));
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
       printf("Volume per thread: %i\n", VOLUME_TRD);
       printf("Number of repetitions for final time: %i\n", (int)s_kernel.count);
       printf("Average time for plaq_dble (sec): %.9f\n", avg_time);
-      printf("Flops: %d\n", flops); 
+      printf("Flops: %lld\n", flops); 
       printf("Total performance for plaq_dble (GFlops/s): %f\n", (double)(flops * 1e-9 / avg_time)); 
       printf("Time per lattice point & thread for plaq_dble (sec): %.9f\n", avg_time/((double)(VOLUME_TRD)));
       printf("Result: %f\n\n", pa);
